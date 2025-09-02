@@ -1,82 +1,113 @@
--- GUI Buatan Sendiri (tanpa OrionLib)
+-- Gui Buatan
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
-local WalkSpeedLabel = Instance.new("TextLabel")
-local WalkSpeedBox = Instance.new("TextBox")
+local WalkLabel = Instance.new("TextLabel")
+local WalkBox = Instance.new("TextBox")
 local FlyButton = Instance.new("TextButton")
+local UICorner = Instance.new("UICorner")
+local player = game.Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local hum = char:WaitForChild("Humanoid")
 
--- Parent GUI
-ScreenGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = game.CoreGui
 
--- Frame utama
-MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-MainFrame.BorderSizePixel = 0
-MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
+-- Frame Utama
 MainFrame.Size = UDim2.new(0, 250, 0, 150)
+MainFrame.Position = UDim2.new(0.35, 0, 0.75, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+MainFrame.BackgroundTransparency = 0.2
+MainFrame.Parent = ScreenGui
 
--- Label WalkSpeed
-WalkSpeedLabel.Parent = MainFrame
-WalkSpeedLabel.BackgroundTransparency = 1
-WalkSpeedLabel.Position = UDim2.new(0, 10, 0, 10)
-WalkSpeedLabel.Size = UDim2.new(0, 100, 0, 25)
-WalkSpeedLabel.Text = "WalkSpeed:"
-WalkSpeedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+UICorner.CornerRadius = UDim.new(0,12)
+UICorner.Parent = MainFrame
 
--- Box input WalkSpeed
-WalkSpeedBox.Parent = MainFrame
-WalkSpeedBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-WalkSpeedBox.Position = UDim2.new(0, 120, 0, 10)
-WalkSpeedBox.Size = UDim2.new(0, 100, 0, 25)
-WalkSpeedBox.Text = "16"
-WalkSpeedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+-- Walkspeed Label
+WalkLabel.Size = UDim2.new(0,100,0,30)
+WalkLabel.Position = UDim2.new(0.05,0,0.1,0)
+WalkLabel.Text = "WalkSpeed:"
+WalkLabel.TextColor3 = Color3.fromRGB(255,255,255)
+WalkLabel.BackgroundTransparency = 1
+WalkLabel.Parent = MainFrame
 
--- Fungsi ubah speed
-WalkSpeedBox.FocusLost:Connect(function()
-    local val = tonumber(WalkSpeedBox.Text)
-    if val then
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = val
-    end
-end)
+-- Walkspeed Box
+WalkBox.Size = UDim2.new(0,100,0,30)
+WalkBox.Position = UDim2.new(0.5,0,0.1,0)
+WalkBox.Text = tostring(hum.WalkSpeed)
+WalkBox.BackgroundColor3 = Color3.fromRGB(50,50,50)
+WalkBox.TextColor3 = Color3.fromRGB(255,255,255)
+WalkBox.Parent = MainFrame
 
--- Tombol Fly Mode
-FlyButton.Parent = MainFrame
-FlyButton.BackgroundColor3 = Color3.fromRGB(70, 130, 180)
-FlyButton.Position = UDim2.new(0, 10, 0, 50)
-FlyButton.Size = UDim2.new(0, 220, 0, 40)
+-- Fly Button
+FlyButton.Size = UDim2.new(0.9,0,0.3,0)
+FlyButton.Position = UDim2.new(0.05,0,0.55,0)
 FlyButton.Text = "Toggle Fly"
-FlyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+FlyButton.BackgroundColor3 = Color3.fromRGB(0,120,255)
+FlyButton.TextColor3 = Color3.fromRGB(255,255,255)
+FlyButton.Parent = MainFrame
+local btncorner = Instance.new("UICorner", FlyButton)
+btncorner.CornerRadius = UDim.new(0,8)
 
--- Fly system
+-- Fitur WalkSpeed
+WalkBox.FocusLost:Connect(function()
+	local val = tonumber(WalkBox.Text)
+	if val then
+		hum.WalkSpeed = val
+	end
+end)
+
+-- Fly System
 local flying = false
-local bv, hum
+local bv, bg
+
+local function startFly()
+	if flying then return end
+	flying = true
+
+	bv = Instance.new("BodyVelocity", char.HumanoidRootPart)
+	bv.Velocity = Vector3.new(0,0,0)
+	bv.MaxForce = Vector3.new(4000,4000,4000)
+
+	bg = Instance.new("BodyGyro", char.HumanoidRootPart)
+	bg.MaxTorque = Vector3.new(4000,4000,4000)
+	bg.P = 10000
+	bg.CFrame = char.HumanoidRootPart.CFrame
+
+	-- Loop kontrol
+	game:GetService("RunService").RenderStepped:Connect(function()
+		if flying and bv and bg then
+			local moveDir = hum.MoveDirection
+			local vel = Vector3.new(moveDir.X*hum.WalkSpeed,0,moveDir.Z*hum.WalkSpeed)
+
+			-- Naik pake tombol loncat
+			if hum.Jump then
+				vel = vel + Vector3.new(0,hum.WalkSpeed,0)
+			end
+
+			-- Turun (CTRL/Shift)
+			if userinputservice:IsKeyDown(Enum.KeyCode.LeftControl) then
+				vel = vel - Vector3.new(0,hum.WalkSpeed,0)
+			end
+
+			bv.Velocity = vel
+			bg.CFrame = workspace.CurrentCamera.CFrame
+		end
+	end)
+end
+
+local function stopFly()
+	flying = false
+	if bv then bv:Destroy() end
+	if bg then bg:Destroy() end
+end
+
 FlyButton.MouseButton1Click:Connect(function()
-    flying = not flying
-    hum = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
-    if flying then
-        bv = Instance.new("BodyVelocity")
-        bv.Velocity = Vector3.new(0,0,0)
-        bv.MaxForce = Vector3.new(4000,4000,4000)
-        bv.Parent = hum
-    else
-        if bv then bv:Destroy() end
-    end
-end)
-
--- Kontrol terbang (Space = naik, Ctrl = turun)
-game:GetService("UserInputService").InputBegan:Connect(function(input, gp)
-    if gp or not flying then return end
-    if input.KeyCode == Enum.KeyCode.Space then
-        bv.Velocity = Vector3.new(0, 50, 0)
-    elseif input.KeyCode == Enum.KeyCode.LeftControl then
-        bv.Velocity = Vector3.new(0, -50, 0)
-    end
-end)
-
-game:GetService("UserInputService").InputEnded:Connect(function(input, gp)
-    if gp or not flying then return end
-    if input.KeyCode == Enum.KeyCode.Space or input.KeyCode == Enum.KeyCode.LeftControl then
-        bv.Velocity = Vector3.new(0, 0, 0)
-    end
+	if flying then
+		stopFly()
+		FlyButton.Text = "Toggle Fly"
+		FlyButton.BackgroundColor3 = Color3.fromRGB(0,120,255)
+	else
+		startFly()
+		FlyButton.Text = "Stop Fly"
+		FlyButton.BackgroundColor3 = Color3.fromRGB(255,50,50)
+	end
 end)
