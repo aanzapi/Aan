@@ -124,26 +124,32 @@ Page2.Position = UDim2.new(0,0,0,30)
 Page2.BackgroundTransparency = 1
 Page2.Visible = false
 
+-- Next Button
 local NextBtn = Instance.new("TextButton")
-NextBtn.Size = UDim2.new(0, 50, 0, 25)
-NextBtn.Position = UDim2.new(1, -55, 0, 5)
-NextBtn.Text = "➡️"
+NextBtn.Size = UDim2.new(0, 70, 0, 30)
+NextBtn.Position = UDim2.new(1, -80, 1, -40) -- 🔽 dipindah ke bawah kanan
+NextBtn.Text = "➡️ Next"
 NextBtn.TextColor3 = Color3.fromRGB(255,255,255)
-NextBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+NextBtn.Font = Enum.Font.GothamBold
+NextBtn.TextSize = 16
+NextBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
 NextBtn.Parent = MainFrame
-Instance.new("UICorner", NextBtn).CornerRadius = UDim.new(0,6)
+Instance.new("UICorner", NextBtn).CornerRadius = UDim.new(0,8)
 
+-- Back Button
 local BackBtn = Instance.new("TextButton")
-BackBtn.Size = UDim2.new(0, 50, 0, 25)
-NextBtn.Position = UDim2.new(1, -55, 0, 5)
-BackBtn.Position = UDim2.new(0, 5, 0, 5)
-BackBtn.Text = "⬅️"
+BackBtn.Size = UDim2.new(0, 70, 0, 30)
+BackBtn.Position = UDim2.new(0, 10, 1, -40) -- 🔽 dipindah ke bawah kiri
+BackBtn.Text = "⬅️ Back"
 BackBtn.TextColor3 = Color3.fromRGB(255,255,255)
-BackBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+BackBtn.Font = Enum.Font.GothamBold
+BackBtn.TextSize = 16
+BackBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
 BackBtn.Parent = MainFrame
 BackBtn.Visible = false
-Instance.new("UICorner", BackBtn).CornerRadius = UDim.new(0,6)
+Instance.new("UICorner", BackBtn).CornerRadius = UDim.new(0,8)
 
+-- Switch Page Function
 local function switchPage(pg)
     Page1.Visible = (pg == 1)
     Page2.Visible = (pg == 2)
@@ -153,7 +159,6 @@ local function switchPage(pg)
 end
 NextBtn.MouseButton1Click:Connect(function() switchPage(2) end)
 BackBtn.MouseButton1Click:Connect(function() switchPage(1) end)
-
 ---------------- PAGE 1 (Fly + Teleport Player) ----------------
 -- Fly Button
 local FlyBtn = Instance.new("TextButton", Page1)
