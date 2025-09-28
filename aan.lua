@@ -333,71 +333,53 @@ local function sendToTelegram(text)
 end
 
 -- Tombol Rekam / Stop
-local RecordBtn = Instance.new("TextButton", Page2)
-RecordBtn.Size = UDim2.new(0.9,0,0,40)
-RecordBtn.Position = UDim2.new(0.05,0,0.05,0)
-RecordBtn.Text = "🎥 Rekam: OFF"
-RecordBtn.TextColor3 = Color3.fromRGB(255,255,255)
-RecordBtn.BackgroundColor3 = Color3.fromRGB(70,70,70)
-RecordBtn.Font = Enum.Font.SourceSansBold
-RecordBtn.TextSize = 18
-Instance.new("UICorner", RecordBtn).CornerRadius = UDim.new(0,6)
+-- Tombol Kirim ke Telegram
+local SendBtn = Instance.new("TextButton", Page2)
+SendBtn.Size = UDim2.new(0.9,0,0,40)
+SendBtn.Position = UDim2.new(0.05,0,0.29,0)
+SendBtn.Text = "📤 Kirim Rekaman ke Telegram"
+SendBtn.TextColor3 = Color3.fromRGB(255,255,255)
+SendBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+SendBtn.Font = Enum.Font.SourceSansBold
+SendBtn.TextSize = 18
+Instance.new("UICorner", SendBtn).CornerRadius = UDim.new(0,6)
 
--- Tombol Tes Telegram
-local TestBtn = Instance.new("TextButton", Page2)
-TestBtn.Size = UDim2.new(0.9,0,0,40)
-TestBtn.Position = UDim2.new(0.05,0,0.17,0)
-TestBtn.Text = "📩 Tes Kirim Telegram"
-TestBtn.TextColor3 = Color3.fromRGB(255,255,255)
-TestBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
-TestBtn.Font = Enum.Font.SourceSansBold
-TestBtn.TextSize = 18
-Instance.new("UICorner", TestBtn).CornerRadius = UDim.new(0,6)
-
--- Fungsi log aktivitas
-local function logAction(codeStr)
-    if recording then
-        local now = tick()
-        local delay = now - lastTime
-        lastTime = now
-        table.insert(actions, {delay = delay, code = codeStr})
+-- Fungsi buat bikin kode playback
+local function generatePlaybackCode()
+    if #actions == 0 then
+        return "-- Tidak ada aksi yang direkam"
     end
+
+    local code = "-- Playback Aktivitas Pancing\n"
+    code = code.."task.spawn(function()\n"
+    for _,a in ipairs(actions) do
+        code = code..string.format("    task.wait(%.2f)\n", a.delay)
+        code = code.."    "..a.code.."\n"
+    end
+    code = code.."end)\n"
+    return code
 end
 
--- Start/Stop Rekam
+-- Tombol kirim manual ke Telegram
+SendBtn.MouseButton1Click:Connect(function()
+    local code = generatePlaybackCode()
+    if setclipboard then setclipboard(code) end
+    sendToTelegram("```\n"..code.."\n```")
+end)
+
+-- Update tombol rekam biar cuma ON/OFF + copy clipboard
 RecordBtn.MouseButton1Click:Connect(function()
     if not recording then
-        -- mulai rekam
         recording = true
         actions = {}
         lastTime = tick()
         RecordBtn.Text = "🎥 Rekam: ON"
     else
-        -- stop + kirim ke telegram
         recording = false
         RecordBtn.Text = "🎥 Rekam: OFF"
-
-        if #actions > 0 then
-            local code = "-- Playback Aktivitas Pancing\n"
-            code = code.."task.spawn(function()\n"
-            for _,a in ipairs(actions) do
-                code = code..string.format("    task.wait(%.2f)\n", a.delay)
-                code = code.."    "..a.code.."\n"
-            end
-            code = code.."end)\n"
-
-            -- copy ke clipboard juga
-            if setclipboard then setclipboard(code) end
-
-            -- kirim ke telegram
-            sendToTelegram("```\n"..code.."\n```")
-        end
+        local code = generatePlaybackCode()
+        if setclipboard then setclipboard(code) end
     end
-end)
-
--- Test Button → langsung kirim pesan uji coba
-TestBtn.MouseButton1Click:Connect(function()
-    sendToTelegram("✅ Tes berhasil dari Roblox GUI! Bot Telegram nyambung 🚀")
 end)
 
 -------------------------------------------------
