@@ -167,7 +167,7 @@ MinusBtn.Font = Enum.Font.SourceSansBold
 MinusBtn.TextSize = 14
 Instance.new("UICorner", MinusBtn).CornerRadius = UDim.new(0, 6)
 
--- Dropdown Teleport Player
+-- === Dropdown Teleport Player ===
 local DropDown = Instance.new("TextButton", Page1)
 DropDown.Size = UDim2.new(0.9, 0, 0, 40)
 DropDown.Position = UDim2.new(0.05, 0, 0.48, 0)
@@ -178,8 +178,9 @@ DropDown.Font = Enum.Font.SourceSansBold
 DropDown.TextSize = 18
 Instance.new("UICorner", DropDown).CornerRadius = UDim.new(0, 6)
 
+-- Container list
 local ListFrame = Instance.new("ScrollingFrame", Page1)
-ListFrame.Size = UDim2.new(0.9, 0, 0, 110)
+ListFrame.Size = UDim2.new(0.9, 0, 0, 140)
 ListFrame.Position = UDim2.new(0.05, 0, 0.65, 0)
 ListFrame.CanvasSize = UDim2.new(0,0,0,0)
 ListFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
@@ -187,7 +188,21 @@ ListFrame.ScrollBarThickness = 4
 ListFrame.Visible = false
 Instance.new("UICorner", ListFrame).CornerRadius = UDim.new(0, 6)
 
+-- Tombol Refresh Player
+local RefreshBtn = Instance.new("TextButton", Page1)
+RefreshBtn.Size = UDim2.new(0.9, 0, 0, 30)
+RefreshBtn.Position = UDim2.new(0.05, 0, 0.60, 0)
+RefreshBtn.Text = "🔄 Refresh Player List"
+RefreshBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+RefreshBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+RefreshBtn.Font = Enum.Font.SourceSansBold
+RefreshBtn.TextSize = 16
+RefreshBtn.Visible = false
+Instance.new("UICorner", RefreshBtn).CornerRadius = UDim.new(0, 6)
+
+
 ---------------- PAGE 2 (Checkpoint System) ----------------
+-- BUTTON SAVE
 local SaveBtn = Instance.new("TextButton", Page2)
 SaveBtn.Size = UDim2.new(0.9,0,0,40)
 SaveBtn.Position = UDim2.new(0.05,0,0.05,0)
@@ -198,6 +213,7 @@ SaveBtn.Font = Enum.Font.SourceSansBold
 SaveBtn.TextSize = 18
 Instance.new("UICorner", SaveBtn).CornerRadius = UDim.new(0,6)
 
+-- BUTTON AUTO TELE
 local AutoTeleBtn = Instance.new("TextButton", Page2)
 AutoTeleBtn.Size = UDim2.new(0.9,0,0,40)
 AutoTeleBtn.Position = UDim2.new(0.05,0,0.17,0)
@@ -208,6 +224,7 @@ AutoTeleBtn.Font = Enum.Font.SourceSansBold
 AutoTeleBtn.TextSize = 18
 Instance.new("UICorner", AutoTeleBtn).CornerRadius = UDim.new(0,6)
 
+-- LIST CHECKPOINT
 local CPList = Instance.new("ScrollingFrame", Page2)
 CPList.Size = UDim2.new(0.9,0,0,200)
 CPList.Position = UDim2.new(0.05,0,0.35,0)
@@ -216,32 +233,62 @@ CPList.BackgroundColor3 = Color3.fromRGB(30,30,30)
 CPList.ScrollBarThickness = 4
 Instance.new("UICorner", CPList).CornerRadius = UDim.new(0,6)
 
--- CHECKPOINT SYSTEM
+-- SYSTEM VARIABLES
 local checkpoints = {}
 local autoTele = false
 
+-- REFRESH LIST
 local function refreshCPList()
     for _,c in pairs(CPList:GetChildren()) do
-        if c:IsA("TextButton") then c:Destroy() end
+        if not c:IsA("UIListLayout") then
+            c:Destroy()
+        end
     end
-    local y=0
+
+    local y = 0
     for i,pos in ipairs(checkpoints) do
-        local Btn = Instance.new("TextButton", CPList)
-        Btn.Size = UDim2.new(1,-5,0,30)
-        Btn.Position = UDim2.new(0,0,0,y)
-        Btn.Text = "Checkpoint "..i
-        Btn.TextColor3 = Color3.fromRGB(255,255,255)
-        Btn.BackgroundColor3 = Color3.fromRGB(50,50,50)
-        Btn.MouseButton1Click:Connect(function()
+        -- Frame container
+        local ItemFrame = Instance.new("Frame", CPList)
+        ItemFrame.Size = UDim2.new(1,-5,0,30)
+        ItemFrame.Position = UDim2.new(0,0,0,y)
+        ItemFrame.BackgroundTransparency = 1
+
+        -- Tombol teleport
+        local TeleBtn = Instance.new("TextButton", ItemFrame)
+        TeleBtn.Size = UDim2.new(0.7,-5,1,0)
+        TeleBtn.Position = UDim2.new(0,0,0,0)
+        TeleBtn.Text = "Checkpoint "..i
+        TeleBtn.TextColor3 = Color3.fromRGB(255,255,255)
+        TeleBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+        Instance.new("UICorner", TeleBtn).CornerRadius = UDim.new(0,6)
+
+        TeleBtn.MouseButton1Click:Connect(function()
             if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
                 LP.Character.HumanoidRootPart.CFrame = pos
             end
         end)
-        y = y+35
+
+        -- Tombol delete
+        local DelBtn = Instance.new("TextButton", ItemFrame)
+        DelBtn.Size = UDim2.new(0.3,0,1,0)
+        DelBtn.Position = UDim2.new(0.7,5,0,0)
+        DelBtn.Text = "🗑️"
+        DelBtn.TextColor3 = Color3.fromRGB(255,100,100)
+        DelBtn.BackgroundColor3 = Color3.fromRGB(80,30,30)
+        Instance.new("UICorner", DelBtn).CornerRadius = UDim.new(0,6)
+
+        DelBtn.MouseButton1Click:Connect(function()
+            table.remove(checkpoints, i)
+            refreshCPList()
+        end)
+
+        y = y + 35
     end
+
     CPList.CanvasSize = UDim2.new(0,0,0,y)
 end
 
+-- SAVE CHECKPOINT
 SaveBtn.MouseButton1Click:Connect(function()
     if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
         table.insert(checkpoints, LP.Character.HumanoidRootPart.CFrame)
@@ -249,6 +296,7 @@ SaveBtn.MouseButton1Click:Connect(function()
     end
 end)
 
+-- AUTO TELEPORT
 AutoTeleBtn.MouseButton1Click:Connect(function()
     autoTele = not autoTele
     AutoTeleBtn.Text = autoTele and "🔁 Auto Tele: ON" or "🔁 Auto Tele: OFF"
@@ -260,7 +308,7 @@ AutoTeleBtn.MouseButton1Click:Connect(function()
                     if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
                         LP.Character.HumanoidRootPart.CFrame = pos
                     end
-                    task.wait(2) -- delay tiap teleport
+                    task.wait(2)
                 end
             end
         end)
@@ -311,34 +359,76 @@ FlyBtn.MouseButton1Click:Connect(function()
     flyY = 0
     if flying then startFly() else if bv then bv:Destroy() bv=nil end end
 end)
-
 -- === Teleport Player List ===
 local function refreshPlayers()
     for _,child in pairs(ListFrame:GetChildren()) do
-        if child:IsA("TextButton") then child:Destroy() end
+        if not child:IsA("UIListLayout") then
+            child:Destroy()
+        end
     end
+
     local y = 0
     for _,plr in pairs(Players:GetPlayers()) do
         if plr ~= LP then
-            local Btn = Instance.new("TextButton", ListFrame)
-            Btn.Size = UDim2.new(1, -5, 0, 30)
-            Btn.Position = UDim2.new(0,0,0,y)
-            Btn.Text = plr.Name
-            Btn.TextColor3 = Color3.fromRGB(255,255,255)
-            Btn.BackgroundColor3 = Color3.fromRGB(50,50,50)
-            Btn.MouseButton1Click:Connect(function()
+            -- Frame container biar ga kaku
+            local ItemFrame = Instance.new("Frame", ListFrame)
+            ItemFrame.Size = UDim2.new(1,-5,0,35)
+            ItemFrame.Position = UDim2.new(0,0,0,y)
+            ItemFrame.BackgroundColor3 = Color3.fromRGB(45,45,45)
+            Instance.new("UICorner", ItemFrame).CornerRadius = UDim.new(0,6)
+
+            -- Label nama player
+            local NameLabel = Instance.new("TextLabel", ItemFrame)
+            NameLabel.Size = UDim2.new(0.7,0,1,0)
+            NameLabel.Position = UDim2.new(0,10,0,0)
+            NameLabel.Text = "🎮 "..plr.Name
+            NameLabel.TextColor3 = Color3.fromRGB(255,255,255)
+            NameLabel.BackgroundTransparency = 1
+            NameLabel.Font = Enum.Font.SourceSansBold
+            NameLabel.TextSize = 16
+            NameLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+            -- Tombol teleport
+            local TeleBtn = Instance.new("TextButton", ItemFrame)
+            TeleBtn.Size = UDim2.new(0.25,0,0.8,0)
+            TeleBtn.Position = UDim2.new(0.72,0,0.1,0)
+            TeleBtn.Text = "Teleport"
+            TeleBtn.TextColor3 = Color3.fromRGB(255,255,255)
+            TeleBtn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+            TeleBtn.Font = Enum.Font.SourceSans
+            TeleBtn.TextSize = 14
+            Instance.new("UICorner", TeleBtn).CornerRadius = UDim.new(0,6)
+
+            TeleBtn.MouseButton1Click:Connect(function()
                 if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                    LP.Character:WaitForChild("HumanoidRootPart").CFrame = plr.Character.HumanoidRootPart.CFrame + Vector3.new(0,3,0)
+                    LP.Character:WaitForChild("HumanoidRootPart").CFrame =
+                        plr.Character.HumanoidRootPart.CFrame + Vector3.new(0,3,0)
                 end
             end)
-            y = y+35
+
+            y = y + 40
         end
     end
+
     ListFrame.CanvasSize = UDim2.new(0,0,0,y)
 end
+
+-- Auto refresh saat player masuk/keluar
 Players.PlayerAdded:Connect(refreshPlayers)
 Players.PlayerRemoving:Connect(refreshPlayers)
-refreshPlayers()
+
+-- Manual refresh button
+RefreshBtn.MouseButton1Click:Connect(refreshPlayers)
+
+-- Toggle dropdown
 DropDown.MouseButton1Click:Connect(function()
-    ListFrame.Visible = not ListFrame.Visible
+    local newState = not ListFrame.Visible
+    ListFrame.Visible = newState
+    RefreshBtn.Visible = newState
+    if newState then
+        refreshPlayers()
+    end
 end)
+
+-- Inisialisasi awal
+refreshPlayers()
