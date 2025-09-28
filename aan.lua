@@ -293,7 +293,7 @@ local recording = false
 local actions = {}
 local lastTime = tick()
 
--- Tombol Rekam
+-- Tombol Rekam / Stop
 local RecordBtn = Instance.new("TextButton", Page2)
 RecordBtn.Size = UDim2.new(0.9,0,0,40)
 RecordBtn.Position = UDim2.new(0.05,0,0.05,0)
@@ -304,29 +304,7 @@ RecordBtn.Font = Enum.Font.SourceSansBold
 RecordBtn.TextSize = 18
 Instance.new("UICorner", RecordBtn).CornerRadius = UDim.new(0,6)
 
--- Tombol Stop & Copy
-local StopBtn = Instance.new("TextButton", Page2)
-StopBtn.Size = UDim2.new(0.9,0,0,40)
-StopBtn.Position = UDim2.new(0.05,0,0.17,0)
-StopBtn.Text = "⏹️ Stop & Copy"
-StopBtn.TextColor3 = Color3.fromRGB(255,255,255)
-StopBtn.BackgroundColor3 = Color3.fromRGB(100,40,40)
-StopBtn.Font = Enum.Font.SourceSansBold
-StopBtn.TextSize = 18
-Instance.new("UICorner", StopBtn).CornerRadius = UDim.new(0,6)
-
--- Tombol Playback (langsung jalanin hasil rekaman)
-local PlayBtn = Instance.new("TextButton", Page2)
-PlayBtn.Size = UDim2.new(0.9,0,0,40)
-PlayBtn.Position = UDim2.new(0.05,0,0.29,0)
-PlayBtn.Text = "▶️ Jalankan Playback"
-PlayBtn.TextColor3 = Color3.fromRGB(255,255,255)
-PlayBtn.BackgroundColor3 = Color3.fromRGB(40,100,40)
-PlayBtn.Font = Enum.Font.SourceSansBold
-PlayBtn.TextSize = 18
-Instance.new("UICorner", PlayBtn).CornerRadius = UDim.new(0,6)
-
--- Fungsi untuk log event
+-- Fungsi log aktivitas
 local function logAction(codeStr)
     if recording then
         local now = tick()
@@ -338,46 +316,36 @@ end
 
 -- Start/Stop Rekam
 RecordBtn.MouseButton1Click:Connect(function()
-    recording = not recording
-    actions = {}
-    lastTime = tick()
-    RecordBtn.Text = recording and "🎥 Rekam: ON" or "🎥 Rekam: OFF"
-end)
+    if not recording then
+        -- mulai rekam
+        recording = true
+        actions = {}
+        lastTime = tick()
+        RecordBtn.Text = "🎥 Rekam: ON"
+    else
+        -- stop + copy
+        recording = false
+        RecordBtn.Text = "🎥 Rekam: OFF"
 
--- Stop & Copy hasil ke clipboard
-StopBtn.MouseButton1Click:Connect(function()
-    if #actions == 0 then return end
-    recording = false
-    RecordBtn.Text = "🎥 Rekam: OFF"
+        if #actions > 0 then
+            local code = "-- Playback Aktivitas Pancing\n"
+            code = code.."task.spawn(function()\n"
+            for _,a in ipairs(actions) do
+                code = code..string.format("    task.wait(%.2f)\n", a.delay)
+                code = code.."    "..a.code.."\n"
+            end
+            code = code.."end)\n"
 
-    -- Convert hasil jadi kode playback
-    local code = "-- Playback Aktivitas Pancing\n"
-    code = code.."task.spawn(function()\n"
-    for _,a in ipairs(actions) do
-        code = code..string.format("    task.wait(%.2f)\n", a.delay)
-        code = code.."    "..a.code.."\n"
-    end
-    code = code.."end)\n"
-
-    setclipboard(code)
-end)
-
--- Jalankan Playback langsung
-PlayBtn.MouseButton1Click:Connect(function()
-    if #actions == 0 then return end
-    task.spawn(function()
-        for _,a in ipairs(actions) do
-            task.wait(a.delay)
-            loadstring(a.code)() -- langsung eksekusi
+            setclipboard(code)
         end
-    end)
+    end
 end)
 
 -------------------------------------------------
--- CONTOH EVENT (edit sesuai Remote game kamu)
+-- CONTOH EVENT (ganti sesuai remote di game kamu)
 -------------------------------------------------
 
--- Contoh: pencet tombol F untuk lempar pancing
+-- Contoh: pencet tombol F buat lempar pancing
 UIS.InputBegan:Connect(function(input,gpe)
     if gpe then return end
     if input.KeyCode == Enum.KeyCode.F then
@@ -385,15 +353,14 @@ UIS.InputBegan:Connect(function(input,gpe)
     end
 end)
 
--- Contoh: perfect cast
+-- Contoh perfect cast
 -- logAction('Remote.Cast:FireServer("PerfectCast")')
 
--- Contoh: dapet ikan
+-- Contoh dapet ikan
 -- logAction('Remote.Catch:FireServer("FishCaught")')
 
--- Contoh: tarik ikan
+-- Contoh tarik ikan
 -- logAction('Remote.Pull:FireServer("PullFish")')
-
 -- 📌 DAFTAR TELEPORT (Page3)
 local Teleports = {
     ["🌊 Pulau Nelayan"] = CFrame.new(-116.440826, 3.262054, 2937.845215, 
