@@ -124,6 +124,26 @@ Page2.Position = UDim2.new(0,0,0,30)
 Page2.BackgroundTransparency = 1
 Page2.Visible = false
 
+local Page3 = Instance.new("Frame", MainFrame)
+Page3.Size = UDim2.new(1,0,1,-30)
+Page3.Position = UDim2.new(0,0,0,30)
+Page3.BackgroundTransparency = 1
+Page3.Visible = false
+
+-- Container scroll
+local ScrollTP = Instance.new("ScrollingFrame", Page3)
+ScrollTP.Size = UDim2.new(0.9,0,0.9,0)
+ScrollTP.Position = UDim2.new(0.05,0,0.05,0)
+ScrollTP.CanvasSize = UDim2.new(0,0,0,0)
+ScrollTP.ScrollBarThickness = 4
+ScrollTP.BackgroundColor3 = Color3.fromRGB(30,30,30)
+Instance.new("UICorner", ScrollTP).CornerRadius = UDim.new(0,6)
+
+-- Layout biar rapi ke bawah
+local layout = Instance.new("UIListLayout", ScrollTP)
+layout.Padding = UDim.new(0,8)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+
 -- Next Button
 local NextBtn = Instance.new("TextButton")
 NextBtn.Size = UDim2.new(0, 70, 0, 30)
@@ -153,13 +173,22 @@ Instance.new("UICorner", BackBtn).CornerRadius = UDim.new(0,8)
 local function switchPage(pg)
     Page1.Visible = (pg == 1)
     Page2.Visible = (pg == 2)
-    BackBtn.Visible = (pg == 2)
-    NextBtn.Visible = (pg == 1)
+    Page3.Visible = (pg == 3) -- 🔥 ditambah
+    BackBtn.Visible = (pg > 1)
+    NextBtn.Visible = (pg < 3) -- 🔥 update, jangan cuma == 1
     currentPage = pg
 end
-NextBtn.MouseButton1Click:Connect(function() switchPage(2) end)
-BackBtn.MouseButton1Click:Connect(function() switchPage(1) end)
+NextBtn.MouseButton1Click:Connect(function()
+    if currentPage < 3 then
+        switchPage(currentPage + 1)
+    end
+end)
 
+BackBtn.MouseButton1Click:Connect(function()
+    if currentPage > 1 then
+        switchPage(currentPage - 1)
+    end
+end)
 ---------------- PAGE 1 (Fly + Teleport Player) ----------------
 -- Fly Button
 local FlyBtn = Instance.new("TextButton", Page1)
@@ -376,6 +405,39 @@ AutoTeleBtn.MouseButton1Click:Connect(function()
             end
         end)
     end
+end)
+
+-- 📌 DAFTAR TELEPORT (Page3)
+local Teleports = {
+    ["🌊 Pulau Nelayan"] = CFrame.new(-116.440826, 3.262054, 2937.845215, 
+        0.357871, 0, 0.933771, 0, 1, 0, -0.933771, 0, 0.357871),
+    ["🏯 Kohana"] = CFrame.new(-617.650330, 7.750060, 606.191711, 
+        -0.082204, 0, 0.996616, 0, 1, 0, -0.996616, 0, -0.082204),
+    ["🔥 Kohana Lava"] = CFrame.new(-598.833862, 59.000057, 109.267891, 
+        -0.929014, 0, 0.370043, 0, 1, 0, -0.370043, 0, -0.929014),
+}
+
+-- Bikin tombol otomatis
+for name,pos in pairs(Teleports) do
+    local TeleBtn = Instance.new("TextButton", ScrollTP)
+    TeleBtn.Size = UDim2.new(1, -10, 0, 40)
+    TeleBtn.Text = name
+    TeleBtn.TextColor3 = Color3.fromRGB(255,255,255)
+    TeleBtn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+    TeleBtn.Font = Enum.Font.SourceSansBold
+    TeleBtn.TextSize = 18
+    Instance.new("UICorner", TeleBtn).CornerRadius = UDim.new(0,6)
+
+    TeleBtn.MouseButton1Click:Connect(function()
+        if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
+            LP.Character.HumanoidRootPart.CFrame = pos
+        end
+    end)
+end
+
+-- Update ukuran canvas biar sesuai jumlah tombol
+layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    ScrollTP.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y+10)
 end)
 
 -- === Fly System (Page1) ===
