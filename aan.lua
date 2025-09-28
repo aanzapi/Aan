@@ -287,126 +287,90 @@ Instance.new("UICorner", RefreshBtn).CornerRadius = UDim.new(0, 6)
 
 
 ---------------- PAGE 2 (Checkpoint System) ----------------
--- BUTTON SAVE
-local SaveBtn = Instance.new("TextButton", Page2)
-SaveBtn.Size = UDim2.new(0.9,0,0,40)
-SaveBtn.Position = UDim2.new(0.05,0,0.05,0)
-SaveBtn.Text = "💾 Save Checkpoint"
-SaveBtn.TextColor3 = Color3.fromRGB(255,255,255)
-SaveBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
-SaveBtn.Font = Enum.Font.SourceSansBold
-SaveBtn.TextSize = 18
-Instance.new("UICorner", SaveBtn).CornerRadius = UDim.new(0,6)
+---------------- PAGE 4 (Rekam Aktivitas Pancing) ----------------
 
--- BUTTON AUTO TELE
-local AutoTeleBtn = Instance.new("TextButton", Page2)
-AutoTeleBtn.Size = UDim2.new(0.9,0,0,40)
-AutoTeleBtn.Position = UDim2.new(0.05,0,0.17,0)
-AutoTeleBtn.Text = "🔁 Auto Tele: OFF"
-AutoTeleBtn.TextColor3 = Color3.fromRGB(255,255,255)
-AutoTeleBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
-AutoTeleBtn.Font = Enum.Font.SourceSansBold
-AutoTeleBtn.TextSize = 18
-Instance.new("UICorner", AutoTeleBtn).CornerRadius = UDim.new(0,6)
+local recording = false
+local actions = {}
+local lastTime = tick()
 
--- LIST CHECKPOINT
-local CPList = Instance.new("ScrollingFrame", Page2)
-CPList.Size = UDim2.new(0.9,0,0,200)
-CPList.Position = UDim2.new(0.05,0,0.35,0)
-CPList.CanvasSize = UDim2.new(0,0,0,0)
-CPList.BackgroundColor3 = Color3.fromRGB(30,30,30)
-CPList.ScrollBarThickness = 4
-Instance.new("UICorner", CPList).CornerRadius = UDim.new(0,6)
+-- Tombol Rekam
+local RecordBtn = Instance.new("TextButton", Page4)
+RecordBtn.Size = UDim2.new(0.9,0,0,40)
+RecordBtn.Position = UDim2.new(0.05,0,0.05,0)
+RecordBtn.Text = "🎥 Rekam: OFF"
+RecordBtn.TextColor3 = Color3.fromRGB(255,255,255)
+RecordBtn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+RecordBtn.Font = Enum.Font.SourceSansBold
+RecordBtn.TextSize = 18
+Instance.new("UICorner", RecordBtn).CornerRadius = UDim.new(0,6)
 
--- SYSTEM VARIABLES
-local checkpoints = {}
-local autoTele = false
+-- Tombol Stop
+local StopBtn = Instance.new("TextButton", Page4)
+StopBtn.Size = UDim2.new(0.9,0,0,40)
+StopBtn.Position = UDim2.new(0.05,0,0.17,0)
+StopBtn.Text = "⏹️ Stop & Copy"
+StopBtn.TextColor3 = Color3.fromRGB(255,255,255)
+StopBtn.BackgroundColor3 = Color3.fromRGB(100,40,40)
+StopBtn.Font = Enum.Font.SourceSansBold
+StopBtn.TextSize = 18
+Instance.new("UICorner", StopBtn).CornerRadius = UDim.new(0,6)
 
--- REFRESH LIST
-local function refreshCPList()
-    for _,c in pairs(CPList:GetChildren()) do
-        if not c:IsA("UIListLayout") then
-            c:Destroy()
-        end
+-- Fungsi untuk log event
+local function logAction(codeStr)
+    if recording then
+        local now = tick()
+        local delay = now - lastTime
+        lastTime = now
+        table.insert(actions, {delay = delay, code = codeStr})
     end
-
-    local y = 0
-    for i,pos in ipairs(checkpoints) do
-        -- Frame container
-        local ItemFrame = Instance.new("Frame", CPList)
-        ItemFrame.Size = UDim2.new(1,-5,0,30)
-        ItemFrame.Position = UDim2.new(0,0,0,y)
-        ItemFrame.BackgroundTransparency = 1
-
-        -- Tombol teleport
-        local TeleBtn = Instance.new("TextButton", ItemFrame)
-        TeleBtn.Size = UDim2.new(0.7,-5,1,0)
-        TeleBtn.Position = UDim2.new(0,0,0,0)
-        TeleBtn.Text = "Checkpoint "..i
-        TeleBtn.TextColor3 = Color3.fromRGB(255,255,255)
-        TeleBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
-        Instance.new("UICorner", TeleBtn).CornerRadius = UDim.new(0,6)
-
-        TeleBtn.MouseButton1Click:Connect(function()
-            if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
-                LP.Character.HumanoidRootPart.CFrame = pos
-            end
-        end)
-
-        -- Tombol delete
-        local DelBtn = Instance.new("TextButton", ItemFrame)
-        DelBtn.Size = UDim2.new(0.3,0,1,0)
-        DelBtn.Position = UDim2.new(0.7,5,0,0)
-        DelBtn.Text = "🗑️"
-        DelBtn.TextColor3 = Color3.fromRGB(255,100,100)
-        DelBtn.BackgroundColor3 = Color3.fromRGB(80,30,30)
-        Instance.new("UICorner", DelBtn).CornerRadius = UDim.new(0,6)
-
-        DelBtn.MouseButton1Click:Connect(function()
-            table.remove(checkpoints, i)
-            refreshCPList()
-        end)
-
-        y = y + 35
-    end
-
-    CPList.CanvasSize = UDim2.new(0,0,0,y)
 end
 
--- SAVE CHECKPOINT + COPY KODE
-SaveBtn.MouseButton1Click:Connect(function()
-    if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
-        local pos = LP.Character.HumanoidRootPart.CFrame
-        table.insert(checkpoints, pos)
-        refreshCPList()
+-- Start/Stop Rekam
+RecordBtn.MouseButton1Click:Connect(function()
+    recording = not recording
+    actions = {}
+    lastTime = tick()
+    RecordBtn.Text = recording and "🎥 Rekam: ON" or "🎥 Rekam: OFF"
+end)
 
-        -- Copy ke clipboard
-        local code = ("CFrame.new(%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)"):format(
-            pos:GetComponents()
-        )
-        setclipboard(code) -- Roblox API buat copy text ke clipboard
+-- Stop & Copy hasil
+StopBtn.MouseButton1Click:Connect(function()
+    if #actions == 0 then return end
+    recording = false
+    RecordBtn.Text = "🎥 Rekam: OFF"
+
+    -- Convert hasil jadi kode playback
+    local code = "-- Playback Aktivitas Pancing\n"
+    code = code.."task.spawn(function()\n"
+    for _,a in ipairs(actions) do
+        code = code..string.format("    task.wait(%.2f)\n", a.delay)
+        code = code.."    "..a.code.."\n"
+    end
+    code = code.."end)\n"
+
+    setclipboard(code)
+end)
+
+-------------------------------------------------
+-- CONTOH EVENT (edit sesuai Remote game kamu)
+-------------------------------------------------
+
+-- Contoh: tombol F untuk lempar pancing
+UIS.InputBegan:Connect(function(input,gpe)
+    if gpe then return end
+    if input.KeyCode == Enum.KeyCode.F then
+        logAction('Remote.Cast:FireServer("ThrowRod")')
     end
 end)
 
--- AUTO TELEPORT
-AutoTeleBtn.MouseButton1Click:Connect(function()
-    autoTele = not autoTele
-    AutoTeleBtn.Text = autoTele and "🔁 Auto Tele: ON" or "🔁 Auto Tele: OFF"
-    if autoTele then
-        task.spawn(function()
-            while autoTele and #checkpoints>0 do
-                for _,pos in ipairs(checkpoints) do
-                    if not autoTele then break end
-                    if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
-                        LP.Character.HumanoidRootPart.CFrame = pos
-                    end
-                    task.wait(2) -- ⏳ waktu jeda antar teleport
-                end
-            end
-        end)
-    end
-end)
+-- Contoh: perfect cast
+-- logAction('Remote.Cast:FireServer("PerfectCast")')
 
+-- Contoh: dapet ikan
+-- logAction('Remote.Catch:FireServer("FishCaught")')
+
+-- Contoh: tarik ikan
+-- logAction('Remote.Pull:FireServer("PullFish")')
 -- 📌 DAFTAR TELEPORT (Page3)
 local Teleports = {
     ["🌊 Pulau Nelayan"] = CFrame.new(-116.440826, 3.262054, 2937.845215, 
