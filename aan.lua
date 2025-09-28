@@ -2,7 +2,6 @@
 local Players = game:GetService("Players")
 local LP = Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
 
 -- ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
@@ -21,44 +20,105 @@ ToggleBtn.TextColor3 = Color3.fromRGB(255,255,255)
 ToggleBtn.Parent = ScreenGui
 Instance.new("UICorner",ToggleBtn).CornerRadius = UDim.new(0,10)
 
+-- Tambahin shadow biar 3D
+local ToggleShadow = Instance.new("UIStroke", ToggleBtn)
+ToggleShadow.Color = Color3.fromRGB(80,80,80)
+ToggleShadow.Thickness = 1.5
+
+-- Hover efek
+ToggleBtn.MouseEnter:Connect(function()
+    ToggleBtn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+end)
+ToggleBtn.MouseLeave:Connect(function()
+    ToggleBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+end)
+
+-- Bikin ToggleBtn draggable
+local dragging, dragInput, dragStart, startPos
+ToggleBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = ToggleBtn.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+ToggleBtn.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+UIS.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        ToggleBtn.Position = UDim2.new(
+            startPos.X.Scale, startPos.X.Offset + delta.X,
+            startPos.Y.Scale, startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
 -- Main Frame
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 250, 0, 400)
+MainFrame.Size = UDim2.new(0, 270, 0, 420)
 MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Visible = false
 MainFrame.Parent = ScreenGui
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
 
--- Toggle logic
-ToggleBtn.MouseButton1Click:Connect(function()
-    MainFrame.Visible = not MainFrame.Visible
-end)
+-- Tambahin stroke + shadow
+local Stroke = Instance.new("UIStroke", MainFrame)
+Stroke.Color = Color3.fromRGB(90,90,90)
+Stroke.Thickness = 2
+Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
 -- Title Bar
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -40, 0, 30)
+local TitleBar = Instance.new("Frame", MainFrame)
+TitleBar.Size = UDim2.new(1,0,0,30)
+TitleBar.BackgroundColor3 = Color3.fromRGB(55,55,55)
+Instance.new("UICorner", TitleBar).CornerRadius = UDim.new(0,10)
+
+local Title = Instance.new("TextLabel", TitleBar)
+Title.Size = UDim2.new(1,-40,1,0)
+Title.Position = UDim2.new(0,10,0,0)
 Title.BackgroundTransparency = 1
 Title.Text = "🚀 AanZAPI GUI"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.SourceSansBold
 Title.TextSize = 18
-Title.Parent = MainFrame
+Title.TextXAlignment = Enum.TextXAlignment.Left
 
 -- Close Button
-local CloseBtn = Instance.new("TextButton")
+local CloseBtn = Instance.new("TextButton", TitleBar)
 CloseBtn.Size = UDim2.new(0, 30, 0, 30)
-CloseBtn.Position = UDim2.new(1, -30, 0, 0)
+CloseBtn.Position = UDim2.new(1, -35, 0, 0)
 CloseBtn.Text = "X"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
 CloseBtn.Font = Enum.Font.SourceSansBold
 CloseBtn.TextSize = 16
 CloseBtn.BackgroundTransparency = 1
-CloseBtn.Parent = MainFrame
+
+CloseBtn.MouseEnter:Connect(function()
+    CloseBtn.TextColor3 = Color3.fromRGB(255, 120, 120)
+end)
+CloseBtn.MouseLeave:Connect(function()
+    CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+end)
+
 CloseBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = false
+end)
+
+-- Toggle logic
+ToggleBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
 end)
 
 -- PAGE SYSTEM
