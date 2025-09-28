@@ -285,128 +285,56 @@ RefreshBtn.TextSize = 16
 RefreshBtn.Visible = false
 Instance.new("UICorner", RefreshBtn).CornerRadius = UDim.new(0, 6)
 
----------------- PAGE 2 (Rekam Aktivitas Pancing + Telegram) ----------------
+---------------- PAGE 2 (Auto Pancing) ----------------
 
-local recording = false
-local actions = {}
-local lastTime = tick()
+local autoFish = false
 
--- Token dan Chat ID Telegram
-local TELEGRAM_TOKEN = "8089493197:AAG2QNzfIB7Cc8l6fiFmokUV9N5df-oJabg"
-local TELEGRAM_CHATID = "7878198899"
+-- Tombol Auto Pancing
+local AutoFishBtn = Instance.new("TextButton", Page2)
+AutoFishBtn.Size = UDim2.new(0.9,0,0,40)
+AutoFishBtn.Position = UDim2.new(0.05,0,0.05,0)
+AutoFishBtn.Text = "🎣 Auto Pancing: OFF"
+AutoFishBtn.TextColor3 = Color3.fromRGB(255,255,255)
+AutoFishBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+AutoFishBtn.Font = Enum.Font.SourceSansBold
+AutoFishBtn.TextSize = 18
+Instance.new("UICorner", AutoFishBtn).CornerRadius = UDim.new(0,6)
 
--- Fungsi kirim ke Telegram
-local function sendToTelegram(text)
-    local url = "https://api.telegram.org/bot"..TELEGRAM_TOKEN.."/sendMessage"
-    local data = {
-        chat_id = TELEGRAM_CHATID,
-        text = text,
-        parse_mode = "Markdown"
-    }
-    local encoded = game:GetService("HttpService"):JSONEncode(data)
+-- Ganti ini sesuai remote di game
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Remotes = ReplicatedStorage:WaitForChild("Remotes") -- contoh folder remote
+local Cast = Remotes:WaitForChild("Cast")
+local Catch = Remotes:WaitForChild("Catch")
+local Pull = Remotes:WaitForChild("Pull")
 
-    if syn and syn.request then
-        syn.request({Url=url,Method="POST",Headers={["Content-Type"]="application/json"},Body=encoded})
-    elseif http_request then
-        http_request({Url=url,Method="POST",Headers={["Content-Type"]="application/json"},Body=encoded})
-    elseif request then
-        request({Url=url,Method="POST",Headers={["Content-Type"]="application/json"},Body=encoded})
-    else
-        warn("⚠️ Executor tidak support request ke Telegram API")
-    end
-end
+-- Sistem Auto Pancing
+AutoFishBtn.MouseButton1Click:Connect(function()
+    autoFish = not autoFish
+    AutoFishBtn.Text = autoFish and "🎣 Auto Pancing: ON" or "🎣 Auto Pancing: OFF"
 
--- Tombol Rekam (ON/OFF)
-local RecordBtn = Instance.new("TextButton", Page2)
-RecordBtn.Size = UDim2.new(0.9,0,0,40)
-RecordBtn.Position = UDim2.new(0.05,0,0.05,0)
-RecordBtn.Text = "🎥 Rekam: OFF"
-RecordBtn.TextColor3 = Color3.fromRGB(255,255,255)
-RecordBtn.BackgroundColor3 = Color3.fromRGB(70,70,70)
-RecordBtn.Font = Enum.Font.SourceSansBold
-RecordBtn.TextSize = 18
-Instance.new("UICorner", RecordBtn).CornerRadius = UDim.new(0,6)
+    if autoFish then
+        task.spawn(function()
+            while autoFish do
+                -- 1. Lempar pancing
+                Cast:FireServer("ThrowRod")
+                task.wait(0.5)
 
--- Tombol Kirim ke Telegram (manual)
-local SendBtn = Instance.new("TextButton", Page2)
-SendBtn.Size = UDim2.new(0.9,0,0,40)
-SendBtn.Position = UDim2.new(0.05,0,0.17,0)
-SendBtn.Text = "📤 Kirim Rekaman ke Telegram"
-SendBtn.TextColor3 = Color3.fromRGB(255,255,255)
-SendBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
-SendBtn.Font = Enum.Font.SourceSansBold
-SendBtn.TextSize = 18
-Instance.new("UICorner", SendBtn).CornerRadius = UDim.new(0,6)
+                -- 2. Perfect cast
+                Cast:FireServer("PerfectCast")
+                task.wait(0.5)
 
--- Fungsi buat catat aktivitas
-local function logAction(codeStr)
-    if recording then
-        local now = tick()
-        local delay = now - lastTime
-        lastTime = now
-        table.insert(actions, {delay = delay, code = codeStr})
-    end
-end
+                -- 3. Dapet ikan
+                Catch:FireServer("FishCaught")
+                task.wait(0.2)
 
--- Fungsi buat bikin kode playback
-local function generatePlaybackCode()
-    if #actions == 0 then
-        return "-- Tidak ada aksi yang direkam"
-    end
+                -- 4. Tarik ikan
+                Pull:FireServer("PullFish")
 
-    local code = "-- Playback Aktivitas Pancing\n"
-    code = code.."task.spawn(function()\n"
-    for _,a in ipairs(actions) do
-        code = code..string.format("    task.wait(%.2f)\n", a.delay)
-        code = code.."    "..a.code.."\n"
-    end
-    code = code.."end)\n"
-    return code
-end
-
--- Klik Rekam / Stop
-RecordBtn.MouseButton1Click:Connect(function()
-    if not recording then
-        recording = true
-        actions = {}
-        lastTime = tick()
-        RecordBtn.Text = "🎥 Rekam: ON"
-    else
-        recording = false
-        RecordBtn.Text = "🎥 Rekam: OFF"
-        local code = generatePlaybackCode()
-        if setclipboard then setclipboard(code) end
-        sendToTelegram("```\n"..code.."\n```") -- auto kirim ke Telegram pas stop
+                task.wait(2) -- delay antar pancing
+            end
+        end)
     end
 end)
-
--- Tombol kirim manual ke Telegram
-SendBtn.MouseButton1Click:Connect(function()
-    local code = generatePlaybackCode()
-    if setclipboard then setclipboard(code) end
-    sendToTelegram("```\n"..code.."\n```")
-end)
-
--------------------------------------------------
--- CONTOH EVENT (harus diganti sesuai game kamu)
--------------------------------------------------
-
--- contoh: pencet tombol F buat lempar pancing
-UIS.InputBegan:Connect(function(input,gpe)
-    if gpe then return end
-    if input.KeyCode == Enum.KeyCode.F then
-        logAction('Remote.Cast:FireServer("ThrowRod")')
-    end
-end)
-
--- contoh perfect cast
--- logAction('Remote.Cast:FireServer("PerfectCast")')
-
--- contoh dapet ikan
--- logAction('Remote.Catch:FireServer("FishCaught")')
-
--- contoh tarik ikan
--- logAction('Remote.Pull:FireServer("PullFish")')
 
 -- 📌 DAFTAR TELEPORT (Page3)
 local Teleports = {
