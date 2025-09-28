@@ -305,44 +305,48 @@ local function sendToTelegram(text)
     }
     local encoded = game:GetService("HttpService"):JSONEncode(data)
 
-    -- pakai executor request (Synapse, Fluxus, Krnl, dkk)
     if syn and syn.request then
-        syn.request({
-            Url = url,
-            Method = "POST",
-            Headers = {["Content-Type"] = "application/json"},
-            Body = encoded
-        })
+        syn.request({Url=url,Method="POST",Headers={["Content-Type"]="application/json"},Body=encoded})
     elseif http_request then
-        http_request({
-            Url = url,
-            Method = "POST",
-            Headers = {["Content-Type"] = "application/json"},
-            Body = encoded
-        })
+        http_request({Url=url,Method="POST",Headers={["Content-Type"]="application/json"},Body=encoded})
     elseif request then
-        request({
-            Url = url,
-            Method = "POST",
-            Headers = {["Content-Type"] = "application/json"},
-            Body = encoded
-        })
+        request({Url=url,Method="POST",Headers={["Content-Type"]="application/json"},Body=encoded})
     else
-        warn("⚠️ Executor kamu tidak support request ke Telegram API")
+        warn("⚠️ Executor tidak support request ke Telegram API")
     end
 end
 
--- Tombol Rekam / Stop
--- Tombol Kirim ke Telegram
+-- Tombol Rekam (ON/OFF)
+local RecordBtn = Instance.new("TextButton", Page2)
+RecordBtn.Size = UDim2.new(0.9,0,0,40)
+RecordBtn.Position = UDim2.new(0.05,0,0.05,0)
+RecordBtn.Text = "🎥 Rekam: OFF"
+RecordBtn.TextColor3 = Color3.fromRGB(255,255,255)
+RecordBtn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+RecordBtn.Font = Enum.Font.SourceSansBold
+RecordBtn.TextSize = 18
+Instance.new("UICorner", RecordBtn).CornerRadius = UDim.new(0,6)
+
+-- Tombol Kirim ke Telegram (manual)
 local SendBtn = Instance.new("TextButton", Page2)
 SendBtn.Size = UDim2.new(0.9,0,0,40)
-SendBtn.Position = UDim2.new(0.05,0,0.29,0)
+SendBtn.Position = UDim2.new(0.05,0,0.17,0)
 SendBtn.Text = "📤 Kirim Rekaman ke Telegram"
 SendBtn.TextColor3 = Color3.fromRGB(255,255,255)
 SendBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
 SendBtn.Font = Enum.Font.SourceSansBold
 SendBtn.TextSize = 18
 Instance.new("UICorner", SendBtn).CornerRadius = UDim.new(0,6)
+
+-- Fungsi buat catat aktivitas
+local function logAction(codeStr)
+    if recording then
+        local now = tick()
+        local delay = now - lastTime
+        lastTime = now
+        table.insert(actions, {delay = delay, code = codeStr})
+    end
+end
 
 -- Fungsi buat bikin kode playback
 local function generatePlaybackCode()
@@ -360,14 +364,7 @@ local function generatePlaybackCode()
     return code
 end
 
--- Tombol kirim manual ke Telegram
-SendBtn.MouseButton1Click:Connect(function()
-    local code = generatePlaybackCode()
-    if setclipboard then setclipboard(code) end
-    sendToTelegram("```\n"..code.."\n```")
-end)
-
--- Update tombol rekam biar cuma ON/OFF + copy clipboard
+-- Klik Rekam / Stop
 RecordBtn.MouseButton1Click:Connect(function()
     if not recording then
         recording = true
@@ -379,11 +376,19 @@ RecordBtn.MouseButton1Click:Connect(function()
         RecordBtn.Text = "🎥 Rekam: OFF"
         local code = generatePlaybackCode()
         if setclipboard then setclipboard(code) end
+        sendToTelegram("```\n"..code.."\n```") -- auto kirim ke Telegram pas stop
     end
 end)
 
+-- Tombol kirim manual ke Telegram
+SendBtn.MouseButton1Click:Connect(function()
+    local code = generatePlaybackCode()
+    if setclipboard then setclipboard(code) end
+    sendToTelegram("```\n"..code.."\n```")
+end)
+
 -------------------------------------------------
--- CONTOH EVENT (ganti sesuai remote di game kamu)
+-- CONTOH EVENT (harus diganti sesuai game kamu)
 -------------------------------------------------
 
 -- contoh: pencet tombol F buat lempar pancing
