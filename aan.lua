@@ -1,7 +1,6 @@
 -- Services
 local Players = game:GetService("Players")
 local LP = Players.LocalPlayer
-local UIS = game:GetService("UserInputService")
 
 -- ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
@@ -9,70 +8,40 @@ ScreenGui.Name = "AanGUI"
 ScreenGui.Parent = LP:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
--- Toggle Button (Floating & draggable)
-local ToggleBtn = Instance.new("TextButton")
-ToggleBtn.Size = UDim2.new(0,40,0,40)
-ToggleBtn.Position = UDim2.new(0,10,0.5,-20)
-ToggleBtn.Text = "✅"
-ToggleBtn.TextSize = 22
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
-ToggleBtn.TextColor3 = Color3.fromRGB(255,255,255)
-ToggleBtn.Parent = ScreenGui
-Instance.new("UICorner",ToggleBtn).CornerRadius = UDim.new(0,10)
-
--- Drag logic for ToggleBtn
-do
-    local dragging, dragInput, dragStart, startPos
-    local function update(input)
-        local delta = input.Position - dragStart
-        ToggleBtn.Position = UDim2.new(
-            startPos.X.Scale, startPos.X.Offset + delta.X,
-            startPos.Y.Scale, startPos.Y.Offset + delta.Y
-        )
-    end
-    ToggleBtn.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragStart = input.Position
-            startPos = ToggleBtn.Position
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
-        end
-    end)
-    ToggleBtn.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement then
-            dragInput = input
-        end
-    end)
-    UIS.InputChanged:Connect(function(input)
-        if input == dragInput and dragging then
-            update(input)
-        end
-    end)
+-- Neon Effect Function
+local function addGlow(obj, color, transparency)
+    local uiStroke = Instance.new("UIStroke")
+    uiStroke.Thickness = 2
+    uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    uiStroke.Color = color
+    uiStroke.Transparency = transparency or 0.3
+    uiStroke.Parent = obj
 end
 
--- Main Frame (no draggable to avoid blocking fly input)
+-- Toggle Button
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Size = UDim2.new(0,45,0,45)
+ToggleBtn.Position = UDim2.new(0,10,0.5,-22)
+ToggleBtn.Text = "⚡"
+ToggleBtn.TextSize = 22
+ToggleBtn.Font = Enum.Font.GothamBold
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(25,25,25)
+ToggleBtn.TextColor3 = Color3.fromRGB(0,255,200)
+ToggleBtn.Parent = ScreenGui
+Instance.new("UICorner",ToggleBtn).CornerRadius = UDim.new(1,0)
+addGlow(ToggleBtn, Color3.fromRGB(0,255,200), 0.2)
+
+-- Main Frame
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 280, 0, 420)
-MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+MainFrame.Position = UDim2.new(0.35, 0, 0.25, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+MainFrame.Active = true
+MainFrame.Draggable = true
 MainFrame.Visible = false
 MainFrame.Parent = ScreenGui
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
-
--- Drop shadow effect
-local Shadow = Instance.new("ImageLabel", MainFrame)
-Shadow.ZIndex = -1
-Shadow.Size = UDim2.new(1, 20, 1, 20)
-Shadow.Position = UDim2.new(0, -10, 0, -10)
-Shadow.Image = "rbxassetid://1316045217"
-Shadow.ImageTransparency = 0.4
-Shadow.ScaleType = Enum.ScaleType.Slice
-Shadow.SliceCenter = Rect.new(10,10,118,118)
-Shadow.BackgroundTransparency = 1
+addGlow(MainFrame, Color3.fromRGB(0,255,200), 0.15)
 
 -- Toggle logic
 ToggleBtn.MouseButton1Click:Connect(function()
@@ -80,68 +49,70 @@ ToggleBtn.MouseButton1Click:Connect(function()
 end)
 
 -- Title Bar
-local TitleBar = Instance.new("Frame", MainFrame)
-TitleBar.Size = UDim2.new(1,0,0,35)
-TitleBar.BackgroundColor3 = Color3.fromRGB(25,25,25)
-Instance.new("UICorner", TitleBar).CornerRadius = UDim.new(0,10)
-
-local Title = Instance.new("TextLabel", TitleBar)
-Title.Size = UDim2.new(1,-40,1,0)
-Title.Position = UDim2.new(0,10,0,0)
-Title.BackgroundTransparency = 1
-Title.Text = "🚀 AanZAPI GUI"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.GothamBold
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, -40, 0, 35)
+Title.BackgroundColor3 = Color3.fromRGB(15,15,15)
+Title.Text = "🚀 AanZAPI - Neo UI"
+Title.TextColor3 = Color3.fromRGB(0,255,200)
+Title.Font = Enum.Font.GothamSemibold
+Title.TextSize = 20
 Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.TextSize = 18
+Title.Parent = MainFrame
+Instance.new("UICorner", Title).CornerRadius = UDim.new(0,8)
+addGlow(Title, Color3.fromRGB(0,255,200), 0.2)
 
 -- Close Button
-local CloseBtn = Instance.new("TextButton", TitleBar)
-CloseBtn.Size = UDim2.new(0,30,0,30)
-CloseBtn.Position = UDim2.new(1,-35,0,3)
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Position = UDim2.new(1, -35, 0, 3)
 CloseBtn.Text = "✖"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.TextSize = 16
 CloseBtn.BackgroundTransparency = 1
+CloseBtn.Parent = MainFrame
 CloseBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = false
 end)
 
 -- PAGE SYSTEM
-local PageContainer = Instance.new("Frame", MainFrame)
-PageContainer.Size = UDim2.new(1,0,1,-40)
-PageContainer.Position = UDim2.new(0,0,0,40)
-PageContainer.BackgroundTransparency = 1
-
-local Page1 = Instance.new("Frame", PageContainer)
-Page1.Size = UDim2.new(1,0,1,0)
+local currentPage = 1
+local Page1 = Instance.new("Frame", MainFrame)
+Page1.Size = UDim2.new(1,0,1,-40)
+Page1.Position = UDim2.new(0,0,0,40)
 Page1.BackgroundTransparency = 1
 
-local Page2 = Instance.new("Frame", PageContainer)
-Page2.Size = UDim2.new(1,0,1,0)
+local Page2 = Instance.new("Frame", MainFrame)
+Page2.Size = UDim2.new(1,0,1,-40)
+Page2.Position = UDim2.new(0,0,0,40)
 Page2.BackgroundTransparency = 1
 Page2.Visible = false
 
+-- Navigation Buttons
 local NextBtn = Instance.new("TextButton")
-NextBtn.Size = UDim2.new(0, 50, 0, 25)
-NextBtn.Position = UDim2.new(1, -55, 0, 5)
+NextBtn.Size = UDim2.new(0, 60, 0, 28)
+NextBtn.Position = UDim2.new(1, -65, 0, 5)
 NextBtn.Text = "➡️"
+NextBtn.Font = Enum.Font.GothamBold
+NextBtn.TextSize = 18
 NextBtn.TextColor3 = Color3.fromRGB(255,255,255)
-NextBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+NextBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
 NextBtn.Parent = MainFrame
-Instance.new("UICorner", NextBtn).CornerRadius = UDim.new(0,6)
+Instance.new("UICorner", NextBtn).CornerRadius = UDim.new(1,0)
+addGlow(NextBtn, Color3.fromRGB(0,255,200), 0.25)
 
 local BackBtn = Instance.new("TextButton")
-BackBtn.Size = UDim2.new(0, 50, 0, 25)
-NextBtn.Position = UDim2.new(1, -55, 0, 5)
+BackBtn.Size = UDim2.new(0, 60, 0, 28)
 BackBtn.Position = UDim2.new(0, 5, 0, 5)
 BackBtn.Text = "⬅️"
+BackBtn.Font = Enum.Font.GothamBold
+BackBtn.TextSize = 18
 BackBtn.TextColor3 = Color3.fromRGB(255,255,255)
-BackBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+BackBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
 BackBtn.Parent = MainFrame
 BackBtn.Visible = false
-Instance.new("UICorner", BackBtn).CornerRadius = UDim.new(0,6)
+Instance.new("UICorner", BackBtn).CornerRadius = UDim.new(1,0)
+addGlow(BackBtn, Color3.fromRGB(0,255,200), 0.25)
 
 local function switchPage(pg)
     Page1.Visible = (pg == 1)
