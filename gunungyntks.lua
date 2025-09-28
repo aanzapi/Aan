@@ -649,28 +649,187 @@ local function createSummitFrame(title,posY,points)
 
     LeftBtn.MouseButton1Click:Connect(function()
         currentCp = math.max(1, currentCp - 1)
-        updateCpLabel()
+---------------- PAGE 3 (Auto Summit Menu) ----------------
+
+local LP = game.Players.LocalPlayer
+local Humanoid = nil
+local function getHRP()
+    if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
+        Humanoid = LP.Character:FindFirstChildOfClass("Humanoid")
+        return LP.Character.HumanoidRootPart
+    end
+    return nil
+end
+
+local function autoJump()
+    task.wait(0.2)
+    if Humanoid then
+        Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end
+
+-- UI TITLE
+local Title = Instance.new("TextLabel", Page3)
+Title.Size = UDim2.new(1,0,0,40)
+Title.Position = UDim2.new(0,0,0,0)
+Title.Text = "🏔️ Auto Summit Menu"
+Title.TextColor3 = Color3.fromRGB(255,255,255)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 20
+
+----------------------------------------------------------------
+-- 📍 YNTKTS POINTS
+----------------------------------------------------------------
+local pointsYNTKTS = {
+    CFrame.new(-662.740540, 58.521275, -441.160828, -0.841944, 0, -0.539566, 0, 1, 0, 0.539566, 0, -0.841944),
+    CFrame.new(-45.962521, 42.518620, -551.943176, 0.871596, 0, -0.490225, 0, 1, 0, 0.490225, 0, 0.871596),
+    CFrame.new(834.555847, 66.512581, -426.948639, -0.675617, 0, -0.737253, 0, 1, 0, 0.737253, 0, -0.675617),
+}
+
+----------------------------------------------------------------
+-- 📍 STECU POINTS
+----------------------------------------------------------------
+local pointsStecu = {
+    CFrame.new(-7.993094, 664.636780, -928.648499, -0.699821, 0, 0.714318, 0, 1, 0, -0.714318, 0, -0.699821),
+}
+
+----------------------------------------------------------------
+-- 🛠️ TEMPLATE BUAT FRAME (Auto + Manual Tele)
+----------------------------------------------------------------
+local function createSummitFrame(title,posY,points)
+    local Frame = Instance.new("Frame", Page3)
+    Frame.Size = UDim2.new(0.9,0,0,160)
+    Frame.Position = UDim2.new(0.05,0,posY,0)
+    Frame.BackgroundColor3 = Color3.fromRGB(40,40,40)
+    Frame.BorderSizePixel = 0
+    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0,6)
+
+    local Label = Instance.new("TextLabel", Frame)
+    Label.Size = UDim2.new(1,0,0,25)
+    Label.Text = title
+    Label.TextColor3 = Color3.fromRGB(255,255,255)
+    Label.BackgroundTransparency = 1
+    Label.Font = Enum.Font.SourceSansBold
+    Label.TextSize = 18
+
+    -- Auto Button
+    local AutoBtn = Instance.new("TextButton", Frame)
+    AutoBtn.Size = UDim2.new(0.45,0,0,30)
+    AutoBtn.Position = UDim2.new(0.05,0,0.25,0)
+    AutoBtn.Text = "Auto Summit: OFF"
+    AutoBtn.TextColor3 = Color3.fromRGB(255,255,255)
+    AutoBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+    AutoBtn.Font = Enum.Font.SourceSansBold
+    AutoBtn.TextSize = 16
+    Instance.new("UICorner", AutoBtn).CornerRadius = UDim.new(0,6)
+
+    -- Delay label
+    local DelayLabel = Instance.new("TextLabel", Frame)
+    DelayLabel.Size = UDim2.new(0.4,0,0,30)
+    DelayLabel.Position = UDim2.new(0.55,0,0.25,0)
+    DelayLabel.Text = "⏳ Delay: 2s"
+    DelayLabel.TextColor3 = Color3.fromRGB(255,255,0)
+    DelayLabel.BackgroundTransparency = 1
+    DelayLabel.Font = Enum.Font.SourceSansBold
+    DelayLabel.TextSize = 16
+
+    -- Delay slider
+    local DelayBtn = Instance.new("TextButton", Frame)
+    DelayBtn.Size = UDim2.new(0.9,0,0,20)
+    DelayBtn.Position = UDim2.new(0.05,0,0.55,0)
+    DelayBtn.Text = "Geser Delay"
+    DelayBtn.BackgroundColor3 = Color3.fromRGB(100,100,100)
+    DelayBtn.TextColor3 = Color3.fromRGB(255,255,255)
+    Instance.new("UICorner", DelayBtn).CornerRadius = UDim.new(0,6)
+
+    -- Manual Teleport
+    local Manual = Instance.new("Frame", Frame)
+    Manual.Size = UDim2.new(0.9,0,0,60)
+    Manual.Position = UDim2.new(0.05,0,0.75,0)
+    Manual.BackgroundTransparency = 1
+
+    local LBtn = Instance.new("TextButton", Manual)
+    LBtn.Size = UDim2.new(0.2,0,0.5,0)
+    LBtn.Text = "⬅️"
+    LBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+    LBtn.TextColor3 = Color3.fromRGB(255,255,255)
+    Instance.new("UICorner", LBtn).CornerRadius = UDim.new(0,6)
+
+    local CpLabel = Instance.new("TextLabel", Manual)
+    CpLabel.Size = UDim2.new(0.6,0,0.5,0)
+    CpLabel.Position = UDim2.new(0.2,0,0,0)
+    CpLabel.Text = "CP 1"
+    CpLabel.TextColor3 = Color3.fromRGB(255,255,255)
+    CpLabel.BackgroundTransparency = 1
+    CpLabel.Font = Enum.Font.SourceSansBold
+    CpLabel.TextSize = 18
+
+    local RBtn = Instance.new("TextButton", Manual)
+    RBtn.Size = UDim2.new(0.2,0,0.5,0)
+    RBtn.Position = UDim2.new(0.8,0,0,0)
+    RBtn.Text = "➡️"
+    RBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+    RBtn.TextColor3 = Color3.fromRGB(255,255,255)
+    Instance.new("UICorner", RBtn).CornerRadius = UDim.new(0,6)
+
+    local TeleBtn = Instance.new("TextButton", Manual)
+    TeleBtn.Size = UDim2.new(0.6,0,0.35,0)
+    TeleBtn.Position = UDim2.new(0.2,0,0.6,0)
+    TeleBtn.Text = "Teleport"
+    TeleBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+    TeleBtn.TextColor3 = Color3.fromRGB(255,255,255)
+    Instance.new("UICorner", TeleBtn).CornerRadius = UDim.new(0,6)
+
+    -- Logic
+    local auto, delay, currentCp, maxCp = false, 2, 1, #points
+    local function updateCp() CpLabel.Text = "CP "..currentCp end
+    updateCp()
+
+    AutoBtn.MouseButton1Click:Connect(function()
+        auto = not auto
+        AutoBtn.Text = auto and "Auto Summit: ON" or "Auto Summit: OFF"
+        if auto then
+            task.spawn(function()
+                while auto do
+                    for _,pos in ipairs(points) do
+                        if not auto then break end
+                        local HRP = getHRP()
+                        if HRP then HRP.CFrame = pos autoJump() end
+                        task.wait(delay)
+                    end
+                end
+            end)
+        end
     end)
 
-    RightBtn.MouseButton1Click:Connect(function()
+    DelayBtn.MouseButton1Click:Connect(function()
+        delay += 1
+        if delay > 10 then delay = 1 end
+        DelayLabel.Text = "⏳ Delay: "..delay.."s"
+    end)
+
+    LBtn.MouseButton1Click:Connect(function()
+        currentCp = math.max(1, currentCp - 1)
+        updateCp()
+    end)
+
+    RBtn.MouseButton1Click:Connect(function()
         currentCp = math.min(maxCp, currentCp + 1)
-        updateCpLabel()
+        updateCp()
     end)
 
     TeleBtn.MouseButton1Click:Connect(function()
         local HRP = getHRP()
-        if HRP then
-            HRP.CFrame = points[currentCp]
-            autoJump()
-        end
+        if HRP then HRP.CFrame = points[currentCp] autoJump() end
     end)
 end
 
 ----------------------------------------------------------------
--- 📌 BUAT FRAME YNTKTS & STECU
+-- 📌 FRAME UNTUK KEDUA SUMMIT
 ----------------------------------------------------------------
-createSummitFrame("⛰️ Summit YNTKTS",0.1,summitPoints)
-createSummitFrame("⛰️ Summit Stecu",0.4,stecuPoints)
+createSummitFrame("⛰️ Summit YNTKTS",0.1,pointsYNTKTS)
+createSummitFrame("⛰️ Summit Stecu",0.4,pointsStecu)
 -- === Fly System (Page1) ===
 local flying = false
 local speed = 60
