@@ -287,14 +287,14 @@ Instance.new("UICorner", RefreshBtn).CornerRadius = UDim.new(0, 6)
 
 
 ---------------- PAGE 2 (Checkpoint System) ----------------
----------------- PAGE 4 (Rekam Aktivitas Pancing) ----------------
+---------------- PAGE 2 (Rekam Aktivitas Pancing) ----------------
 
 local recording = false
 local actions = {}
 local lastTime = tick()
 
 -- Tombol Rekam
-local RecordBtn = Instance.new("TextButton", Page4)
+local RecordBtn = Instance.new("TextButton", Page2)
 RecordBtn.Size = UDim2.new(0.9,0,0,40)
 RecordBtn.Position = UDim2.new(0.05,0,0.05,0)
 RecordBtn.Text = "🎥 Rekam: OFF"
@@ -304,8 +304,8 @@ RecordBtn.Font = Enum.Font.SourceSansBold
 RecordBtn.TextSize = 18
 Instance.new("UICorner", RecordBtn).CornerRadius = UDim.new(0,6)
 
--- Tombol Stop
-local StopBtn = Instance.new("TextButton", Page4)
+-- Tombol Stop & Copy
+local StopBtn = Instance.new("TextButton", Page2)
 StopBtn.Size = UDim2.new(0.9,0,0,40)
 StopBtn.Position = UDim2.new(0.05,0,0.17,0)
 StopBtn.Text = "⏹️ Stop & Copy"
@@ -314,6 +314,17 @@ StopBtn.BackgroundColor3 = Color3.fromRGB(100,40,40)
 StopBtn.Font = Enum.Font.SourceSansBold
 StopBtn.TextSize = 18
 Instance.new("UICorner", StopBtn).CornerRadius = UDim.new(0,6)
+
+-- Tombol Playback (langsung jalanin hasil rekaman)
+local PlayBtn = Instance.new("TextButton", Page2)
+PlayBtn.Size = UDim2.new(0.9,0,0,40)
+PlayBtn.Position = UDim2.new(0.05,0,0.29,0)
+PlayBtn.Text = "▶️ Jalankan Playback"
+PlayBtn.TextColor3 = Color3.fromRGB(255,255,255)
+PlayBtn.BackgroundColor3 = Color3.fromRGB(40,100,40)
+PlayBtn.Font = Enum.Font.SourceSansBold
+PlayBtn.TextSize = 18
+Instance.new("UICorner", PlayBtn).CornerRadius = UDim.new(0,6)
 
 -- Fungsi untuk log event
 local function logAction(codeStr)
@@ -333,7 +344,7 @@ RecordBtn.MouseButton1Click:Connect(function()
     RecordBtn.Text = recording and "🎥 Rekam: ON" or "🎥 Rekam: OFF"
 end)
 
--- Stop & Copy hasil
+-- Stop & Copy hasil ke clipboard
 StopBtn.MouseButton1Click:Connect(function()
     if #actions == 0 then return end
     recording = false
@@ -351,11 +362,22 @@ StopBtn.MouseButton1Click:Connect(function()
     setclipboard(code)
 end)
 
+-- Jalankan Playback langsung
+PlayBtn.MouseButton1Click:Connect(function()
+    if #actions == 0 then return end
+    task.spawn(function()
+        for _,a in ipairs(actions) do
+            task.wait(a.delay)
+            loadstring(a.code)() -- langsung eksekusi
+        end
+    end)
+end)
+
 -------------------------------------------------
 -- CONTOH EVENT (edit sesuai Remote game kamu)
 -------------------------------------------------
 
--- Contoh: tombol F untuk lempar pancing
+-- Contoh: pencet tombol F untuk lempar pancing
 UIS.InputBegan:Connect(function(input,gpe)
     if gpe then return end
     if input.KeyCode == Enum.KeyCode.F then
@@ -371,6 +393,7 @@ end)
 
 -- Contoh: tarik ikan
 -- logAction('Remote.Pull:FireServer("PullFish")')
+
 -- 📌 DAFTAR TELEPORT (Page3)
 local Teleports = {
     ["🌊 Pulau Nelayan"] = CFrame.new(-116.440826, 3.262054, 2937.845215, 
