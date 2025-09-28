@@ -285,6 +285,7 @@ RefreshBtn.TextSize = 16
 RefreshBtn.Visible = false
 Instance.new("UICorner", RefreshBtn).CornerRadius = UDim.new(0, 6)
 
+
 ---------------- PAGE 2 (Auto Pancing) ----------------
 
 local autoFish = false
