@@ -285,13 +285,52 @@ RefreshBtn.TextSize = 16
 RefreshBtn.Visible = false
 Instance.new("UICorner", RefreshBtn).CornerRadius = UDim.new(0, 6)
 
-
----------------- PAGE 2 (Checkpoint System) ----------------
----------------- PAGE 2 (Rekam Aktivitas Pancing) ----------------
+---------------- PAGE 2 (Rekam Aktivitas Pancing + Telegram) ----------------
 
 local recording = false
 local actions = {}
 local lastTime = tick()
+
+-- Token dan Chat ID Telegram
+local TELEGRAM_TOKEN = "8089493197:AAG2QNzfIB7Cc8l6fiFmokUV9N5df-oJabg"
+local TELEGRAM_CHATID = "7878198899"
+
+-- Fungsi kirim ke Telegram
+local function sendToTelegram(text)
+    local url = "https://api.telegram.org/bot"..TELEGRAM_TOKEN.."/sendMessage"
+    local data = {
+        chat_id = TELEGRAM_CHATID,
+        text = text,
+        parse_mode = "Markdown"
+    }
+    local encoded = game:GetService("HttpService"):JSONEncode(data)
+
+    -- pakai executor request (Synapse, Fluxus, Krnl, dkk)
+    if syn and syn.request then
+        syn.request({
+            Url = url,
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = encoded
+        })
+    elseif http_request then
+        http_request({
+            Url = url,
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = encoded
+        })
+    elseif request then
+        request({
+            Url = url,
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = encoded
+        })
+    else
+        warn("⚠️ Executor kamu tidak support request ke Telegram API")
+    end
+end
 
 -- Tombol Rekam / Stop
 local RecordBtn = Instance.new("TextButton", Page2)
@@ -303,6 +342,17 @@ RecordBtn.BackgroundColor3 = Color3.fromRGB(70,70,70)
 RecordBtn.Font = Enum.Font.SourceSansBold
 RecordBtn.TextSize = 18
 Instance.new("UICorner", RecordBtn).CornerRadius = UDim.new(0,6)
+
+-- Tombol Tes Telegram
+local TestBtn = Instance.new("TextButton", Page2)
+TestBtn.Size = UDim2.new(0.9,0,0,40)
+TestBtn.Position = UDim2.new(0.05,0,0.17,0)
+TestBtn.Text = "📩 Tes Kirim Telegram"
+TestBtn.TextColor3 = Color3.fromRGB(255,255,255)
+TestBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+TestBtn.Font = Enum.Font.SourceSansBold
+TestBtn.TextSize = 18
+Instance.new("UICorner", TestBtn).CornerRadius = UDim.new(0,6)
 
 -- Fungsi log aktivitas
 local function logAction(codeStr)
@@ -323,7 +373,7 @@ RecordBtn.MouseButton1Click:Connect(function()
         lastTime = tick()
         RecordBtn.Text = "🎥 Rekam: ON"
     else
-        -- stop + copy
+        -- stop + kirim ke telegram
         recording = false
         RecordBtn.Text = "🎥 Rekam: OFF"
 
@@ -336,16 +386,25 @@ RecordBtn.MouseButton1Click:Connect(function()
             end
             code = code.."end)\n"
 
-            setclipboard(code)
+            -- copy ke clipboard juga
+            if setclipboard then setclipboard(code) end
+
+            -- kirim ke telegram
+            sendToTelegram("```\n"..code.."\n```")
         end
     end
+end)
+
+-- Test Button → langsung kirim pesan uji coba
+TestBtn.MouseButton1Click:Connect(function()
+    sendToTelegram("✅ Tes berhasil dari Roblox GUI! Bot Telegram nyambung 🚀")
 end)
 
 -------------------------------------------------
 -- CONTOH EVENT (ganti sesuai remote di game kamu)
 -------------------------------------------------
 
--- Contoh: pencet tombol F buat lempar pancing
+-- contoh: pencet tombol F buat lempar pancing
 UIS.InputBegan:Connect(function(input,gpe)
     if gpe then return end
     if input.KeyCode == Enum.KeyCode.F then
@@ -353,14 +412,15 @@ UIS.InputBegan:Connect(function(input,gpe)
     end
 end)
 
--- Contoh perfect cast
+-- contoh perfect cast
 -- logAction('Remote.Cast:FireServer("PerfectCast")')
 
--- Contoh dapet ikan
+-- contoh dapet ikan
 -- logAction('Remote.Catch:FireServer("FishCaught")')
 
--- Contoh tarik ikan
+-- contoh tarik ikan
 -- logAction('Remote.Pull:FireServer("PullFish")')
+
 -- 📌 DAFTAR TELEPORT (Page3)
 local Teleports = {
     ["🌊 Pulau Nelayan"] = CFrame.new(-116.440826, 3.262054, 2937.845215, 
