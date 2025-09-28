@@ -9,7 +9,7 @@ ScreenGui.Name = "AanGUI"
 ScreenGui.Parent = LP:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
--- Toggle Button
+-- Toggle Button (Floating & draggable)
 local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Size = UDim2.new(0,40,0,40)
 ToggleBtn.Position = UDim2.new(0,10,0.5,-20)
@@ -20,69 +20,69 @@ ToggleBtn.TextColor3 = Color3.fromRGB(255,255,255)
 ToggleBtn.Parent = ScreenGui
 Instance.new("UICorner",ToggleBtn).CornerRadius = UDim.new(0,10)
 
--- Tambahin shadow biar 3D
-local ToggleShadow = Instance.new("UIStroke", ToggleBtn)
-ToggleShadow.Color = Color3.fromRGB(80,80,80)
-ToggleShadow.Thickness = 1.5
-
--- Hover efek
-ToggleBtn.MouseEnter:Connect(function()
-    ToggleBtn.BackgroundColor3 = Color3.fromRGB(70,70,70)
-end)
-ToggleBtn.MouseLeave:Connect(function()
-    ToggleBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
-end)
-
--- Bikin ToggleBtn draggable
-local dragging, dragInput, dragStart, startPos
-ToggleBtn.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = ToggleBtn.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
-end)
-ToggleBtn.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
-        dragInput = input
-    end
-end)
-UIS.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
+-- Drag logic for ToggleBtn
+do
+    local dragging, dragInput, dragStart, startPos
+    local function update(input)
         local delta = input.Position - dragStart
         ToggleBtn.Position = UDim2.new(
             startPos.X.Scale, startPos.X.Offset + delta.X,
             startPos.Y.Scale, startPos.Y.Offset + delta.Y
         )
     end
-end)
+    ToggleBtn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = ToggleBtn.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+    ToggleBtn.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInput = input
+        end
+    end)
+    UIS.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            update(input)
+        end
+    end)
+end
 
--- Main Frame
+-- Main Frame (no draggable to avoid blocking fly input)
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 270, 0, 420)
+MainFrame.Size = UDim2.new(0, 280, 0, 420)
 MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-MainFrame.Active = true
-MainFrame.Draggable = true
+MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 MainFrame.Visible = false
 MainFrame.Parent = ScreenGui
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
 
--- Tambahin stroke + shadow
-local Stroke = Instance.new("UIStroke", MainFrame)
-Stroke.Color = Color3.fromRGB(90,90,90)
-Stroke.Thickness = 2
-Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+-- Drop shadow effect
+local Shadow = Instance.new("ImageLabel", MainFrame)
+Shadow.ZIndex = -1
+Shadow.Size = UDim2.new(1, 20, 1, 20)
+Shadow.Position = UDim2.new(0, -10, 0, -10)
+Shadow.Image = "rbxassetid://1316045217"
+Shadow.ImageTransparency = 0.4
+Shadow.ScaleType = Enum.ScaleType.Slice
+Shadow.SliceCenter = Rect.new(10,10,118,118)
+Shadow.BackgroundTransparency = 1
+
+-- Toggle logic
+ToggleBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
 
 -- Title Bar
 local TitleBar = Instance.new("Frame", MainFrame)
-TitleBar.Size = UDim2.new(1,0,0,30)
-TitleBar.BackgroundColor3 = Color3.fromRGB(55,55,55)
+TitleBar.Size = UDim2.new(1,0,0,35)
+TitleBar.BackgroundColor3 = Color3.fromRGB(25,25,25)
 Instance.new("UICorner", TitleBar).CornerRadius = UDim.new(0,10)
 
 local Title = Instance.new("TextLabel", TitleBar)
@@ -91,46 +91,35 @@ Title.Position = UDim2.new(0,10,0,0)
 Title.BackgroundTransparency = 1
 Title.Text = "🚀 AanZAPI GUI"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.SourceSansBold
-Title.TextSize = 18
+Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.TextSize = 18
 
 -- Close Button
 local CloseBtn = Instance.new("TextButton", TitleBar)
-CloseBtn.Size = UDim2.new(0, 30, 0, 30)
-CloseBtn.Position = UDim2.new(1, -35, 0, 0)
-CloseBtn.Text = "X"
+CloseBtn.Size = UDim2.new(0,30,0,30)
+CloseBtn.Position = UDim2.new(1,-35,0,3)
+CloseBtn.Text = "✖"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
-CloseBtn.Font = Enum.Font.SourceSansBold
+CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.TextSize = 16
 CloseBtn.BackgroundTransparency = 1
-
-CloseBtn.MouseEnter:Connect(function()
-    CloseBtn.TextColor3 = Color3.fromRGB(255, 120, 120)
-end)
-CloseBtn.MouseLeave:Connect(function()
-    CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
-end)
-
 CloseBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = false
 end)
 
--- Toggle logic
-ToggleBtn.MouseButton1Click:Connect(function()
-    MainFrame.Visible = not MainFrame.Visible
-end)
-
 -- PAGE SYSTEM
-local currentPage = 1
-local Page1 = Instance.new("Frame", MainFrame)
-Page1.Size = UDim2.new(1,0,1,-30)
-Page1.Position = UDim2.new(0,0,0,30)
+local PageContainer = Instance.new("Frame", MainFrame)
+PageContainer.Size = UDim2.new(1,0,1,-40)
+PageContainer.Position = UDim2.new(0,0,0,40)
+PageContainer.BackgroundTransparency = 1
+
+local Page1 = Instance.new("Frame", PageContainer)
+Page1.Size = UDim2.new(1,0,1,0)
 Page1.BackgroundTransparency = 1
 
-local Page2 = Instance.new("Frame", MainFrame)
-Page2.Size = UDim2.new(1,0,1,-30)
-Page2.Position = UDim2.new(0,0,0,30)
+local Page2 = Instance.new("Frame", PageContainer)
+Page2.Size = UDim2.new(1,0,1,0)
 Page2.BackgroundTransparency = 1
 Page2.Visible = false
 
