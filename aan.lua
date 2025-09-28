@@ -318,9 +318,14 @@ CPList.BackgroundColor3 = Color3.fromRGB(30,30,30)
 CPList.ScrollBarThickness = 4
 Instance.new("UICorner", CPList).CornerRadius = UDim.new(0,6)
 
+-- ⬇️ tambahin UIListLayout biar list rapi
+local layout = Instance.new("UIListLayout", CPList)
+layout.Padding = UDim.new(0,5)
+
 -- SYSTEM VARIABLES
 local checkpoints = {}
 local autoTele = false
+local LP = game.Players.LocalPlayer
 
 -- REFRESH LIST
 local function refreshCPList()
@@ -330,18 +335,15 @@ local function refreshCPList()
         end
     end
 
-    local y = 0
     for i,pos in ipairs(checkpoints) do
         -- Frame container
         local ItemFrame = Instance.new("Frame", CPList)
         ItemFrame.Size = UDim2.new(1,-5,0,30)
-        ItemFrame.Position = UDim2.new(0,0,0,y)
         ItemFrame.BackgroundTransparency = 1
 
         -- Tombol teleport
         local TeleBtn = Instance.new("TextButton", ItemFrame)
         TeleBtn.Size = UDim2.new(0.7,-5,1,0)
-        TeleBtn.Position = UDim2.new(0,0,0,0)
         TeleBtn.Text = "Checkpoint "..i
         TeleBtn.TextColor3 = Color3.fromRGB(255,255,255)
         TeleBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
@@ -366,11 +368,7 @@ local function refreshCPList()
             table.remove(checkpoints, i)
             refreshCPList()
         end)
-
-        y = y + 35
     end
-
-    CPList.CanvasSize = UDim2.new(0,0,0,y)
 end
 
 -- TOKEN & CHAT ID TELEGRAM
@@ -387,50 +385,27 @@ local function sendToTelegram(text)
     }
     local encoded = game:GetService("HttpService"):JSONEncode(data)
 
-    -- executor request
     if syn and syn.request then
-        syn.request({
-            Url = url,
-            Method = "POST",
-            Headers = {["Content-Type"] = "application/json"},
-            Body = encoded
-        })
+        syn.request({Url=url, Method="POST", Headers={["Content-Type"]="application/json"}, Body=encoded})
     elseif http_request then
-        http_request({
-            Url = url,
-            Method = "POST",
-            Headers = {["Content-Type"] = "application/json"},
-            Body = encoded
-        })
+        http_request({Url=url, Method="POST", Headers={["Content-Type"]="application/json"}, Body=encoded})
     elseif request then
-        request({
-            Url = url,
-            Method = "POST",
-            Headers = {["Content-Type"] = "application/json"},
-            Body = encoded
-        })
+        request({Url=url, Method="POST", Headers={["Content-Type"]="application/json"}, Body=encoded})
     else
         warn("⚠️ Executor tidak support request ke Telegram API")
     end
 end
 
+-- SAVE CHECKPOINT + TELEGRAM
 SaveBtn.MouseButton1Click:Connect(function()
     if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
         local pos = LP.Character.HumanoidRootPart.CFrame
         table.insert(checkpoints, pos)
         refreshCPList()
 
-        -- Format kode CFrame
-        local code = ("CFrame.new(%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)"):format(
-            pos:GetComponents()
-        )
-
-        -- Copy ke clipboard (opsional)
+        local code = ("CFrame.new(%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)"):format(pos:GetComponents())
         if setclipboard then setclipboard(code) end
-
-        -- Kirim ke Telegram
-        local message = "📍 Checkpoint Baru Tersimpan!\n```\n"..code.."\n```"
-        sendToTelegram(message)
+        sendToTelegram("📍 Checkpoint Baru!\n```\n"..code.."\n```")
     end
 end)
 
@@ -446,7 +421,7 @@ AutoTeleBtn.MouseButton1Click:Connect(function()
                     if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
                         LP.Character.HumanoidRootPart.CFrame = pos
                     end
-                    task.wait(2) -- ⏳ waktu jeda antar teleport
+                    task.wait(2)
                 end
             end
         end)
@@ -564,4 +539,13 @@ local function refreshPlayers()
             -- Tombol teleport
             local TeleBtn = Instance.new("TextButton", ItemFrame)
             TeleBtn.Size = UDim2.new(0.25,0,0.8,0)
-            TeleBtn.Position = U
+            TeleBtn.Position = UDim2.new(0.72,0,0.1,0)
+            TeleBtn.Text = "Teleport"
+            TeleBtn.TextColor3 = Color3.fromRGB(255,255,255)
+            TeleBtn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+            TeleBtn.Font = Enum.Font.SourceSans
+            TeleBtn.TextSize = 14
+            Instance.new("UICorner", TeleBtn).CornerRadius = UDim.new(0,6)
+
+            TeleBtn.MouseButton1Click:Connect(function()
+    
