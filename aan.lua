@@ -1,6 +1,8 @@
 -- Services
 local Players = game:GetService("Players")
 local LP = Players.LocalPlayer
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 
 -- ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
@@ -8,66 +10,100 @@ ScreenGui.Name = "AanGUI"
 ScreenGui.Parent = LP:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
--- Neon Effect Function
-local function addGlow(obj, color, transparency)
-    local uiStroke = Instance.new("UIStroke")
-    uiStroke.Thickness = 2
-    uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    uiStroke.Color = color
-    uiStroke.Transparency = transparency or 0.3
-    uiStroke.Parent = obj
-end
-
 -- Toggle Button
 local ToggleBtn = Instance.new("TextButton")
-ToggleBtn.Size = UDim2.new(0,45,0,45)
-ToggleBtn.Position = UDim2.new(0,10,0.5,-22)
-ToggleBtn.Text = "⚡"
+ToggleBtn.Size = UDim2.new(0,40,0,40)
+ToggleBtn.Position = UDim2.new(0,10,0.5,-20)
+ToggleBtn.Text = "✅"
 ToggleBtn.TextSize = 22
-ToggleBtn.Font = Enum.Font.GothamBold
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(25,25,25)
-ToggleBtn.TextColor3 = Color3.fromRGB(0,255,200)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+ToggleBtn.TextColor3 = Color3.fromRGB(255,255,255)
 ToggleBtn.Parent = ScreenGui
-Instance.new("UICorner",ToggleBtn).CornerRadius = UDim.new(1,0)
-addGlow(ToggleBtn, Color3.fromRGB(0,255,200), 0.2)
+Instance.new("UICorner",ToggleBtn).CornerRadius = UDim.new(0,10)
 
 -- Main Frame
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 280, 0, 420)
-MainFrame.Position = UDim2.new(0.35, 0, 0.25, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+MainFrame.Size = UDim2.new(0, 250, 0, 400)
+MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Visible = false
 MainFrame.Parent = ScreenGui
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
-addGlow(MainFrame, Color3.fromRGB(0,255,200), 0.15)
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
 -- Toggle logic
 ToggleBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
 end)
 
--- Title Bar
+-- Title Bar (Neon Glow + Gradient + Blink)
+local TweenService = game:GetService("TweenService")
+
+-- Main Title
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -40, 0, 35)
-Title.BackgroundColor3 = Color3.fromRGB(15,15,15)
-Title.Text = "🚀 AanZAPI - Neo UI"
-Title.TextColor3 = Color3.fromRGB(0,255,200)
-Title.Font = Enum.Font.GothamSemibold
-Title.TextSize = 20
-Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.BackgroundTransparency = 1
+Title.Text = "🚀 AanZAPI GUI"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 24
+Title.TextXAlignment = Enum.TextXAlignment.Center
+Title.TextYAlignment = Enum.TextYAlignment.Center
 Title.Parent = MainFrame
-Instance.new("UICorner", Title).CornerRadius = UDim.new(0,8)
-addGlow(Title, Color3.fromRGB(0,255,200), 0.2)
+
+-- Glow effect (clone behind Title)
+local Glow = Title:Clone()
+Glow.TextColor3 = Color3.fromRGB(0, 255, 200) -- Neon cyan
+Glow.TextTransparency = 0.6
+Glow.ZIndex = Title.ZIndex - 1 -- Supaya di belakang
+Glow.Parent = MainFrame
+
+-- Gradient untuk teks utama
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 200)), 
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 150, 255)), 
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 255, 200))
+}
+gradient.Rotation = 0
+gradient.Parent = Title
+
+-- Animasi Glow (nyala-mati + gradient jalan)
+task.spawn(function()
+    while true do
+        -- Gerak gradient
+        TweenService:Create(gradient, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+            Offset = Vector2.new(1, 0)
+        }):Play()
+
+        -- Nyala
+        TweenService:Create(Title, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+            TextTransparency = 0
+        }):Play()
+        TweenService:Create(Glow, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+            TextTransparency = 0.3
+        }):Play()
+        task.wait(1.2)
+
+        -- Meredup
+        TweenService:Create(Title, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+            TextTransparency = 0.4
+        }):Play()
+        TweenService:Create(Glow, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+            TextTransparency = 0.8
+        }):Play()
+        task.wait(0.8)
+    end
+end)
 
 -- Close Button
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Size = UDim2.new(0, 30, 0, 30)
-CloseBtn.Position = UDim2.new(1, -35, 0, 3)
-CloseBtn.Text = "✖"
+CloseBtn.Position = UDim2.new(1, -30, 0, 0)
+CloseBtn.Text = "X"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
-CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.Font = Enum.Font.SourceSansBold
 CloseBtn.TextSize = 16
 CloseBtn.BackgroundTransparency = 1
 CloseBtn.Parent = MainFrame
@@ -78,41 +114,35 @@ end)
 -- PAGE SYSTEM
 local currentPage = 1
 local Page1 = Instance.new("Frame", MainFrame)
-Page1.Size = UDim2.new(1,0,1,-40)
-Page1.Position = UDim2.new(0,0,0,40)
+Page1.Size = UDim2.new(1,0,1,-30)
+Page1.Position = UDim2.new(0,0,0,30)
 Page1.BackgroundTransparency = 1
 
 local Page2 = Instance.new("Frame", MainFrame)
-Page2.Size = UDim2.new(1,0,1,-40)
-Page2.Position = UDim2.new(0,0,0,40)
+Page2.Size = UDim2.new(1,0,1,-30)
+Page2.Position = UDim2.new(0,0,0,30)
 Page2.BackgroundTransparency = 1
 Page2.Visible = false
 
--- Navigation Buttons
 local NextBtn = Instance.new("TextButton")
-NextBtn.Size = UDim2.new(0, 60, 0, 28)
-NextBtn.Position = UDim2.new(1, -65, 0, 5)
+NextBtn.Size = UDim2.new(0, 50, 0, 25)
+NextBtn.Position = UDim2.new(1, -55, 0, 5)
 NextBtn.Text = "➡️"
-NextBtn.Font = Enum.Font.GothamBold
-NextBtn.TextSize = 18
 NextBtn.TextColor3 = Color3.fromRGB(255,255,255)
-NextBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+NextBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
 NextBtn.Parent = MainFrame
-Instance.new("UICorner", NextBtn).CornerRadius = UDim.new(1,0)
-addGlow(NextBtn, Color3.fromRGB(0,255,200), 0.25)
+Instance.new("UICorner", NextBtn).CornerRadius = UDim.new(0,6)
 
 local BackBtn = Instance.new("TextButton")
-BackBtn.Size = UDim2.new(0, 60, 0, 28)
+BackBtn.Size = UDim2.new(0, 50, 0, 25)
+NextBtn.Position = UDim2.new(1, -55, 0, 5)
 BackBtn.Position = UDim2.new(0, 5, 0, 5)
 BackBtn.Text = "⬅️"
-BackBtn.Font = Enum.Font.GothamBold
-BackBtn.TextSize = 18
 BackBtn.TextColor3 = Color3.fromRGB(255,255,255)
-BackBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+BackBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
 BackBtn.Parent = MainFrame
 BackBtn.Visible = false
-Instance.new("UICorner", BackBtn).CornerRadius = UDim.new(1,0)
-addGlow(BackBtn, Color3.fromRGB(0,255,200), 0.25)
+Instance.new("UICorner", BackBtn).CornerRadius = UDim.new(0,6)
 
 local function switchPage(pg)
     Page1.Visible = (pg == 1)
