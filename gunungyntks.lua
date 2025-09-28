@@ -44,7 +44,7 @@ local TweenService = game:GetService("TweenService")
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 40)
 Title.BackgroundTransparency = 1
-Title.Text = "🚀 AanZAPI GUI"
+Title.Text = "🚀 AanZ Pro"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 24
@@ -581,19 +581,23 @@ local function createSummitFrame(title,posY,points)
 
     -- Manual Teleport Buttons
     local ManualFrame = Instance.new("Frame", Frame)
-    ManualFrame.Size = UDim2.new(0.9,0,0,60) -- lebih tinggi biar cukup 2 baris
+    ManualFrame.Size = UDim2.new(0.9,0,0,70) -- tinggi lebih besar biar muat
     ManualFrame.Position = UDim2.new(0.05,0,0.75,0)
     ManualFrame.BackgroundTransparency = 1
 
-    local Grid = Instance.new("UIGridLayout", ManualFrame)
+    local Grid = Instance.new("UIGridLayout")
+    Grid.Parent = ManualFrame
     Grid.CellSize = UDim2.new(0,30,0,30) -- ukuran tombol
-    Grid.CellPadding = UDim2.new(0,5,0,5) -- jarak antar tombol
-    Grid.FillDirectionMaxCells = 8 -- max 8 tombol per baris
+    Grid.CellPadding = UDim2.new(0,6,0,6) -- jarak antar tombol
+    Grid.FillDirection = Enum.FillDirection.Horizontal
     Grid.HorizontalAlignment = Enum.HorizontalAlignment.Center
-    Grid.VerticalAlignment = Enum.VerticalAlignment.Center
+    Grid.VerticalAlignment = Enum.VerticalAlignment.Top
+    Grid.SortOrder = Enum.SortOrder.LayoutOrder
 
     for i,pos in ipairs(points) do
-        local Btn = Instance.new("TextButton", ManualFrame)
+        local Btn = Instance.new("TextButton")
+        Btn.Parent = ManualFrame
+        Btn.Size = UDim2.new(0,30,0,30)
         Btn.Text = tostring(i)
         Btn.TextColor3 = Color3.fromRGB(255,255,255)
         Btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
