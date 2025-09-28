@@ -286,52 +286,168 @@ RefreshBtn.Visible = false
 Instance.new("UICorner", RefreshBtn).CornerRadius = UDim.new(0, 6)
 
 
----------------- PAGE 2 (Auto Pancing) ----------------
+---------------- PAGE 2 (Checkpoint System) ----------------
+-- BUTTON SAVE
+local SaveBtn = Instance.new("TextButton", Page2)
+SaveBtn.Size = UDim2.new(0.9,0,0,40)
+SaveBtn.Position = UDim2.new(0.05,0,0.05,0)
+SaveBtn.Text = "💾 Save Checkpoint"
+SaveBtn.TextColor3 = Color3.fromRGB(255,255,255)
+SaveBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+SaveBtn.Font = Enum.Font.SourceSansBold
+SaveBtn.TextSize = 18
+Instance.new("UICorner", SaveBtn).CornerRadius = UDim.new(0,6)
 
-local autoFish = false
+-- BUTTON AUTO TELE
+local AutoTeleBtn = Instance.new("TextButton", Page2)
+AutoTeleBtn.Size = UDim2.new(0.9,0,0,40)
+AutoTeleBtn.Position = UDim2.new(0.05,0,0.17,0)
+AutoTeleBtn.Text = "🔁 Auto Tele: OFF"
+AutoTeleBtn.TextColor3 = Color3.fromRGB(255,255,255)
+AutoTeleBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+AutoTeleBtn.Font = Enum.Font.SourceSansBold
+AutoTeleBtn.TextSize = 18
+Instance.new("UICorner", AutoTeleBtn).CornerRadius = UDim.new(0,6)
 
--- Tombol Auto Pancing
-local AutoFishBtn = Instance.new("TextButton", Page2)
-AutoFishBtn.Size = UDim2.new(0.9,0,0,40)
-AutoFishBtn.Position = UDim2.new(0.05,0,0.05,0)
-AutoFishBtn.Text = "🎣 Auto Pancing: OFF"
-AutoFishBtn.TextColor3 = Color3.fromRGB(255,255,255)
-AutoFishBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
-AutoFishBtn.Font = Enum.Font.SourceSansBold
-AutoFishBtn.TextSize = 18
-Instance.new("UICorner", AutoFishBtn).CornerRadius = UDim.new(0,6)
+-- LIST CHECKPOINT
+local CPList = Instance.new("ScrollingFrame", Page2)
+CPList.Size = UDim2.new(0.9,0,0,200)
+CPList.Position = UDim2.new(0.05,0,0.35,0)
+CPList.CanvasSize = UDim2.new(0,0,0,0)
+CPList.BackgroundColor3 = Color3.fromRGB(30,30,30)
+CPList.ScrollBarThickness = 4
+Instance.new("UICorner", CPList).CornerRadius = UDim.new(0,6)
 
--- Ganti ini sesuai remote di game
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Remotes = ReplicatedStorage:WaitForChild("Remotes") -- contoh folder remote
-local Cast = Remotes:WaitForChild("Cast")
-local Catch = Remotes:WaitForChild("Catch")
-local Pull = Remotes:WaitForChild("Pull")
+-- SYSTEM VARIABLES
+local checkpoints = {}
+local autoTele = false
 
--- Sistem Auto Pancing
-AutoFishBtn.MouseButton1Click:Connect(function()
-    autoFish = not autoFish
-    AutoFishBtn.Text = autoFish and "🎣 Auto Pancing: ON" or "🎣 Auto Pancing: OFF"
+-- REFRESH LIST
+local function refreshCPList()
+    for _,c in pairs(CPList:GetChildren()) do
+        if not c:IsA("UIListLayout") then
+            c:Destroy()
+        end
+    end
 
-    if autoFish then
+    local y = 0
+    for i,pos in ipairs(checkpoints) do
+        -- Frame container
+        local ItemFrame = Instance.new("Frame", CPList)
+        ItemFrame.Size = UDim2.new(1,-5,0,30)
+        ItemFrame.Position = UDim2.new(0,0,0,y)
+        ItemFrame.BackgroundTransparency = 1
+
+        -- Tombol teleport
+        local TeleBtn = Instance.new("TextButton", ItemFrame)
+        TeleBtn.Size = UDim2.new(0.7,-5,1,0)
+        TeleBtn.Position = UDim2.new(0,0,0,0)
+        TeleBtn.Text = "Checkpoint "..i
+        TeleBtn.TextColor3 = Color3.fromRGB(255,255,255)
+        TeleBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+        Instance.new("UICorner", TeleBtn).CornerRadius = UDim.new(0,6)
+
+        TeleBtn.MouseButton1Click:Connect(function()
+            if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
+                LP.Character.HumanoidRootPart.CFrame = pos
+            end
+        end)
+
+        -- Tombol delete
+        local DelBtn = Instance.new("TextButton", ItemFrame)
+        DelBtn.Size = UDim2.new(0.3,0,1,0)
+        DelBtn.Position = UDim2.new(0.7,5,0,0)
+        DelBtn.Text = "🗑️"
+        DelBtn.TextColor3 = Color3.fromRGB(255,100,100)
+        DelBtn.BackgroundColor3 = Color3.fromRGB(80,30,30)
+        Instance.new("UICorner", DelBtn).CornerRadius = UDim.new(0,6)
+
+        DelBtn.MouseButton1Click:Connect(function()
+            table.remove(checkpoints, i)
+            refreshCPList()
+        end)
+
+        y = y + 35
+    end
+
+    CPList.CanvasSize = UDim2.new(0,0,0,y)
+end
+
+-- TOKEN & CHAT ID TELEGRAM
+local TELEGRAM_TOKEN = "8089493197:AAG2QNzfIB7Cc8l6fiFmokUV9N5df-oJabg"
+local TELEGRAM_CHATID = "7878198899"
+
+-- Fungsi kirim ke Telegram
+local function sendToTelegram(text)
+    local url = "https://api.telegram.org/bot"..TELEGRAM_TOKEN.."/sendMessage"
+    local data = {
+        chat_id = TELEGRAM_CHATID,
+        text = text,
+        parse_mode = "Markdown"
+    }
+    local encoded = game:GetService("HttpService"):JSONEncode(data)
+
+    -- executor request
+    if syn and syn.request then
+        syn.request({
+            Url = url,
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = encoded
+        })
+    elseif http_request then
+        http_request({
+            Url = url,
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = encoded
+        })
+    elseif request then
+        request({
+            Url = url,
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = encoded
+        })
+    else
+        warn("⚠️ Executor tidak support request ke Telegram API")
+    end
+end
+
+SaveBtn.MouseButton1Click:Connect(function()
+    if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
+        local pos = LP.Character.HumanoidRootPart.CFrame
+        table.insert(checkpoints, pos)
+        refreshCPList()
+
+        -- Format kode CFrame
+        local code = ("CFrame.new(%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)"):format(
+            pos:GetComponents()
+        )
+
+        -- Copy ke clipboard (opsional)
+        if setclipboard then setclipboard(code) end
+
+        -- Kirim ke Telegram
+        local message = "📍 Checkpoint Baru Tersimpan!\n```\n"..code.."\n```"
+        sendToTelegram(message)
+    end
+end)
+
+-- AUTO TELEPORT
+AutoTeleBtn.MouseButton1Click:Connect(function()
+    autoTele = not autoTele
+    AutoTeleBtn.Text = autoTele and "🔁 Auto Tele: ON" or "🔁 Auto Tele: OFF"
+    if autoTele then
         task.spawn(function()
-            while autoFish do
-                -- 1. Lempar pancing
-                Cast:FireServer("ThrowRod")
-                task.wait(0.5)
-
-                -- 2. Perfect cast
-                Cast:FireServer("PerfectCast")
-                task.wait(0.5)
-
-                -- 3. Dapet ikan
-                Catch:FireServer("FishCaught")
-                task.wait(0.2)
-
-                -- 4. Tarik ikan
-                Pull:FireServer("PullFish")
-
-                task.wait(2) -- delay antar pancing
+            while autoTele and #checkpoints>0 do
+                for _,pos in ipairs(checkpoints) do
+                    if not autoTele then break end
+                    if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
+                        LP.Character.HumanoidRootPart.CFrame = pos
+                    end
+                    task.wait(2) -- ⏳ waktu jeda antar teleport
+                end
             end
         end)
     end
@@ -448,44 +564,4 @@ local function refreshPlayers()
             -- Tombol teleport
             local TeleBtn = Instance.new("TextButton", ItemFrame)
             TeleBtn.Size = UDim2.new(0.25,0,0.8,0)
-            TeleBtn.Position = UDim2.new(0.72,0,0.1,0)
-            TeleBtn.Text = "Teleport"
-            TeleBtn.TextColor3 = Color3.fromRGB(255,255,255)
-            TeleBtn.BackgroundColor3 = Color3.fromRGB(70,70,70)
-            TeleBtn.Font = Enum.Font.SourceSans
-            TeleBtn.TextSize = 14
-            Instance.new("UICorner", TeleBtn).CornerRadius = UDim.new(0,6)
-
-            TeleBtn.MouseButton1Click:Connect(function()
-                if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                    LP.Character:WaitForChild("HumanoidRootPart").CFrame =
-                        plr.Character.HumanoidRootPart.CFrame + Vector3.new(0,3,0)
-                end
-            end)
-
-            y = y + 40
-        end
-    end
-
-    ListFrame.CanvasSize = UDim2.new(0,0,0,y)
-end
-
--- Auto refresh saat player masuk/keluar
-Players.PlayerAdded:Connect(refreshPlayers)
-Players.PlayerRemoving:Connect(refreshPlayers)
-
--- Manual refresh button
-RefreshBtn.MouseButton1Click:Connect(refreshPlayers)
-
--- Toggle dropdown
-DropDown.MouseButton1Click:Connect(function()
-    local newState = not ListFrame.Visible
-    ListFrame.Visible = newState
-    RefreshBtn.Visible = newState
-    if newState then
-        refreshPlayers()
-    end
-end)
-
--- Inisialisasi awal
-refreshPlayers()
+            TeleBtn.Position = U
