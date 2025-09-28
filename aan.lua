@@ -23,8 +23,8 @@ Instance.new("UICorner",ToggleBtn).CornerRadius = UDim.new(0,10)
 
 -- Main Frame
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0.6, 0, 0.3375, 0)
-MainFrame.Position = UDim2.new(0.2, 0, 0.3, 0)
+MainFrame.Size = UDim2.new(0, 250, 0, 400)
+MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 MainFrame.Active = true
 MainFrame.Draggable = true
@@ -114,36 +114,42 @@ end)
 -- PAGE SYSTEM
 local currentPage = 1
 local Page1 = Instance.new("Frame", MainFrame)
-Page1.Size = UDim2.new(1, 0, 1, -40)
-Page1.Position = UDim2.new(0, 0, 0, 40)
+Page1.Size = UDim2.new(1,0,1,-30)
+Page1.Position = UDim2.new(0,0,0,30)
 Page1.BackgroundTransparency = 1
 
 local Page2 = Instance.new("Frame", MainFrame)
-Page2.Size = UDim2.new(1, 0, 1, -40)
-Page2.Position = UDim2.new(0, 0, 0, 40)
+Page2.Size = UDim2.new(1,0,1,-30)
+Page2.Position = UDim2.new(0,0,0,30)
 Page2.BackgroundTransparency = 1
 Page2.Visible = false
 
+-- Next Button
 local NextBtn = Instance.new("TextButton")
-NextBtn.Size = UDim2.new(0, 50, 0, 25)
-NextBtn.Position = UDim2.new(1, -55, 0, 5)
+NextBtn.Size = UDim2.new(0, 70, 0, 30)
+NextBtn.Position = UDim2.new(1, -80, 1, -40) -- 🔽 dipindah ke bawah kanan
 NextBtn.Text = "➡️"
 NextBtn.TextColor3 = Color3.fromRGB(255,255,255)
-NextBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+NextBtn.Font = Enum.Font.GothamBold
+NextBtn.TextSize = 16
+NextBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
 NextBtn.Parent = MainFrame
-Instance.new("UICorner", NextBtn).CornerRadius = UDim.new(0,6)
+Instance.new("UICorner", NextBtn).CornerRadius = UDim.new(0,8)
 
+-- Back Button
 local BackBtn = Instance.new("TextButton")
-BackBtn.Size = UDim2.new(0, 50, 0, 25)
-NextBtn.Position = UDim2.new(1, -55, 0, 5)
-BackBtn.Position = UDim2.new(0, 5, 0, 5)
+BackBtn.Size = UDim2.new(0, 70, 0, 30)
+BackBtn.Position = UDim2.new(0, 10, 1, -40) -- 🔽 dipindah ke bawah kiri
 BackBtn.Text = "⬅️"
 BackBtn.TextColor3 = Color3.fromRGB(255,255,255)
-BackBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+BackBtn.Font = Enum.Font.GothamBold
+BackBtn.TextSize = 16
+BackBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
 BackBtn.Parent = MainFrame
 BackBtn.Visible = false
-Instance.new("UICorner", BackBtn).CornerRadius = UDim.new(0,6)
+Instance.new("UICorner", BackBtn).CornerRadius = UDim.new(0,8)
 
+-- Switch Page Function
 local function switchPage(pg)
     Page1.Visible = (pg == 1)
     Page2.Visible = (pg == 2)
@@ -338,11 +344,18 @@ local function refreshCPList()
     CPList.CanvasSize = UDim2.new(0,0,0,y)
 end
 
--- SAVE CHECKPOINT
+-- SAVE CHECKPOINT + COPY KODE
 SaveBtn.MouseButton1Click:Connect(function()
     if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
-        table.insert(checkpoints, LP.Character.HumanoidRootPart.CFrame)
+        local pos = LP.Character.HumanoidRootPart.CFrame
+        table.insert(checkpoints, pos)
         refreshCPList()
+
+        -- Copy ke clipboard
+        local code = ("CFrame.new(%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)"):format(
+            pos:GetComponents()
+        )
+        setclipboard(code) -- Roblox API buat copy text ke clipboard
     end
 end)
 
@@ -358,7 +371,7 @@ AutoTeleBtn.MouseButton1Click:Connect(function()
                     if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
                         LP.Character.HumanoidRootPart.CFrame = pos
                     end
-                    task.wait(2)
+                    task.wait(2) -- ⏳ waktu jeda antar teleport
                 end
             end
         end)
