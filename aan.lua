@@ -1,169 +1,258 @@
---// Advanced Mobile GUI Script by AanZAPI
--- Bisa dipindah-pindah (draggable)
+-- Main GUI - By ChatGPT
 
 -- Buat ScreenGui
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Parent = game:GetService("CoreGui")
+local gui = Instance.new("ScreenGui", game.CoreGui)
+gui.Name = "CustomScriptGUI"
 
--- Frame utama
-local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 250, 0, 300)
-MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Draggable = true
-MainFrame.Parent = ScreenGui
+-- Frame Utama
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0, 500, 0, 350)
+main.Position = UDim2.new(0.5, -250, 0.5, -175)
+main.BackgroundColor3 = Color3.fromRGB(45, 35, 65)
+main.Active, main.Draggable = true, true
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 12)
 
--- Judul
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 30)
-Title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-Title.Text = "🔥 AanZAPI Super GUI 🔥"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.SourceSansBold
-Title.TextSize = 18
-Title.Parent = MainFrame
+-- Header
+local header = Instance.new("TextLabel", main)
+header.Size = UDim2.new(1, 0, 0, 40)
+header.BackgroundColor3 = Color3.fromRGB(65, 50, 95)
+header.Text = "Fish It Script - Custom Tab"
+header.TextColor3 = Color3.new(1,1,1)
+header.Font = Enum.Font.GothamBold
+header.TextSize = 18
+Instance.new("UICorner", header).CornerRadius = UDim.new(0, 12)
 
--- Tombol Close
-local CloseButton = Instance.new("TextButton")
-CloseButton.Size = UDim2.new(0, 30, 0, 30)
-CloseButton.Position = UDim2.new(1, -30, 0, 0)
-CloseButton.Text = "X"
-CloseButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-CloseButton.TextColor3 = Color3.fromRGB(255,255,255)
-CloseButton.Parent = MainFrame
-CloseButton.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
+-- Tab Frame
+local tabFrame = Instance.new("Frame", main)
+tabFrame.Size = UDim2.new(1, -20, 0, 40)
+tabFrame.Position = UDim2.new(0, 10, 0, 50)
+tabFrame.BackgroundTransparency = 1
+
+-- Content Frame
+local content = Instance.new("Frame", main)
+content.Size = UDim2.new(1, -20, 1, -100)
+content.Position = UDim2.new(0, 10, 0, 95)
+content.BackgroundColor3 = Color3.fromRGB(50, 40, 80)
+Instance.new("UICorner", content).CornerRadius = UDim.new(0, 10)
+
+-- Fungsi bikin tombol tab
+local function makeTab(name, pos)
+	local btn = Instance.new("TextButton", tabFrame)
+	btn.Size = UDim2.new(0, 95, 1, 0)
+	btn.Position = UDim2.new(0, pos, 0, 0)
+	btn.BackgroundColor3 = Color3.fromRGB(70, 55, 100)
+	btn.Text = name
+	btn.TextColor3 = Color3.new(1,1,1)
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 14
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
+	return btn
+end
+
+-- Tabs
+local tabPlayer  = makeTab("Player Tele", 0)
+local tabSave    = makeTab("Save Tele", 100)
+local tabFly     = makeTab("Fly", 200)
+local tabRun     = makeTab("Runhack", 300)
+local tabFall    = makeTab("Anti Jatuh", 400)
+
+-- Konten untuk tiap tab
+local pages = {}
+
+local function newPage()
+	local p = Instance.new("Frame", content)
+	p.Size = UDim2.new(1, 0, 1, 0)
+	p.BackgroundTransparency = 1
+	p.Visible = false
+	return p
+end
+
+-- 1. Player Tele
+pages.player = newPage()
+local dropdown = Instance.new("TextButton", pages.player)
+dropdown.Size = UDim2.new(1, -20, 0, 40)
+dropdown.Position = UDim2.new(0, 10, 0, 10)
+dropdown.Text = "Pilih Player"
+dropdown.BackgroundColor3 = Color3.fromRGB(90, 70, 120)
+dropdown.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", dropdown).CornerRadius = UDim.new(0, 8)
+
+local playerList = Instance.new("ScrollingFrame", pages.player)
+playerList.Size = UDim2.new(1, -20, 0, 120)
+playerList.Position = UDim2.new(0, 10, 0, 60)
+playerList.BackgroundColor3 = Color3.fromRGB(35, 30, 60)
+playerList.ScrollBarThickness = 6
+playerList.Visible = false
+Instance.new("UICorner", playerList).CornerRadius = UDim.new(0, 8)
+
+local tpBtn = Instance.new("TextButton", pages.player)
+tpBtn.Size = UDim2.new(1, -20, 0, 40)
+tpBtn.Position = UDim2.new(0, 10, 0, 190)
+tpBtn.Text = "Teleport"
+tpBtn.BackgroundColor3 = Color3.fromRGB(120, 90, 150)
+tpBtn.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", tpBtn).CornerRadius = UDim.new(0, 8)
+
+local selectedPlayer = nil
+local function refreshPlayers()
+	playerList:ClearAllChildren()
+	local y = 0
+	for _,plr in pairs(game.Players:GetPlayers()) do
+		if plr ~= game.Players.LocalPlayer then
+			local b = Instance.new("TextButton", playerList)
+			b.Size = UDim2.new(1, -10, 0, 30)
+			b.Position = UDim2.new(0, 5, 0, y)
+			b.Text = plr.Name
+			b.BackgroundColor3 = Color3.fromRGB(70, 55, 100)
+			b.TextColor3 = Color3.new(1,1,1)
+			Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
+			b.MouseButton1Click:Connect(function()
+				selectedPlayer = plr
+				dropdown.Text = "Dipilih: "..plr.Name
+				playerList.Visible = false
+			end)
+			y = y + 35
+		end
+	end
+	playerList.CanvasSize = UDim2.new(0,0,0,y)
+end
+dropdown.MouseButton1Click:Connect(function()
+	refreshPlayers()
+	playerList.Visible = not playerList.Visible
 end)
-
--- Layout
-local Layout = Instance.new("UIListLayout")
-Layout.Padding = UDim.new(0, 5)
-Layout.FillDirection = Enum.FillDirection.Vertical
-Layout.SortOrder = Enum.SortOrder.LayoutOrder
-Layout.Parent = MainFrame
-
--- WalkSpeed Slider
-local WalkLabel = Instance.new("TextLabel")
-WalkLabel.Size = UDim2.new(1, -10, 0, 20)
-WalkLabel.Text = "WalkSpeed"
-WalkLabel.TextColor3 = Color3.fromRGB(255,255,255)
-WalkLabel.BackgroundTransparency = 1
-WalkLabel.Parent = MainFrame
-
-local WalkBox = Instance.new("TextBox")
-WalkBox.Size = UDim2.new(1, -10, 0, 25)
-WalkBox.Text = "16"
-WalkBox.BackgroundColor3 = Color3.fromRGB(70,70,70)
-WalkBox.TextColor3 = Color3.fromRGB(255,255,255)
-WalkBox.Parent = MainFrame
-
-WalkBox.FocusLost:Connect(function()
-    local hum = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-    if hum then
-        hum.WalkSpeed = tonumber(WalkBox.Text) or 16
-    end
-end)
-
--- JumpPower Slider
-local JumpLabel = WalkLabel:Clone()
-JumpLabel.Text = "JumpPower"
-JumpLabel.Parent = MainFrame
-
-local JumpBox = WalkBox:Clone()
-JumpBox.Text = "50"
-JumpBox.Parent = MainFrame
-
-JumpBox.FocusLost:Connect(function()
-    local hum = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-    if hum then
-        hum.JumpPower = tonumber(JumpBox.Text) or 50
-    end
-end)
-
--- Fly Toggle
-local FlyBtn = Instance.new("TextButton")
-FlyBtn.Size = UDim2.new(1, -10, 0, 30)
-FlyBtn.Text = "✈️ Fly (OFF)"
-FlyBtn.BackgroundColor3 = Color3.fromRGB(50,100,200)
-FlyBtn.TextColor3 = Color3.fromRGB(255,255,255)
-FlyBtn.Parent = MainFrame
-
-local flying = false
-local lp = game.Players.LocalPlayer
-local char = lp.Character or lp.CharacterAdded:Wait()
-local hum = char:WaitForChild("Humanoid")
-local hrp = char:WaitForChild("HumanoidRootPart")
-
-FlyBtn.MouseButton1Click:Connect(function()
-    flying = not flying
-    FlyBtn.Text = flying and "✈️ Fly (ON)" or "✈️ Fly (OFF)"
-    if flying then
-        task.spawn(function()
-            while flying do
-                hrp.Velocity = Vector3.new(0,50,0)
-                task.wait()
-            end
-        end)
-    end
-end)
-
--- NoClip Toggle
-local NoClipBtn = FlyBtn:Clone()
-NoClipBtn.Text = "🚪 NoClip (OFF)"
-NoClipBtn.Parent = MainFrame
-
-local noclip = false
-NoClipBtn.MouseButton1Click:Connect(function()
-    noclip = not noclip
-    NoClipBtn.Text = noclip and "🚪 NoClip (ON)" or "🚪 NoClip (OFF)"
-    task.spawn(function()
-        while noclip do
-            for _,v in pairs(char:GetDescendants()) do
-                if v:IsA("BasePart") then
-                    v.CanCollide = false
-                end
-            end
-            task.wait()
-        end
-    end)
-end)
-
--- ESP Toggle
-local ESPBtn = FlyBtn:Clone()
-ESPBtn.Text = "👁️ ESP (OFF)"
-ESPBtn.Parent = MainFrame
-
-local esp = false
-ESPBtn.MouseButton1Click:Connect(function()
-    esp = not esp
-    ESPBtn.Text = esp and "👁️ ESP (ON)" or "👁️ ESP (OFF)"
-    if esp then
-        for _,plr in pairs(game.Players:GetPlayers()) do
-            if plr ~= lp and plr.Character and plr.Character:FindFirstChild("Head") then
-                local Billboard = Instance.new("BillboardGui", plr.Character.Head)
-                Billboard.Size = UDim2.new(0,100,0,20)
-                Billboard.Adornee = plr.Character.Head
-                Billboard.AlwaysOnTop = true
-                local Name = Instance.new("TextLabel", Billboard)
-                Name.Size = UDim2.new(1,0,1,0)
-                Name.Text = plr.Name
-                Name.TextColor3 = Color3.fromRGB(255,0,0)
-                Name.BackgroundTransparency = 1
-            end
-        end
-    else
-        for _,plr in pairs(game.Players:GetPlayers()) do
-            if plr.Character and plr.Character:FindFirstChild("Head") then
-                local head = plr.Character.Head
-                for _,gui in pairs(head:GetChildren()) do
-                    if gui:IsA("BillboardGui") then gui:Destroy() end
-                end
-            end
-        end
-    end
-end)		FlyButton.Text = "Stop Fly"
-		FlyButton.BackgroundColor3 = Color3.fromRGB(255,50,50)
+tpBtn.MouseButton1Click:Connect(function()
+	if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
+		local lp = game.Players.LocalPlayer
+		if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+			lp.Character.HumanoidRootPart.CFrame = selectedPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(2,0,0)
+		end
 	end
 end)
+
+-- 2. Save Tele
+pages.save = newPage()
+local savedPos = nil
+local saveBtn = Instance.new("TextButton", pages.save)
+saveBtn.Size = UDim2.new(1, -20, 0, 40)
+saveBtn.Position = UDim2.new(0, 10, 0, 20)
+saveBtn.Text = "Save Posisi"
+saveBtn.BackgroundColor3 = Color3.fromRGB(90, 70, 120)
+saveBtn.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", saveBtn).CornerRadius = UDim.new(0, 8)
+
+local goBtn = Instance.new("TextButton", pages.save)
+goBtn.Size = UDim2.new(1, -20, 0, 40)
+goBtn.Position = UDim2.new(0, 10, 0, 70)
+goBtn.Text = "Teleport ke Posisi Tersimpan"
+goBtn.BackgroundColor3 = Color3.fromRGB(120, 90, 150)
+goBtn.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", goBtn).CornerRadius = UDim.new(0, 8)
+
+saveBtn.MouseButton1Click:Connect(function()
+	local lp = game.Players.LocalPlayer
+	if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+		savedPos = lp.Character.HumanoidRootPart.CFrame
+	end
+end)
+goBtn.MouseButton1Click:Connect(function()
+	local lp = game.Players.LocalPlayer
+	if savedPos and lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+		lp.Character.HumanoidRootPart.CFrame = savedPos
+	end
+end)
+
+-- 3. Fly
+pages.fly = newPage()
+local flyToggle = Instance.new("TextButton", pages.fly)
+flyToggle.Size = UDim2.new(1, -20, 0, 40)
+flyToggle.Position = UDim2.new(0, 10, 0, 20)
+flyToggle.Text = "Toggle Fly"
+flyToggle.BackgroundColor3 = Color3.fromRGB(120, 90, 150)
+flyToggle.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", flyToggle).CornerRadius = UDim.new(0, 8)
+
+local flying = false
+flyToggle.MouseButton1Click:Connect(function()
+	flying = not flying
+	local lp = game.Players.LocalPlayer
+	local char = lp.Character or lp.CharacterAdded:Wait()
+	local hrp = char:WaitForChild("HumanoidRootPart")
+	local hum = char:WaitForChild("Humanoid")
+
+	if flying then
+		spawn(function()
+			while flying and hum do
+				game:GetService("RunService").Heartbeat:Wait()
+				if hum.MoveDirection.Magnitude > 0 then
+					hrp.Velocity = hum.MoveDirection * 60
+				else
+					hrp.Velocity = Vector3.new(0,0,0)
+				end
+			end
+		end)
+	else
+		hrp.Velocity = Vector3.new(0,0,0)
+	end
+end)
+
+-- 4. Runhack
+pages.run = newPage()
+local runToggle = Instance.new("TextButton", pages.run)
+runToggle.Size = UDim2.new(1, -20, 0, 40)
+runToggle.Position = UDim2.new(0, 10, 0, 20)
+runToggle.Text = "Toggle Speed"
+runToggle.BackgroundColor3 = Color3.fromRGB(120, 90, 150)
+runToggle.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", runToggle).CornerRadius = UDim.new(0, 8)
+
+local boosted = false
+runToggle.MouseButton1Click:Connect(function()
+	boosted = not boosted
+	local hum = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+	if hum then
+		if boosted then
+			hum.WalkSpeed = 50
+		else
+			hum.WalkSpeed = 16
+		end
+	end
+end)
+
+-- 5. Anti Jatuh Mati
+pages.fall = newPage()
+local antiBtn = Instance.new("TextButton", pages.fall)
+antiBtn.Size = UDim2.new(1, -20, 0, 40)
+antiBtn.Position = UDim2.new(0, 10, 0, 20)
+antiBtn.Text = "Aktifkan Anti Jatuh"
+antiBtn.BackgroundColor3 = Color3.fromRGB(120, 90, 150)
+antiBtn.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", antiBtn).CornerRadius = UDim.new(0, 8)
+
+local anti = false
+antiBtn.MouseButton1Click:Connect(function()
+	anti = not anti
+	local hum = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+	if hum then
+		if anti then
+			hum.StateChanged:Connect(function(_, new)
+				if new == Enum.HumanoidStateType.Freefall then
+					hum:ChangeState(Enum.HumanoidStateType.Physics)
+				end
+			end)
+		end
+	end
+end)
+
+-- Sistem Tab
+local function showPage(p)
+	for _,pg in pairs(pages) do pg.Visible = false end
+	p.Visible = true
+end
+tabPlayer.MouseButton1Click:Connect(function() showPage(pages.player) end)
+tabSave.MouseButton1Click:Connect(function() showPage(pages.save) end)
+tabFly.MouseButton1Click:Connect(function() showPage(pages.fly) end)
+tabRun.MouseButton1Click:Connect(function() showPage(pages.run) end)
+tabFall.MouseButton1Click:Connect(function() showPage(pages.fall) end)
+
+-- default
+showPage(pages.player)
