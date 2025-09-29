@@ -149,8 +149,9 @@ CloseBtn.MouseButton1Click:Connect(function()
 end)
 
 -- Sidebar (Tab Menu)
+-- Sidebar (Tab Menu)
 local SideBar = Instance.new("Frame", MainFrame)
-SideBar.Size = UDim2.new(0,130,1,-40)
+SideBar.Size = UDim2.new(0.23,0,1,-40) -- ✅ scale (23% dari MainFrame)
 SideBar.Position = UDim2.new(0,0,0,40)
 SideBar.BackgroundColor3 = Color3.fromRGB(25,25,30)
 SideBar.BorderSizePixel = 0
@@ -162,11 +163,18 @@ UIList.SortOrder = Enum.SortOrder.LayoutOrder
 
 -- Container untuk Pages
 local PageContainer = Instance.new("Frame", MainFrame)
-PageContainer.Size = UDim2.new(1,-130,1,-40)
-PageContainer.Position = UDim2.new(0,130,0,40)
+PageContainer.Size = UDim2.new(0.77,0,1,-40) -- ✅ sisanya 77% area
+PageContainer.Position = UDim2.new(0.23,0,0,40)
 PageContainer.BackgroundColor3 = Color3.fromRGB(35,35,45)
 PageContainer.BorderSizePixel = 0
 Instance.new("UICorner", PageContainer).CornerRadius = UDim.new(0,12)
+
+-- Padding biar konten ga mepet
+local Padding = Instance.new("UIPadding", PageContainer)
+Padding.PaddingTop = UDim.new(0,6)
+Padding.PaddingLeft = UDim.new(0,6)
+Padding.PaddingRight = UDim.new(0,6)
+Padding.PaddingBottom = UDim.new(0,6)
 
 ----------------------------------------------------------------
 -- 📝 Fungsi buat tambah Tab + Page
@@ -174,7 +182,7 @@ Instance.new("UICorner", PageContainer).CornerRadius = UDim.new(0,12)
 local Pages = {}
 local function createTab(name, icon)
     local Btn = Instance.new("TextButton", SideBar)
-    Btn.Size = UDim2.new(1,0,0,30)
+    Btn.Size = UDim2.new(1,0,0,0.08) -- ✅ tinggi proporsional (8% sidebar)
     Btn.Text = (icon or "📌").." "..name
     Btn.TextColor3 = Color3.fromRGB(200,200,200)
     Btn.BackgroundColor3 = Color3.fromRGB(40,40,55)
@@ -187,6 +195,7 @@ local function createTab(name, icon)
     Page.Visible = false
     Page.ScrollBarThickness = 4
     Page.BackgroundTransparency = 1
+    Page.CanvasSize = UDim2.new(0,0,0,0) -- ✅ biar auto scroll aman
 
     Pages[name] = Page
 
@@ -205,7 +214,6 @@ local function createTab(name, icon)
 
     return Page
 end
-
 -- Default Page (Home)
 local HomePage = createTab("Home","🏠")
 Pages["Home"].Visible = true
