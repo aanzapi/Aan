@@ -1,19 +1,6 @@
 ----------------------------------------------------------------
 -- 🌌 ELEGANT SUMMIT GUI (Dark + Rainbow Border + Resize)
 ----------------------------------------------------------------
-
--- Services
-local Players = game:GetService("Players")
-local LP = Players.LocalPlayer
-local UIS = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-
--- ScreenGui
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "ProGUI"
-ScreenGui.Parent = LP:WaitForChild("PlayerGui")
-ScreenGui.ResetOnSpawn = false
-
 -- Services
 local Players = game:GetService("Players")
 local LP = Players.LocalPlayer
