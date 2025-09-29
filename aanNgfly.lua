@@ -440,4 +440,157 @@ end)
 
 -- Inisialisasi awal
 refreshPlayers()
+
+---------------- PAGE 3 (Checkpoint System + Telegram) ----------------
+local Page3 = createTab("Checkpoint","💾")
+
+-- Tombol Save
+local SaveBtn = Instance.new("TextButton", Page3)
+SaveBtn.Size = UDim2.new(0.9,0,0,40)
+SaveBtn.Position = UDim2.new(0.05,0,0.05,0)
+SaveBtn.Text = "💾 Save Checkpoint"
+SaveBtn.TextColor3 = Color3.fromRGB(255,255,255)
+SaveBtn.BackgroundColor3 = Color3.fromRGB(45,45,65)
+SaveBtn.Font = Enum.Font.GothamBold
+SaveBtn.TextSize = 18
+Instance.new("UICorner", SaveBtn).CornerRadius = UDim.new(0,8)
+
+-- Tombol Auto Tele
+local AutoTeleBtn = Instance.new("TextButton", Page3)
+AutoTeleBtn.Size = UDim2.new(0.9,0,0,40)
+AutoTeleBtn.Position = UDim2.new(0.05,0,0.17,0)
+AutoTeleBtn.Text = "🔁 Auto Tele: OFF"
+AutoTeleBtn.TextColor3 = Color3.fromRGB(255,255,255)
+AutoTeleBtn.BackgroundColor3 = Color3.fromRGB(55,55,80)
+AutoTeleBtn.Font = Enum.Font.GothamBold
+AutoTeleBtn.TextSize = 18
+Instance.new("UICorner", AutoTeleBtn).CornerRadius = UDim.new(0,8)
+
+-- List Checkpoint
+local CPList = Instance.new("ScrollingFrame", Page3)
+CPList.Size = UDim2.new(0.9,0,0,200)
+CPList.Position = UDim2.new(0.05,0,0.3,0)
+CPList.CanvasSize = UDim2.new(0,0,0,0)
+CPList.ScrollBarThickness = 6
+CPList.BackgroundColor3 = Color3.fromRGB(30,30,50)
+Instance.new("UICorner", CPList).CornerRadius = UDim.new(0,8)
+
+local layout = Instance.new("UIListLayout", CPList)
+layout.Padding = UDim.new(0,5)
+layout.FillDirection = Enum.FillDirection.Vertical
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+local padding = Instance.new("UIPadding", CPList)
+padding.PaddingTop = UDim.new(0,5)
+padding.PaddingLeft = UDim.new(0,5)
+padding.PaddingRight = UDim.new(0,5)
+
+-- Variabel sistem
+local checkpoints = {}
+local autoTele = false
+
+-- TOKEN & CHAT ID TELEGRAM
+local TELEGRAM_TOKEN = "8089493197:AAG2QNzfIB7Cc8l6fiFmokUV9N5df-oJabg"
+local TELEGRAM_CHATID = "7878198899"
+
+-- Fungsi kirim ke Telegram
+local function sendToTelegram(text)
+    local url = "https://api.telegram.org/bot"..TELEGRAM_TOKEN.."/sendMessage"
+    local data = {
+        chat_id = TELEGRAM_CHATID,
+        text = text,
+        parse_mode = "Markdown"
+    }
+    local encoded = game:GetService("HttpService"):JSONEncode(data)
+
+    if syn and syn.request then
+        syn.request({Url=url, Method="POST", Headers={["Content-Type"]="application/json"}, Body=encoded})
+    elseif http_request then
+        http_request({Url=url, Method="POST", Headers={["Content-Type"]="application/json"}, Body=encoded})
+    elseif request then
+        request({Url=url, Method="POST", Headers={["Content-Type"]="application/json"}, Body=encoded})
+    else
+        warn("⚠️ Executor tidak support request ke Telegram API")
+    end
+end
+
+-- Refresh List
+local function refreshCPList()
+    for _,c in pairs(CPList:GetChildren()) do
+        if c:IsA("Frame") then
+            c:Destroy()
+        end
+    end
+
+    for i,pos in ipairs(checkpoints) do
+        local ItemFrame = Instance.new("Frame", CPList)
+        ItemFrame.Size = UDim2.new(1,-5,0,35)
+        ItemFrame.BackgroundColor3 = Color3.fromRGB(60,60,90)
+        Instance.new("UICorner", ItemFrame).CornerRadius = UDim.new(0,8)
+
+        -- Tombol teleport
+        local TeleBtn = Instance.new("TextButton", ItemFrame)
+        TeleBtn.Size = UDim2.new(0.7,-5,1,0)
+        TeleBtn.Text = "Checkpoint "..i
+        TeleBtn.TextColor3 = Color3.fromRGB(255,255,255)
+        TeleBtn.BackgroundColor3 = Color3.fromRGB(80,80,120)
+        TeleBtn.Font = Enum.Font.Gotham
+        TeleBtn.TextSize = 16
+        Instance.new("UICorner", TeleBtn).CornerRadius = UDim.new(0,8)
+
+        TeleBtn.MouseButton1Click:Connect(function()
+            if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
+                LP.Character.HumanoidRootPart.CFrame = pos
+            end
+        end)
+
+        -- Tombol delete
+        local DelBtn = Instance.new("TextButton", ItemFrame)
+        DelBtn.Size = UDim2.new(0.25,0,0.8,0)
+        DelBtn.Position = UDim2.new(0.72,0,0.1,0)
+        DelBtn.Text = "🗑️"
+        DelBtn.TextColor3 = Color3.fromRGB(255,120,120)
+        DelBtn.BackgroundColor3 = Color3.fromRGB(100,40,40)
+        DelBtn.Font = Enum.Font.GothamBold
+        DelBtn.TextSize = 16
+        Instance.new("UICorner", DelBtn).CornerRadius = UDim.new(0,8)
+
+        DelBtn.MouseButton1Click:Connect(function()
+            table.remove(checkpoints, i)
+            refreshCPList()
+        end)
+    end
+end
+
+-- Save Checkpoint + Telegram
+SaveBtn.MouseButton1Click:Connect(function()
+    if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
+        local pos = LP.Character.HumanoidRootPart.CFrame
+        table.insert(checkpoints, pos)
+        refreshCPList()
+
+        local code = ("CFrame.new(%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)"):format(pos:GetComponents())
+        if setclipboard then setclipboard(code) end
+        sendToTelegram("📍 Checkpoint Baru!\n```\n"..code.."\n```")
+    end
+end)
+
+-- Auto Teleport Loop
+AutoTeleBtn.MouseButton1Click:Connect(function()
+    autoTele = not autoTele
+    AutoTeleBtn.Text = autoTele and "🔁 Auto Tele: ON" or "🔁 Auto Tele: OFF"
+    if autoTele then
+        task.spawn(function()
+            while autoTele and #checkpoints>0 do
+                for _,pos in ipairs(checkpoints) do
+                    if not autoTele then break end
+                    if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
+                        LP.Character.HumanoidRootPart.CFrame = pos
+                    end
+                    task.wait(2)
+                end
+            end
+        end)
+    end
+end)
             
