@@ -169,15 +169,21 @@ UIList.Padding = UDim.new(0,6)
 UIList.SortOrder = Enum.SortOrder.LayoutOrder
 
 ----------------------------------------------------------------
--- Container untuk Pages
+-- Container untuk Pages (fix supaya ga ikut scale aneh)
 ----------------------------------------------------------------
 local PageContainer = Instance.new("Frame", MainFrame)
 PageContainer.Name = "PageContainer"
-PageContainer.Size = UDim2.new(1,-130,1,-40)
+PageContainer.AnchorPoint = Vector2.new(0,0)
 PageContainer.Position = UDim2.new(0,130,0,40)
+PageContainer.Size = UDim2.new(0, MainFrame.AbsoluteSize.X-130, 0, MainFrame.AbsoluteSize.Y-40)
 PageContainer.BackgroundColor3 = Color3.fromRGB(35,35,45)
 PageContainer.BorderSizePixel = 0
 Instance.new("UICorner", PageContainer).CornerRadius = UDim.new(0,12)
+
+-- biar size PageContainer update terus kalau MainFrame di-resize
+MainFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+    PageContainer.Size = UDim2.new(0, MainFrame.AbsoluteSize.X-130, 0, MainFrame.AbsoluteSize.Y-40)
+end)
 
 ----------------------------------------------------------------
 -- 📝 Fungsi buat tambah Tab + Page
