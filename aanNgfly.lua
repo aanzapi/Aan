@@ -323,3 +323,111 @@ FlyBtn.MouseButton1Click:Connect(function()
     flyY = 0
     if flying then startFly() else if bv then bv:Destroy() bv=nil end end
 end)
+
+---------------- PAGE 2 (Teleport Player) ----------------
+-- === Dropdown Teleport Player ===
+local DropDown = Instance.new("TextButton", Page2)
+DropDown.Size = UDim2.new(0.9, 0, 0, 40)
+DropDown.Position = UDim2.new(0.05, 0, 0.05, 0)
+DropDown.Text = "👤 Teleport Menu"
+DropDown.TextColor3 = Color3.fromRGB(255, 255, 255)
+DropDown.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+DropDown.Font = Enum.Font.SourceSansBold
+DropDown.TextSize = 18
+Instance.new("UICorner", DropDown).CornerRadius = UDim.new(0, 6)
+
+-- Container list
+local ListFrame = Instance.new("ScrollingFrame", Page2)
+ListFrame.Size = UDim2.new(0.9, 0, 0, 140)
+ListFrame.Position = UDim2.new(0.05, 0, 0.23, 0)
+ListFrame.CanvasSize = UDim2.new(0,0,0,0)
+ListFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+ListFrame.ScrollBarThickness = 4
+ListFrame.Visible = false
+Instance.new("UICorner", ListFrame).CornerRadius = UDim.new(0, 6)
+
+-- Tombol Refresh Player
+local RefreshBtn = Instance.new("TextButton", Page2)
+RefreshBtn.Size = UDim2.new(0.9, 0, 0, 30)
+RefreshBtn.Position = UDim2.new(0.05, 0, 0.18, 0)
+RefreshBtn.Text = "🔄 Refresh Player List"
+RefreshBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+RefreshBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+RefreshBtn.Font = Enum.Font.SourceSansBold
+RefreshBtn.TextSize = 16
+RefreshBtn.Visible = false
+Instance.new("UICorner", RefreshBtn).CornerRadius = UDim.new(0, 6)
+
+-- === Teleport Player List ===
+local function refreshPlayers()
+    for _,child in pairs(ListFrame:GetChildren()) do
+        if not child:IsA("UIListLayout") then
+            child:Destroy()
+        end
+    end
+
+    local y = 0
+    for _,plr in pairs(Players:GetPlayers()) do
+        if plr ~= LP then
+            -- Frame container biar ga kaku
+            local ItemFrame = Instance.new("Frame", ListFrame)
+            ItemFrame.Size = UDim2.new(1,-5,0,35)
+            ItemFrame.Position = UDim2.new(0,0,0,y)
+            ItemFrame.BackgroundColor3 = Color3.fromRGB(45,45,45)
+            Instance.new("UICorner", ItemFrame).CornerRadius = UDim.new(0,6)
+
+            -- Label nama player
+            local NameLabel = Instance.new("TextLabel", ItemFrame)
+            NameLabel.Size = UDim2.new(0.7,0,1,0)
+            NameLabel.Position = UDim2.new(0,10,0,0)
+            NameLabel.Text = "🎮 "..plr.Name
+            NameLabel.TextColor3 = Color3.fromRGB(255,255,255)
+            NameLabel.BackgroundTransparency = 1
+            NameLabel.Font = Enum.Font.SourceSansBold
+            NameLabel.TextSize = 16
+            NameLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+            -- Tombol teleport
+            local TeleBtn = Instance.new("TextButton", ItemFrame)
+            TeleBtn.Size = UDim2.new(0.25,0,0.8,0)
+            TeleBtn.Position = UDim2.new(0.72,0,0.1,0)
+            TeleBtn.Text = "Teleport"
+            TeleBtn.TextColor3 = Color3.fromRGB(255,255,255)
+            TeleBtn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+            TeleBtn.Font = Enum.Font.SourceSans
+            TeleBtn.TextSize = 14
+            Instance.new("UICorner", TeleBtn).CornerRadius = UDim.new(0,6)
+
+            TeleBtn.MouseButton1Click:Connect(function()
+                if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                    LP.Character:WaitForChild("HumanoidRootPart").CFrame =
+                        plr.Character.HumanoidRootPart.CFrame + Vector3.new(0,3,0)
+                end
+            end)
+
+            y = y + 40
+        end
+    end
+
+    ListFrame.CanvasSize = UDim2.new(0,0,0,y)
+end
+
+-- Auto refresh saat player masuk/keluar
+Players.PlayerAdded:Connect(refreshPlayers)
+Players.PlayerRemoving:Connect(refreshPlayers)
+
+-- Manual refresh button
+RefreshBtn.MouseButton1Click:Connect(refreshPlayers)
+
+-- Toggle dropdown
+DropDown.MouseButton1Click:Connect(function()
+    local newState = not ListFrame.Visible
+    ListFrame.Visible = newState
+    RefreshBtn.Visible = newState
+    if newState then
+        refreshPlayers()
+    end
+end)
+
+-- Inisialisasi awal
+refreshPlayers()
