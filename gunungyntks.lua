@@ -670,7 +670,7 @@ end
 -- 📌 BUAT FRAME YNTKTS & STECU
 ----------------------------------------------------------------
 createSummitFrame("⛰️ Summit YNTKTS",0.1,summitPoints)
-createSummitFrame("⛰️ Summit Stecu",0.5,stecuPoints)
+createSummitFrame("⛰️ Summit Stecu",0.6,stecuPoints)
 -- === Fly System (Page1) ===
 local flying = false
 local speed = 60
