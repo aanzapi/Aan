@@ -1,103 +1,92 @@
 -- Services
 local Players = game:GetService("Players")
 local LP = Players.LocalPlayer
+local TweenService = game:GetService("TweenService")
 
 -- ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "CustomUI"
+ScreenGui.Name = "FishItUI"
 ScreenGui.Parent = LP:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
--- Main Frame
+---------------------------------------------------------------------
+-- 🔹 Intro Animation: A A N dengan Glow
+---------------------------------------------------------------------
+local IntroFrame = Instance.new("Frame", ScreenGui)
+IntroFrame.Size = UDim2.new(1,0,1,0)
+IntroFrame.BackgroundColor3 = Color3.fromRGB(20, 10, 30)
+IntroFrame.ZIndex = 10
+
+local AANLabel = Instance.new("TextLabel", IntroFrame)
+AANLabel.Size = UDim2.new(1,0,1,0)
+AANLabel.Text = ""
+AANLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+AANLabel.Font = Enum.Font.GothamBlack
+AANLabel.TextScaled = true
+AANLabel.BackgroundTransparency = 1
+AANLabel.ZIndex = 11
+
+-- Glow efek (Stroke)
+local UIStroke = Instance.new("UIStroke", AANLabel)
+UIStroke.Thickness = 2
+UIStroke.Color = Color3.fromRGB(180, 90, 255)
+UIStroke.Transparency = 0.2
+
+-- Animasi huruf muncul
+local text = "A A N"
+for i = 1, #text do
+	task.wait(0.4)
+	AANLabel.Text = string.sub(text, 1, i)
+
+	-- Pulse glow tiap huruf muncul
+	UIStroke.Thickness = 6
+	local pulse = TweenService:Create(UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Thickness = 2})
+	pulse:Play()
+end
+
+-- Animasi Glow Berdenyut (loop kecil sebelum fade)
+local keepPulsing = true
+task.spawn(function()
+	while keepPulsing do
+		local up = TweenService:Create(UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Transparency = 0.6})
+		local down = TweenService:Create(UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Transparency = 0.2})
+		up:Play()
+		up.Completed:Wait()
+		down:Play()
+		down.Completed:Wait()
+	end
+end)
+
+-- Tunggu sebentar lalu fade out
+task.wait(1.5)
+keepPulsing = false
+local fadeTween = TweenService:Create(AANLabel, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 1})
+fadeTween:Play()
+fadeTween.Completed:Wait()
+
+-- Hilangkan IntroFrame
+IntroFrame:Destroy()
+
+---------------------------------------------------------------------
+-- 🔹 Baru Tampilkan Main UI
+---------------------------------------------------------------------
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 450, 0, 280)
 MainFrame.Position = UDim2.new(0.5, -225, 0.5, -140)
-MainFrame.BackgroundColor3 = Color3.fromRGB(42, 21, 60) -- base ungu gelap
+MainFrame.BackgroundColor3 = Color3.fromRGB(42, 21, 60)
 MainFrame.BorderSizePixel = 0
+MainFrame.Visible = false
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
 
-local Stroke = Instance.new("UIStroke", MainFrame)
-Stroke.Thickness = 2
-Stroke.Color = Color3.fromRGB(90, 60, 120)
+-- Animasi muncul (zoom + fade)
+MainFrame.BackgroundTransparency = 1
+MainFrame.Size = UDim2.new(0, 200, 0, 120)
 
--- Header Bar
-local Header = Instance.new("Frame", MainFrame)
-Header.Size = UDim2.new(1,0,0,40)
-Header.BackgroundColor3 = Color3.fromRGB(58, 29, 83)
-Header.BorderSizePixel = 0
-Instance.new("UICorner", Header).CornerRadius = UDim.new(0,12)
+task.wait(0.3)
+MainFrame.Visible = true
+TweenService:Create(MainFrame, TweenInfo.new(0.8, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+	Size = UDim2.new(0, 450, 0, 280),
+	BackgroundTransparency = 0
+}):Play()
 
-local Title = Instance.new("TextLabel", Header)
-Title.Size = UDim2.new(1, -40, 1, 0)
-Title.Position = UDim2.new(0,10,0,0)
-Title.Text = "Fish It Script - AldyToi"
-Title.TextColor3 = Color3.fromRGB(220,200,255)
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 16
-Title.BackgroundTransparency = 1
-Title.TextXAlignment = Enum.TextXAlignment.Left
-
--- Close Button
-local CloseBtn = Instance.new("TextButton", Header)
-CloseBtn.Size = UDim2.new(0,30,0,30)
-CloseBtn.Position = UDim2.new(1,-35,0.5,-15)
-CloseBtn.Text = "✖"
-CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.TextSize = 16
-CloseBtn.TextColor3 = Color3.fromRGB(255,150,180)
-CloseBtn.BackgroundTransparency = 1
-
--- Tab Bar
-local TabBar = Instance.new("Frame", MainFrame)
-TabBar.Size = UDim2.new(1,0,0,40)
-TabBar.Position = UDim2.new(0,0,0,40)
-TabBar.BackgroundColor3 = Color3.fromRGB(42,21,60)
-TabBar.BorderSizePixel = 0
-
-local TabLayout = Instance.new("UIListLayout", TabBar)
-TabLayout.FillDirection = Enum.FillDirection.Horizontal
-TabLayout.Padding = UDim.new(0,10)
-TabLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-TabLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-
--- Contoh Tab
-local function createTab(name,icon)
-    local Tab = Instance.new("TextButton", TabBar)
-    Tab.Size = UDim2.new(0,100,0,30)
-    Tab.BackgroundColor3 = Color3.fromRGB(58,29,83)
-    Tab.Text = icon.." "..name
-    Tab.Font = Enum.Font.Gotham
-    Tab.TextSize = 14
-    Tab.TextColor3 = Color3.fromRGB(220,200,255)
-    local corner = Instance.new("UICorner", Tab)
-    corner.CornerRadius = UDim.new(0,8)
-
-    local stroke = Instance.new("UIStroke", Tab)
-    stroke.Thickness = 1
-    stroke.Color = Color3.fromRGB(90,60,120)
-    return Tab
-end
-
-local Tab1 = createTab("Event","🎉")
-local Tab2 = createTab("Auto Sell","💰")
-local Tab3 = createTab("Auto Trade","🔄")
-local Tab4 = createTab("Trade Stone","💎")
-
--- Content Frame
-local Content = Instance.new("Frame", MainFrame)
-Content.Size = UDim2.new(1,-20,1,-90)
-Content.Position = UDim2.new(0,10,0,80)
-Content.BackgroundColor3 = Color3.fromRGB(58,29,83)
-Content.BorderSizePixel = 0
-Instance.new("UICorner", Content).CornerRadius = UDim.new(0,10)
-
--- Placeholder isi
-local Info = Instance.new("TextLabel", Content)
-Info.Size = UDim2.new(1,-20,0,30)
-Info.Position = UDim2.new(0,10,0,10)
-Info.Text = "⚡ Panel siap dipakai!"
-Info.TextColor3 = Color3.fromRGB(230,230,255)
-Info.Font = Enum.Font.Gotham
-Info.TextSize = 15
-Info.BackgroundTransparency = 1
-Info.TextXAlignment = Enum.TextXAlignment.Left
+-- ❗ lanjutkan isi UI panelmu di bawah sini (header, tab, dll)
