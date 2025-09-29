@@ -344,8 +344,9 @@ ListFrame.Size = UDim2.new(0.9, 0, 0, 140)
 ListFrame.Position = UDim2.new(0.05, 0, 0.23, 0)
 ListFrame.CanvasSize = UDim2.new(0,0,0,0)
 ListFrame.BackgroundColor3 = Color3.fromRGB(30,30,50)
-ListFrame.ScrollBarThickness = 4
+ListFrame.ScrollBarThickness = 6
 ListFrame.Visible = false
+ListFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
 Instance.new("UICorner", ListFrame).CornerRadius = UDim.new(0, 8)
 
 -- Layout otomatis
@@ -353,6 +354,12 @@ local layout = Instance.new("UIListLayout", ListFrame)
 layout.Padding = UDim.new(0,5)
 layout.FillDirection = Enum.FillDirection.Vertical
 layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+-- Padding biar ga nempel
+local padding = Instance.new("UIPadding", ListFrame)
+padding.PaddingTop = UDim.new(0,5)
+padding.PaddingLeft = UDim.new(0,5)
+padding.PaddingRight = UDim.new(0,5)
 
 -- Tombol Refresh Player
 local RefreshBtn = Instance.new("TextButton", Page2)
@@ -369,7 +376,7 @@ Instance.new("UICorner", RefreshBtn).CornerRadius = UDim.new(0, 8)
 -- === Teleport Player List ===
 local function refreshPlayers()
     for _,child in pairs(ListFrame:GetChildren()) do
-        if not child:IsA("UIListLayout") then
+        if child:IsA("Frame") then
             child:Destroy()
         end
     end
@@ -378,7 +385,7 @@ local function refreshPlayers()
         if plr ~= LP then
             -- Frame container
             local ItemFrame = Instance.new("Frame", ListFrame)
-            ItemFrame.Size = UDim2.new(1, -5, 0, 35)
+            ItemFrame.Size = UDim2.new(1, -10, 0, 35)
             ItemFrame.BackgroundColor3 = Color3.fromRGB(60,60,90)
             Instance.new("UICorner", ItemFrame).CornerRadius = UDim.new(0, 8)
 
@@ -433,3 +440,4 @@ end)
 
 -- Inisialisasi awal
 refreshPlayers()
+            
