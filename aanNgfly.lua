@@ -594,3 +594,216 @@ AutoTeleBtn.MouseButton1Click:Connect(function()
     end
 end)
             
+---------------- PAGE 4 (Summit Teleport) ----------------
+local Page4 = createTab("Summit Teleport","⛰️")
+
+-- Scrolling list container
+local SummitList = Instance.new("ScrollingFrame", Page4)
+SummitList.Size = UDim2.new(0.95,0,0.9,0)
+SummitList.Position = UDim2.new(0.025,0,0.05,0)
+SummitList.CanvasSize = UDim2.new(0,0,0,0)
+SummitList.ScrollBarThickness = 6
+SummitList.BackgroundTransparency = 1
+
+local layout = Instance.new("UIListLayout", SummitList)
+layout.Padding = UDim.new(0,8)
+layout.FillDirection = Enum.FillDirection.Vertical
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+----------------------------------------------------------------
+-- 📍 LIST GUNUNG (Tambah sesuka hati)
+----------------------------------------------------------------
+local SummitData = {
+    {
+        name = "Mount Stecu",
+        points = {
+            CFrame.new(-7.993094, 664.636780, -928.648499, -0.699821, 0, 0.714318, 0, 1, 0, -0.714318, 0, -0.699821),
+        }
+    },
+    {
+        name = "Mount YNTKTS",
+        points = {
+            CFrame.new(727.611145, 44.237709, 681.177551, 0.989370, 0, 0.145422, 0, 1, 0, -0.145422, 0, 0.989370),
+        }
+    },
+    -- contoh tambah gunung baru
+    {
+        name = "Mount Dummy",
+        points = {
+            CFrame.new(0,50,0),
+            CFrame.new(10,60,10),
+        }
+    }
+}
+
+----------------------------------------------------------------
+-- 🛠️ FUNGSI BUAT MOUNT ITEM
+----------------------------------------------------------------
+local function createSummitItem(title, points)
+    local Container = Instance.new("Frame", SummitList)
+    Container.Size = UDim2.new(1,-10,0,40)
+    Container.BackgroundColor3 = Color3.fromRGB(50,50,70)
+    Container.ClipsDescendants = true
+    Container.AutomaticSize = Enum.AutomaticSize.Y
+    Instance.new("UICorner", Container).CornerRadius = UDim.new(0,8)
+
+    local Toggle = Instance.new("TextButton", Container)
+    Toggle.Size = UDim2.new(1,0,0,40)
+    Toggle.Text = "⛰️ "..title.." ▼"
+    Toggle.TextColor3 = Color3.fromRGB(255,255,255)
+    Toggle.BackgroundTransparency = 1
+    Toggle.Font = Enum.Font.GothamBold
+    Toggle.TextSize = 18
+
+    -- Frame isi
+    local Content = Instance.new("Frame", Container)
+    Content.Size = UDim2.new(1,-10,0,160)
+    Content.Position = UDim2.new(0,5,0,45)
+    Content.BackgroundColor3 = Color3.fromRGB(35,35,55)
+    Content.Visible = false
+    Instance.new("UICorner", Content).CornerRadius = UDim.new(0,6)
+
+    ----------------------------------------------------------------
+    -- Reuse createSummitFrame logic (Auto + Manual teleport)
+    ----------------------------------------------------------------
+    local function makeControls(frame, points)
+        local ToggleBtn = Instance.new("TextButton", frame)
+        ToggleBtn.Size = UDim2.new(0.45,0,0,30)
+        ToggleBtn.Position = UDim2.new(0.05,0,0.05,0)
+        ToggleBtn.Text = "Auto Summit: OFF"
+        ToggleBtn.TextColor3 = Color3.fromRGB(255,255,255)
+        ToggleBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+        ToggleBtn.Font = Enum.Font.GothamBold
+        ToggleBtn.TextSize = 16
+        Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(0,6)
+
+        local DelayLabel = Instance.new("TextLabel", frame)
+        DelayLabel.Size = UDim2.new(0.4,0,0,30)
+        DelayLabel.Position = UDim2.new(0.55,0,0.05,0)
+        DelayLabel.Text = "⏳ Delay: 2s"
+        DelayLabel.TextColor3 = Color3.fromRGB(255,255,0)
+        DelayLabel.BackgroundTransparency = 1
+        DelayLabel.Font = Enum.Font.GothamBold
+        DelayLabel.TextSize = 16
+
+        local auto = false
+        local delay = 2
+
+        ToggleBtn.MouseButton1Click:Connect(function()
+            auto = not auto
+            ToggleBtn.Text = auto and "Auto Summit: ON" or "Auto Summit: OFF"
+            if auto then
+                task.spawn(function()
+                    while auto do
+                        for _,pos in ipairs(points) do
+                            if not auto then break end
+                            local HRP = getHRP()
+                            if HRP then
+                                HRP.CFrame = pos
+                                autoJump()
+                            end
+                            task.wait(delay)
+                        end
+                    end
+                end)
+            end
+        end)
+
+        -- Slider delay (klik ganti delay)
+        local Slider = Instance.new("TextButton", frame)
+        Slider.Size = UDim2.new(0.9,0,0,20)
+        Slider.Position = UDim2.new(0.05,0,0.25,0)
+        Slider.Text = "Geser Delay"
+        Slider.BackgroundColor3 = Color3.fromRGB(100,100,100)
+        Slider.TextColor3 = Color3.fromRGB(255,255,255)
+        Slider.Font = Enum.Font.Gotham
+        Slider.TextSize = 14
+        Instance.new("UICorner", Slider).CornerRadius = UDim.new(0,6)
+
+        Slider.MouseButton1Click:Connect(function()
+            delay = delay + 1
+            if delay > 10 then delay = 1 end
+            DelayLabel.Text = "⏳ Delay: "..delay.."s"
+        end)
+
+        ----------------------------------------------------------------
+        -- Manual Teleport
+        ----------------------------------------------------------------
+        local ManualFrame = Instance.new("Frame", frame)
+        ManualFrame.Size = UDim2.new(0.9,0,0,60)
+        ManualFrame.Position = UDim2.new(0.05,0,0.55,0)
+        ManualFrame.BackgroundTransparency = 1
+
+        local LeftBtn = Instance.new("TextButton", ManualFrame)
+        LeftBtn.Size = UDim2.new(0.2,0,0.5,0)
+        LeftBtn.Text = "⬅️"
+        LeftBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+        LeftBtn.TextColor3 = Color3.fromRGB(255,255,255)
+        Instance.new("UICorner", LeftBtn).CornerRadius = UDim.new(0,6)
+
+        local CpLabel = Instance.new("TextLabel", ManualFrame)
+        CpLabel.Size = UDim2.new(0.6,0,0.5,0)
+        CpLabel.Position = UDim2.new(0.2,0,0,0)
+        CpLabel.Text = "CP 1"
+        CpLabel.TextColor3 = Color3.fromRGB(255,255,255)
+        CpLabel.BackgroundTransparency = 1
+        CpLabel.Font = Enum.Font.GothamBold
+        CpLabel.TextSize = 18
+
+        local RightBtn = Instance.new("TextButton", ManualFrame)
+        RightBtn.Size = UDim2.new(0.2,0,0.5,0)
+        RightBtn.Position = UDim2.new(0.8,0,0,0)
+        RightBtn.Text = "➡️"
+        RightBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+        RightBtn.TextColor3 = Color3.fromRGB(255,255,255)
+        Instance.new("UICorner", RightBtn).CornerRadius = UDim.new(0,6)
+
+        local TeleBtn = Instance.new("TextButton", ManualFrame)
+        TeleBtn.Size = UDim2.new(0.6,0,0.35,0)
+        TeleBtn.Position = UDim2.new(0.2,0,0.6,0)
+        TeleBtn.Text = "Teleport"
+        TeleBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+        TeleBtn.TextColor3 = Color3.fromRGB(255,255,255)
+        Instance.new("UICorner", TeleBtn).CornerRadius = UDim.new(0,6)
+
+        local currentCp = 1
+        local maxCp = #points
+        local function updateCpLabel()
+            CpLabel.Text = "CP "..currentCp
+        end
+        updateCpLabel()
+
+        LeftBtn.MouseButton1Click:Connect(function()
+            currentCp = math.max(1, currentCp - 1)
+            updateCpLabel()
+        end)
+        RightBtn.MouseButton1Click:Connect(function()
+            currentCp = math.min(maxCp, currentCp + 1)
+            updateCpLabel()
+        end)
+        TeleBtn.MouseButton1Click:Connect(function()
+            local HRP = getHRP()
+            if HRP then
+                HRP.CFrame = points[currentCp]
+                autoJump()
+            end
+        end)
+    end
+
+    makeControls(Content, points)
+
+    -- Expand/Collapse
+    local expanded = false
+    Toggle.MouseButton1Click:Connect(function()
+        expanded = not expanded
+        Content.Visible = expanded
+        Toggle.Text = expanded and ("⛰️ "..title.." ▲") or ("⛰️ "..title.." ▼")
+    end)
+end
+
+----------------------------------------------------------------
+-- Generate semua mount otomatis
+----------------------------------------------------------------
+for _,data in ipairs(SummitData) do
+    createSummitItem(data.name, data.points)
+end
