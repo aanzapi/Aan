@@ -155,44 +155,38 @@ end)
 ----------------------------------------------------------------
 local SideBar = Instance.new("ScrollingFrame", MainFrame)
 SideBar.Name = "SideBar"
-SideBar.Size = UDim2.new(0,130,1,-40) -- ikut tinggi MainFrame
+SideBar.Size = UDim2.new(0,130,1,-40)
 SideBar.Position = UDim2.new(0,0,0,40)
 SideBar.BackgroundColor3 = Color3.fromRGB(25,25,30)
 SideBar.BorderSizePixel = 0
 SideBar.ScrollBarThickness = 4
-SideBar.AutomaticCanvasSize = Enum.AutomaticSize.Y -- biar auto scroll kalo tombol kebanyakan
+SideBar.AutomaticCanvasSize = Enum.AutomaticSize.Y
+SideBar.CanvasSize = UDim2.new(0,0,0,0) -- aman biar auto scroll
 Instance.new("UICorner", SideBar).CornerRadius = UDim.new(0,12)
 
--- Layout biar tombol rapi
+-- Layout tombol
 local UIList = Instance.new("UIListLayout", SideBar)
 UIList.Padding = UDim.new(0,6)
 UIList.SortOrder = Enum.SortOrder.LayoutOrder
 
 ----------------------------------------------------------------
--- Container untuk Pages (supaya stabil kaya di foto kamu)
+-- Container untuk Pages
 ----------------------------------------------------------------
-local PageContainer = Instance.new("Frame")
+local PageContainer = Instance.new("Frame", MainFrame)
 PageContainer.Name = "PageContainer"
-PageContainer.Parent = MainFrame
+PageContainer.Size = UDim2.new(1,-130,1,-40)
+PageContainer.Position = UDim2.new(0,130,0,40)
 PageContainer.BackgroundColor3 = Color3.fromRGB(35,35,45)
 PageContainer.BorderSizePixel = 0
 Instance.new("UICorner", PageContainer).CornerRadius = UDim.new(0,12)
 
--- Set awal ukuran
-PageContainer.Position = UDim2.new(0,130,0,40)
-PageContainer.Size = UDim2.new(0, MainFrame.AbsoluteSize.X - 130, 0, MainFrame.AbsoluteSize.Y - 40)
-
--- Biar auto update kalo MainFrame di-resize
-MainFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
-    PageContainer.Size = UDim2.new(0, MainFrame.AbsoluteSize.X - 130, 0, MainFrame.AbsoluteSize.Y - 40)
-end)
 ----------------------------------------------------------------
 -- 📝 Fungsi buat tambah Tab + Page
 ----------------------------------------------------------------
 local Pages = {}
 local function createTab(name, icon)
     local Btn = Instance.new("TextButton", SideBar)
-    Btn.Size = UDim2.new(1,-10,0,30) -- lebar ngikut SideBar
+    Btn.Size = UDim2.new(1,-10,0,30)
     Btn.Text = (icon or "📌").." "..name
     Btn.TextColor3 = Color3.fromRGB(200,200,200)
     Btn.BackgroundColor3 = Color3.fromRGB(40,40,55)
@@ -201,12 +195,19 @@ local function createTab(name, icon)
     Btn.AutoButtonColor = true
     Instance.new("UICorner", Btn).CornerRadius = UDim.new(0,8)
 
+    -- Halaman
     local Page = Instance.new("ScrollingFrame", PageContainer)
     Page.Size = UDim2.new(1,0,1,0)
     Page.Visible = false
-    Page.ScrollBarThickness = 4
-    Page.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    Page.ScrollBarThickness = 6
     Page.BackgroundTransparency = 1
+    Page.CanvasSize = UDim2.new(0,0,0,0)
+    Page.AutomaticCanvasSize = Enum.AutomaticSize.Y
+
+    -- Supaya isi page rapi tapi nggak ikut kecil-besar
+    local PageLayout = Instance.new("UIListLayout", Page)
+    PageLayout.Padding = UDim.new(0,8)
+    PageLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
     Pages[name] = Page
 
