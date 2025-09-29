@@ -176,12 +176,15 @@ Instance.new("UICorner", PageContainer).CornerRadius = UDim.new(0,12)
 local Pages = {}
 local function createTab(name, icon)
     local Btn = Instance.new("TextButton", SideBar)
-    Btn.Size = UDim2.new(1,0,0,30)
+    Btn.Size = UDim2.new(1, -8, 0, 32) -- 🔹 ada padding kanan-kiri (-8px)
     Btn.Text = (icon or "📌").." "..name
     Btn.TextColor3 = Color3.fromRGB(200,200,200)
     Btn.BackgroundColor3 = Color3.fromRGB(40,40,55)
     Btn.Font = Enum.Font.GothamBold
     Btn.TextSize = 14
+    Btn.TextScaled = true -- 🔥 biar otomatis menyesuaikan
+    Btn.TextWrapped = true -- 🔥 teks panjang bakal turun ke bawah
+    Btn.ClipsDescendants = true -- 🔒 teks ga bisa keluar garis tombol
     Instance.new("UICorner", Btn).CornerRadius = UDim.new(0,8)
 
     local Page = Instance.new("ScrollingFrame", PageContainer)
@@ -189,6 +192,7 @@ local function createTab(name, icon)
     Page.Visible = false
     Page.ScrollBarThickness = 4
     Page.BackgroundTransparency = 1
+    Page.AutomaticCanvasSize = Enum.AutomaticSize.Y
 
     Pages[name] = Page
 
@@ -207,6 +211,13 @@ local function createTab(name, icon)
 
     return Page
 end
+
+-- Tambahin Padding Sidebar biar ga nempel frame
+local SidePadding = Instance.new("UIPadding", SideBar)
+SidePadding.PaddingLeft = UDim.new(0,4)
+SidePadding.PaddingRight = UDim.new(0,4)
+SidePadding.PaddingTop = UDim.new(0,4)
+SidePadding.PaddingBottom = UDim.new(0,4)
 
 -- Default Page (Home)
 local HomePage = createTab("Home","🏠")
