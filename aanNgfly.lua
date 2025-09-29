@@ -1,148 +1,122 @@
--- // Advanced GUI by AanZAPI
--- Bisa digeser, ada tombol close, Fly + Teleport player list
--- Tested untuk HP (mobile analog support)
+---------------- UI BASE (Mentahan) ----------------
 
 -- Services
 local Players = game:GetService("Players")
 local LP = Players.LocalPlayer
-local UIS = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local StarterGui = game:GetService("StarterGui")
 
--- Buat ScreenGui
+-- ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AanGUI"
+ScreenGui.Name = "ProGUI"
 ScreenGui.Parent = LP:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
 -- Main Frame
-local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 250, 0, 300)
-MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0,500,0,300)
+MainFrame.Position = UDim2.new(0.25,0,0.25,0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
-MainFrame.Parent = ScreenGui
-
--- UICorner biar rounded
-local UICorner = Instance.new("UICorner", MainFrame)
-UICorner.CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0,10)
 
 -- Title Bar
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -40, 0, 30)
-Title.BackgroundTransparency = 1
-Title.Text = "🚀 AanZAPI GUI"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+local TitleBar = Instance.new("Frame", MainFrame)
+TitleBar.Size = UDim2.new(1,0,0,40)
+TitleBar.BackgroundColor3 = Color3.fromRGB(40,40,40)
+TitleBar.BorderSizePixel = 0
+Instance.new("UICorner", TitleBar).CornerRadius = UDim.new(0,10)
+
+local Title = Instance.new("TextLabel", TitleBar)
+Title.Size = UDim2.new(1,0,1,0)
+Title.Text = "🔥 PRO GUI BASE"
+Title.TextColor3 = Color3.fromRGB(255,255,255)
 Title.Font = Enum.Font.SourceSansBold
-Title.TextSize = 18
-Title.Parent = MainFrame
+Title.TextSize = 20
+Title.BackgroundTransparency = 1
 
 -- Close Button
-local CloseBtn = Instance.new("TextButton")
-CloseBtn.Size = UDim2.new(0, 30, 0, 30)
-CloseBtn.Position = UDim2.new(1, -30, 0, 0)
+local CloseBtn = Instance.new("TextButton", TitleBar)
+CloseBtn.Size = UDim2.new(0,40,0,40)
+CloseBtn.Position = UDim2.new(1,-40,0,0)
 CloseBtn.Text = "X"
-CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
-CloseBtn.Font = Enum.Font.SourceSansBold
-CloseBtn.TextSize = 16
+CloseBtn.TextColor3 = Color3.fromRGB(255,100,100)
 CloseBtn.BackgroundTransparency = 1
-CloseBtn.Parent = MainFrame
+CloseBtn.Font = Enum.Font.SourceSansBold
+CloseBtn.TextSize = 18
 CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- Fly Button
-local FlyBtn = Instance.new("TextButton")
-FlyBtn.Size = UDim2.new(0.9, 0, 0, 40)
-FlyBtn.Position = UDim2.new(0.05, 0, 0.15, 0)
-FlyBtn.Text = "✈️ Fly: OFF"
-FlyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-FlyBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-FlyBtn.Font = Enum.Font.SourceSansBold
-FlyBtn.TextSize = 18
-FlyBtn.Parent = MainFrame
-Instance.new("UICorner", FlyBtn).CornerRadius = UDim.new(0, 6)
+-- Sidebar (Tab Menu)
+local SideBar = Instance.new("Frame", MainFrame)
+SideBar.Size = UDim2.new(0,120,1,-40)
+SideBar.Position = UDim2.new(0,0,0,40)
+SideBar.BackgroundColor3 = Color3.fromRGB(35,35,35)
+SideBar.BorderSizePixel = 0
 
--- Dropdown Teleport
-local DropDown = Instance.new("TextButton")
-DropDown.Size = UDim2.new(0.9, 0, 0, 40)
-DropDown.Position = UDim2.new(0.05, 0, 0.35, 0)
-DropDown.Text = "👤 Teleport Menu"
-DropDown.TextColor3 = Color3.fromRGB(255, 255, 255)
-DropDown.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-DropDown.Font = Enum.Font.SourceSansBold
-DropDown.TextSize = 18
-DropDown.Parent = MainFrame
-Instance.new("UICorner", DropDown).CornerRadius = UDim.new(0, 6)
+local UIList = Instance.new("UIListLayout", SideBar)
+UIList.Padding = UDim.new(0,5)
+UIList.SortOrder = Enum.SortOrder.LayoutOrder
 
--- Frame List Player
-local ListFrame = Instance.new("ScrollingFrame")
-ListFrame.Size = UDim2.new(0.9, 0, 0.4, 0)
-ListFrame.Position = UDim2.new(0.05, 0, 0.55, 0)
-ListFrame.CanvasSize = UDim2.new(0,0,0,0)
-ListFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
-ListFrame.ScrollBarThickness = 4
-ListFrame.Visible = false
-ListFrame.Parent = MainFrame
-Instance.new("UICorner", ListFrame).CornerRadius = UDim.new(0, 6)
+-- Container untuk Pages
+local PageContainer = Instance.new("Frame", MainFrame)
+PageContainer.Size = UDim2.new(1,-120,1,-40)
+PageContainer.Position = UDim2.new(0,120,0,40)
+PageContainer.BackgroundColor3 = Color3.fromRGB(45,45,45)
+PageContainer.BorderSizePixel = 0
+Instance.new("UICorner", PageContainer).CornerRadius = UDim.new(0,8)
 
--- Fungsi refresh list player
-local function refreshPlayers()
-    for _,child in pairs(ListFrame:GetChildren()) do
-        if child:IsA("TextButton") then child:Destroy() end
-    end
-    local y = 0
-    for _,plr in pairs(Players:GetPlayers()) do
-        if plr ~= LP then
-            local Btn = Instance.new("TextButton")
-            Btn.Size = UDim2.new(1, -5, 0, 30)
-            Btn.Position = UDim2.new(0, 0, 0, y)
-            Btn.Text = plr.Name
-            Btn.TextColor3 = Color3.fromRGB(255,255,255)
-            Btn.BackgroundColor3 = Color3.fromRGB(50,50,50)
-            Btn.Parent = ListFrame
-            y = y + 35
-            Btn.MouseButton1Click:Connect(function()
-                if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                    LP.Character:WaitForChild("HumanoidRootPart").CFrame = plr.Character.HumanoidRootPart.CFrame + Vector3.new(0,3,0)
-                end
-            end)
-        end
-    end
-    ListFrame.CanvasSize = UDim2.new(0,0,0,y)
-end
-Players.PlayerAdded:Connect(refreshPlayers)
-Players.PlayerRemoving:Connect(refreshPlayers)
-refreshPlayers()
+----------------------------------------------------------------
+-- 📝 Fungsi buat tambah Tab + Page
+----------------------------------------------------------------
+local Pages = {}
+local function createTab(name)
+    local Btn = Instance.new("TextButton", SideBar)
+    Btn.Size = UDim2.new(1,0,0,30)
+    Btn.Text = name
+    Btn.TextColor3 = Color3.fromRGB(255,255,255)
+    Btn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+    Btn.Font = Enum.Font.SourceSansBold
+    Btn.TextSize = 16
+    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0,6)
 
-DropDown.MouseButton1Click:Connect(function()
-    ListFrame.Visible = not ListFrame.Visible
-end)
+    local Page = Instance.new("ScrollingFrame", PageContainer)
+    Page.Size = UDim2.new(1,0,1,0)
+    Page.Visible = false
+    Page.ScrollBarThickness = 6
+    Page.BackgroundTransparency = 1
 
--- Fly System
-local flying = false
-local speed = 50
-local Humanoid = LP.Character:WaitForChild("Humanoid")
-local HRP = LP.Character:WaitForChild("HumanoidRootPart")
+    Pages[name] = Page
 
-local function flyLoop()
-    RunService.RenderStepped:Connect(function()
-        if flying and HRP then
-            local moveDir = Humanoid.MoveDirection
-            HRP.Velocity = Vector3.new(moveDir.X*speed, 0, moveDir.Z*speed)
-            if UIS:IsKeyDown(Enum.KeyCode.Space) then
-                HRP.Velocity = HRP.Velocity + Vector3.new(0,speed/1.5,0)
-            end
-        end
+    Btn.MouseButton1Click:Connect(function()
+        for _,p in pairs(Pages) do p.Visible = false end
+        Page.Visible = true
     end)
-end
-flyLoop()
 
-FlyBtn.MouseButton1Click:Connect(function()
-    flying = not flying
-    FlyBtn.Text = flying and "✈️ Fly: ON" or "✈️ Fly: OFF"
-    if not flying then
-        HRP.Velocity = Vector3.zero
-    end
-end)
+    return Page
+end
+
+----------------------------------------------------------------
+-- 📌 Contoh Page
+----------------------------------------------------------------
+local Page1 = createTab("🏠 Home")
+local Label1 = Instance.new("TextLabel", Page1)
+Label1.Size = UDim2.new(1,0,0,30)
+Label1.Text = "Selamat datang di GUI base!"
+Label1.TextColor3 = Color3.fromRGB(255,255,255)
+Label1.Font = Enum.Font.SourceSansBold
+Label1.TextSize = 18
+Label1.BackgroundTransparency = 1
+
+local Page2 = createTab("⚙️ Settings")
+local Label2 = Instance.new("TextLabel", Page2)
+Label2.Size = UDim2.new(1,0,0,30)
+Label2.Text = "Atur konfigurasi disini."
+Label2.TextColor3 = Color3.fromRGB(255,255,255)
+Label2.Font = Enum.Font.SourceSansBold
+Label2.TextSize = 18
+Label2.BackgroundTransparency = 1
+
+-- Buka Page1 default
+Pages["🏠 Home"].Visible = true
