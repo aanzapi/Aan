@@ -10,11 +10,11 @@ ScreenGui.Parent = LP:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
 ---------------------------------------------------------------------
--- 🔹 Intro Animation: A A N dengan Glow
+-- 🔹 Intro Animation: A A N transparan (tanpa background hitam)
 ---------------------------------------------------------------------
 local IntroFrame = Instance.new("Frame", ScreenGui)
 IntroFrame.Size = UDim2.new(1,0,1,0)
-IntroFrame.BackgroundColor3 = Color3.fromRGB(20, 10, 30)
+IntroFrame.BackgroundTransparency = 1 -- 🔥 transparan
 IntroFrame.ZIndex = 10
 
 local AANLabel = Instance.new("TextLabel", IntroFrame)
