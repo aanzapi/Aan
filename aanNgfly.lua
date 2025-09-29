@@ -150,20 +150,29 @@ CloseBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = false
 end)
 
--- Sidebar (Tab Menu)
-local SideBar = Instance.new("Frame", MainFrame)
-SideBar.Size = UDim2.new(0,130,1,-40)
+----------------------------------------------------------------
+-- Sidebar (Scrolling Tab Menu)
+----------------------------------------------------------------
+local SideBar = Instance.new("ScrollingFrame", MainFrame)
+SideBar.Name = "SideBar"
+SideBar.Size = UDim2.new(0,130,1,-40) -- ikut tinggi MainFrame
 SideBar.Position = UDim2.new(0,0,0,40)
 SideBar.BackgroundColor3 = Color3.fromRGB(25,25,30)
 SideBar.BorderSizePixel = 0
+SideBar.ScrollBarThickness = 4
+SideBar.AutomaticCanvasSize = Enum.AutomaticSize.Y -- biar auto scroll kalo tombol kebanyakan
 Instance.new("UICorner", SideBar).CornerRadius = UDim.new(0,12)
 
+-- Layout biar tombol rapi
 local UIList = Instance.new("UIListLayout", SideBar)
 UIList.Padding = UDim.new(0,6)
 UIList.SortOrder = Enum.SortOrder.LayoutOrder
 
+----------------------------------------------------------------
 -- Container untuk Pages
+----------------------------------------------------------------
 local PageContainer = Instance.new("Frame", MainFrame)
+PageContainer.Name = "PageContainer"
 PageContainer.Size = UDim2.new(1,-130,1,-40)
 PageContainer.Position = UDim2.new(0,130,0,40)
 PageContainer.BackgroundColor3 = Color3.fromRGB(35,35,45)
@@ -176,28 +185,21 @@ Instance.new("UICorner", PageContainer).CornerRadius = UDim.new(0,12)
 local Pages = {}
 local function createTab(name, icon)
     local Btn = Instance.new("TextButton", SideBar)
-    Btn.Size = UDim2.new(1, 0, 0, 32) -- 🔥 full scale lebar sidebar
+    Btn.Size = UDim2.new(1,-10,0,30) -- lebar ngikut SideBar
     Btn.Text = (icon or "📌").." "..name
     Btn.TextColor3 = Color3.fromRGB(200,200,200)
     Btn.BackgroundColor3 = Color3.fromRGB(40,40,55)
     Btn.Font = Enum.Font.GothamBold
-    Btn.TextScaled = true -- teks auto ngecil
-    Btn.TextWrapped = true -- teks panjang auto turun
-    Btn.ClipsDescendants = true -- 🔒 teks ga bisa keluar tombol
+    Btn.TextSize = 14
     Btn.AutoButtonColor = true
     Instance.new("UICorner", Btn).CornerRadius = UDim.new(0,8)
 
-    -- 🔧 biar tombol tetap proporsional
-    local ar = Instance.new("UIAspectRatioConstraint", Btn)
-    ar.AspectRatio = 6 -- atur rasio sesuai kebutuhan (lebih besar = lebih lebar)
-
-    -- PAGE
     local Page = Instance.new("ScrollingFrame", PageContainer)
     Page.Size = UDim2.new(1,0,1,0)
     Page.Visible = false
     Page.ScrollBarThickness = 4
-    Page.BackgroundTransparency = 1
     Page.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    Page.BackgroundTransparency = 1
 
     Pages[name] = Page
 
@@ -216,13 +218,6 @@ local function createTab(name, icon)
 
     return Page
 end
-
--- PADDING biar ga mentok border
-local SidePadding = Instance.new("UIPadding", SideBar)
-SidePadding.PaddingLeft = UDim.new(0,4)
-SidePadding.PaddingRight = UDim.new(0,4)
-SidePadding.PaddingTop = UDim.new(0,4)
-SidePadding.PaddingBottom = UDim.new(0,4)
 -- Default Page (Home)
 local HomePage = createTab("Home","🏠")
 Pages["Home"].Visible = true
