@@ -212,139 +212,35 @@ ZoomInBtn.MouseButton1Click:Connect(function()
     applyResize()
 end)
 
----------------- PAGE 1 (Fly + Teleport Player) ----------------
-local Page1 = createTab("Fly + Teleport","✈️")
-
--- Fly Button
-local FlyBtn = Instance.new("TextButton", Page1)
-FlyBtn.Size = UDim2.new(0.9, 0, 0, 40)
-FlyBtn.Position = UDim2.new(0.05, 0, 0.05, 0)
-FlyBtn.Text = "✈️ Fly: OFF"
-FlyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-FlyBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
-FlyBtn.Font = Enum.Font.GothamBold
-FlyBtn.TextSize = 18
-Instance.new("UICorner", FlyBtn).CornerRadius = UDim.new(0, 8)
-
--- Tombol Naik & Turun
-local UpBtn = Instance.new("TextButton", Page1)
-UpBtn.Size = UDim2.new(0.43, 0, 0, 35)
-UpBtn.Position = UDim2.new(0.05, 0, 0.18, 0)
-UpBtn.Text = "⬆️ Naik"
-UpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-UpBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 80)
-UpBtn.Font = Enum.Font.GothamBold
-UpBtn.TextSize = 16
-Instance.new("UICorner", UpBtn).CornerRadius = UDim.new(0, 8)
-
-local DownBtn = Instance.new("TextButton", Page1)
-DownBtn.Size = UDim2.new(0.43, 0, 0, 35)
-DownBtn.Position = UDim2.new(0.52, 0, 0.18, 0)
-DownBtn.Text = "⬇️ Turun"
-DownBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-DownBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 80)
-DownBtn.Font = Enum.Font.GothamBold
-DownBtn.TextSize = 16
-Instance.new("UICorner", DownBtn).CornerRadius = UDim.new(0, 8)
-
--- Atur Speed
-local SpeedLabel = Instance.new("TextLabel", Page1)
-SpeedLabel.Size = UDim2.new(0.9, 0, 0, 25)
-SpeedLabel.Position = UDim2.new(0.05, 0, 0.3, 0)
-SpeedLabel.BackgroundTransparency = 1
-SpeedLabel.Text = "⚡ Speed: 60"
-SpeedLabel.TextColor3 = Color3.fromRGB(255, 255, 200)
-SpeedLabel.Font = Enum.Font.GothamBold
-SpeedLabel.TextSize = 16
-
-local PlusBtn = Instance.new("TextButton", Page1)
-PlusBtn.Size = UDim2.new(0.43, 0, 0, 30)
-PlusBtn.Position = UDim2.new(0.05, 0, 0.36, 0)
-PlusBtn.Text = "+ Speed"
-PlusBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-PlusBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 80)
-PlusBtn.Font = Enum.Font.GothamBold
-PlusBtn.TextSize = 14
-Instance.new("UICorner", PlusBtn).CornerRadius = UDim.new(0, 8)
-
-local MinusBtn = Instance.new("TextButton", Page1)
-MinusBtn.Size = UDim2.new(0.43, 0, 0, 30)
-MinusBtn.Position = UDim2.new(0.52, 0, 0.36, 0)
-MinusBtn.Text = "- Speed"
-MinusBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-MinusBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 80)
-MinusBtn.Font = Enum.Font.GothamBold
-MinusBtn.TextSize = 14
-Instance.new("UICorner", MinusBtn).CornerRadius = UDim.new(0, 8)
-
-----------------------------------------------------------------
--- === Fly System (Page1) ===
-----------------------------------------------------------------
-local flying = false
-local speed = 60
-local bv
-local flyY = 0
-local upHeld, downHeld = false, false
-
-local function startFly()
-    local HRP = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
-    if not HRP then return end
-    bv = Instance.new("BodyVelocity")
-    bv.Velocity = Vector3.zero
-    bv.MaxForce = Vector3.new(1e5,1e5,1e5)
-    bv.Parent = HRP
-
-    RunService.RenderStepped:Connect(function()
-        if flying and HRP and bv then
-            local moveDir = LP.Character:FindFirstChild("Humanoid").MoveDirection
-            if upHeld then flyY = speed elseif downHeld then flyY = -speed else flyY = 0 end
-            bv.Velocity = Vector3.new(moveDir.X*speed, flyY, moveDir.Z*speed)
-        end
-    end)
-end
-
-UpBtn.MouseButton1Down:Connect(function() if flying then upHeld=true end end)
-UpBtn.MouseButton1Up:Connect(function() upHeld=false end)
-DownBtn.MouseButton1Down:Connect(function() if flying then downHeld=true end end)
-DownBtn.MouseButton1Up:Connect(function() downHeld=false end)
-
-PlusBtn.MouseButton1Click:Connect(function()
-    speed = speed+10
-    SpeedLabel.Text = "⚡ Speed: "..speed
-end)
-MinusBtn.MouseButton1Click:Connect(function()
-    speed = math.max(10, speed-10)
-    SpeedLabel.Text = "⚡ Speed: "..speed
-end)
-
-FlyBtn.MouseButton1Click:Connect(function()
-    flying = not flying
-    FlyBtn.Text = flying and "✈️ Fly: ON" or "✈️ Fly: OFF"
-    flyY = 0
-    if flying then startFly() else if bv then bv:Destroy() bv=nil end end
-end)
-
 ---------------- PAGE 2 (Teleport Player) ----------------
--- === Dropdown Teleport Player ===
+local Page2 = createTab("Teleport Player","👤")
+
+-- Dropdown / Toggle List
 local DropDown = Instance.new("TextButton", Page2)
 DropDown.Size = UDim2.new(0.9, 0, 0, 40)
 DropDown.Position = UDim2.new(0.05, 0, 0.05, 0)
 DropDown.Text = "👤 Teleport Menu"
 DropDown.TextColor3 = Color3.fromRGB(255, 255, 255)
-DropDown.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-DropDown.Font = Enum.Font.SourceSansBold
+DropDown.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+DropDown.Font = Enum.Font.GothamBold
 DropDown.TextSize = 18
-Instance.new("UICorner", DropDown).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", DropDown).CornerRadius = UDim.new(0, 8)
 
 -- Container list
 local ListFrame = Instance.new("ScrollingFrame", Page2)
 ListFrame.Size = UDim2.new(0.9, 0, 0, 140)
 ListFrame.Position = UDim2.new(0.05, 0, 0.23, 0)
 ListFrame.CanvasSize = UDim2.new(0,0,0,0)
-ListFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+ListFrame.BackgroundColor3 = Color3.fromRGB(30,30,50)
 ListFrame.ScrollBarThickness = 4
 ListFrame.Visible = false
-Instance.new("UICorner", ListFrame).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", ListFrame).CornerRadius = UDim.new(0, 8)
+
+-- Layout otomatis
+local layout = Instance.new("UIListLayout", ListFrame)
+layout.Padding = UDim.new(0,5)
+layout.FillDirection = Enum.FillDirection.Vertical
+layout.SortOrder = Enum.SortOrder.LayoutOrder
 
 -- Tombol Refresh Player
 local RefreshBtn = Instance.new("TextButton", Page2)
@@ -352,11 +248,11 @@ RefreshBtn.Size = UDim2.new(0.9, 0, 0, 30)
 RefreshBtn.Position = UDim2.new(0.05, 0, 0.18, 0)
 RefreshBtn.Text = "🔄 Refresh Player List"
 RefreshBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-RefreshBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-RefreshBtn.Font = Enum.Font.SourceSansBold
+RefreshBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 80)
+RefreshBtn.Font = Enum.Font.GothamBold
 RefreshBtn.TextSize = 16
 RefreshBtn.Visible = false
-Instance.new("UICorner", RefreshBtn).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", RefreshBtn).CornerRadius = UDim.new(0, 8)
 
 -- === Teleport Player List ===
 local function refreshPlayers()
@@ -366,15 +262,13 @@ local function refreshPlayers()
         end
     end
 
-    local y = 0
     for _,plr in pairs(Players:GetPlayers()) do
         if plr ~= LP then
-            -- Frame container biar ga kaku
+            -- Frame container
             local ItemFrame = Instance.new("Frame", ListFrame)
-            ItemFrame.Size = UDim2.new(1,-5,0,35)
-            ItemFrame.Position = UDim2.new(0,0,0,y)
-            ItemFrame.BackgroundColor3 = Color3.fromRGB(45,45,45)
-            Instance.new("UICorner", ItemFrame).CornerRadius = UDim.new(0,6)
+            ItemFrame.Size = UDim2.new(1, -5, 0, 35)
+            ItemFrame.BackgroundColor3 = Color3.fromRGB(60,60,90)
+            Instance.new("UICorner", ItemFrame).CornerRadius = UDim.new(0, 8)
 
             -- Label nama player
             local NameLabel = Instance.new("TextLabel", ItemFrame)
@@ -383,7 +277,7 @@ local function refreshPlayers()
             NameLabel.Text = "🎮 "..plr.Name
             NameLabel.TextColor3 = Color3.fromRGB(255,255,255)
             NameLabel.BackgroundTransparency = 1
-            NameLabel.Font = Enum.Font.SourceSansBold
+            NameLabel.Font = Enum.Font.GothamBold
             NameLabel.TextSize = 16
             NameLabel.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -393,10 +287,10 @@ local function refreshPlayers()
             TeleBtn.Position = UDim2.new(0.72,0,0.1,0)
             TeleBtn.Text = "Teleport"
             TeleBtn.TextColor3 = Color3.fromRGB(255,255,255)
-            TeleBtn.BackgroundColor3 = Color3.fromRGB(70,70,70)
-            TeleBtn.Font = Enum.Font.SourceSans
+            TeleBtn.BackgroundColor3 = Color3.fromRGB(90,90,130)
+            TeleBtn.Font = Enum.Font.Gotham
             TeleBtn.TextSize = 14
-            Instance.new("UICorner", TeleBtn).CornerRadius = UDim.new(0,6)
+            Instance.new("UICorner", TeleBtn).CornerRadius = UDim.new(0,8)
 
             TeleBtn.MouseButton1Click:Connect(function()
                 if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
@@ -404,12 +298,8 @@ local function refreshPlayers()
                         plr.Character.HumanoidRootPart.CFrame + Vector3.new(0,3,0)
                 end
             end)
-
-            y = y + 40
         end
     end
-
-    ListFrame.CanvasSize = UDim2.new(0,0,0,y)
 end
 
 -- Auto refresh saat player masuk/keluar
