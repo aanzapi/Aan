@@ -169,13 +169,45 @@ ToggleBtn.MouseButton1Click:Connect(function()
 end)
 
 ----------------------------------------------------------------
--- 🔍 Resize Feature (Ctrl + MouseWheel)
+-- 🔍 Resize Button (Zoom In / Zoom Out)
 ----------------------------------------------------------------
 local scale = 1
-UIS.InputChanged:Connect(function(input)
-    if UIS:IsKeyDown(Enum.KeyCode.LeftControl) and input.UserInputType == Enum.UserInputType.MouseWheel then
-        scale += input.Position.Z * 0.05
-        scale = math.clamp(scale,0.6,1.5)
-        MainFrame.Size = UDim2.new(0,550*scale,0,330*scale)
-    end
+local function applyResize()
+    MainFrame.Size = UDim2.new(0,550*scale,0,330*scale)
+end
+
+-- Tombol Zoom Out
+local ZoomOutBtn = Instance.new("TextButton", TitleBar)
+ZoomOutBtn.Size = UDim2.new(0,32,0,32)
+ZoomOutBtn.Position = UDim2.new(1,-125,0.5,-16)
+ZoomOutBtn.Text = "-"
+ZoomOutBtn.TextSize = 22
+ZoomOutBtn.Font = Enum.Font.GothamBold
+ZoomOutBtn.TextColor3 = Color3.fromRGB(255,220,220)
+ZoomOutBtn.BackgroundColor3 = Color3.fromRGB(35,35,55)
+ZoomOutBtn.AutoButtonColor = true
+Instance.new("UICorner", ZoomOutBtn).CornerRadius = UDim.new(0,8)
+
+ZoomOutBtn.MouseButton1Click:Connect(function()
+    scale -= 0.1
+    scale = math.clamp(scale,0.6,1.8)
+    applyResize()
+end)
+
+-- Tombol Zoom In
+local ZoomInBtn = Instance.new("TextButton", TitleBar)
+ZoomInBtn.Size = UDim2.new(0,32,0,32)
+ZoomInBtn.Position = UDim2.new(1,-85,0.5,-16)
+ZoomInBtn.Text = "+"
+ZoomInBtn.TextSize = 22
+ZoomInBtn.Font = Enum.Font.GothamBold
+ZoomInBtn.TextColor3 = Color3.fromRGB(220,255,220)
+ZoomInBtn.BackgroundColor3 = Color3.fromRGB(35,35,55)
+ZoomInBtn.AutoButtonColor = true
+Instance.new("UICorner", ZoomInBtn).CornerRadius = UDim.new(0,8)
+
+ZoomInBtn.MouseButton1Click:Connect(function()
+    scale += 0.1
+    scale = math.clamp(scale,0.6,1.8)
+    applyResize()
 end)
