@@ -973,4 +973,140 @@ for _,data in ipairs(summitData) do
     createSummitItem(data.name, data.points)
 end
 
+---------------- PAGE 5 (Movement Tools) ----------------
+local Page5 = createTab("Movement Tools","⚙️")
+
+local Container = Instance.new("Frame", Page5)
+Container.Size = UDim2.new(0.95,0,0.9,0)
+Container.Position = UDim2.new(0.025,0,0.05,0)
+Container.BackgroundTransparency = 1
+
+local layout = Instance.new("UIListLayout", Container)
+layout.Padding = UDim.new(0,10)
+layout.FillDirection = Enum.FillDirection.Vertical
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+----------------------------------------------------------------
+-- 🧱 TEMBUS TEMBOK (NOCLIP)
+----------------------------------------------------------------
+local NoclipFrame = Instance.new("Frame", Container)
+NoclipFrame.Size = UDim2.new(1, -5, 0, 100)
+NoclipFrame.BackgroundColor3 = Color3.fromRGB(40,40,60)
+NoclipFrame.BorderSizePixel = 0
+Instance.new("UICorner", NoclipFrame).CornerRadius = UDim.new(0,8)
+
+local NoclipLabel = Instance.new("TextLabel", NoclipFrame)
+NoclipLabel.Size = UDim2.new(1,0,0,25)
+NoclipLabel.Text = "🧱 Tembus Tembok (Noclip)"
+NoclipLabel.BackgroundTransparency = 1
+NoclipLabel.TextColor3 = Color3.fromRGB(255,255,255)
+NoclipLabel.Font = Enum.Font.GothamBold
+NoclipLabel.TextSize = 18
+
+local NoclipBtn = Instance.new("TextButton", NoclipFrame)
+NoclipBtn.Size = UDim2.new(0.9,0,0,35)
+NoclipBtn.Position = UDim2.new(0.05,0,0.4,0)
+NoclipBtn.Text = "Noclip: OFF"
+NoclipBtn.TextColor3 = Color3.fromRGB(255,255,255)
+NoclipBtn.BackgroundColor3 = Color3.fromRGB(70,70,90)
+Instance.new("UICorner", NoclipBtn).CornerRadius = UDim.new(0,6)
+
+local noclipEnabled = false
+local noclipConn
+
+NoclipBtn.MouseButton1Click:Connect(function()
+    noclipEnabled = not noclipEnabled
+    NoclipBtn.Text = noclipEnabled and "Noclip: ON" or "Noclip: OFF"
+    NoclipBtn.BackgroundColor3 = noclipEnabled and Color3.fromRGB(90,120,90) or Color3.fromRGB(70,70,90)
+
+    if noclipEnabled then
+        noclipConn = game:GetService("RunService").Stepped:Connect(function()
+            if LP.Character then
+                for _,v in pairs(LP.Character:GetDescendants()) do
+                    if v:IsA("BasePart") and v.CanCollide then
+                        v.CanCollide = false
+                    end
+                end
+            end
+        end)
+    else
+        if noclipConn then
+            noclipConn:Disconnect()
+            noclipConn = nil
+        end
+    end
+end)
+
+----------------------------------------------------------------
+-- 🏃‍♂️ AUTO WALK (BISA ATUR KECEPATAN)
+----------------------------------------------------------------
+local AutoWalkFrame = Instance.new("Frame", Container)
+AutoWalkFrame.Size = UDim2.new(1, -5, 0, 140)
+AutoWalkFrame.BackgroundColor3 = Color3.fromRGB(40,40,60)
+AutoWalkFrame.BorderSizePixel = 0
+Instance.new("UICorner", AutoWalkFrame).CornerRadius = UDim.new(0,8)
+
+local WalkLabel = Instance.new("TextLabel", AutoWalkFrame)
+WalkLabel.Size = UDim2.new(1,0,0,25)
+WalkLabel.Text = "🏃‍♂️ Auto Walk"
+WalkLabel.BackgroundTransparency = 1
+WalkLabel.TextColor3 = Color3.fromRGB(255,255,255)
+WalkLabel.Font = Enum.Font.GothamBold
+WalkLabel.TextSize = 18
+
+local WalkBtn = Instance.new("TextButton", AutoWalkFrame)
+WalkBtn.Size = UDim2.new(0.9,0,0,35)
+WalkBtn.Position = UDim2.new(0.05,0,0.3,0)
+WalkBtn.Text = "Auto Walk: OFF"
+WalkBtn.TextColor3 = Color3.fromRGB(255,255,255)
+WalkBtn.BackgroundColor3 = Color3.fromRGB(70,70,90)
+Instance.new("UICorner", WalkBtn).CornerRadius = UDim.new(0,6)
+
+local SpeedLabel = Instance.new("TextLabel", AutoWalkFrame)
+SpeedLabel.Size = UDim2.new(0.9,0,0,25)
+SpeedLabel.Position = UDim2.new(0.05,0,0.6,0)
+SpeedLabel.Text = "⚡ Kecepatan: 16"
+SpeedLabel.TextColor3 = Color3.fromRGB(255,255,0)
+SpeedLabel.BackgroundTransparency = 1
+SpeedLabel.Font = Enum.Font.GothamBold
+SpeedLabel.TextSize = 16
+
+local SpeedSlider = Instance.new("TextButton", AutoWalkFrame)
+SpeedSlider.Size = UDim2.new(0.9,0,0,25)
+SpeedSlider.Position = UDim2.new(0.05,0,0.78,0)
+SpeedSlider.Text = "Geser kecepatan"
+SpeedSlider.TextColor3 = Color3.fromRGB(255,255,255)
+SpeedSlider.BackgroundColor3 = Color3.fromRGB(90,90,120)
+Instance.new("UICorner", SpeedSlider).CornerRadius = UDim.new(0,6)
+
+local autoWalk = false
+local speed = 16
+local walkConn
+
+WalkBtn.MouseButton1Click:Connect(function()
+    autoWalk = not autoWalk
+    WalkBtn.Text = autoWalk and "Auto Walk: ON" or "Auto Walk: OFF"
+    WalkBtn.BackgroundColor3 = autoWalk and Color3.fromRGB(90,120,90) or Color3.fromRGB(70,70,90)
+
+    if autoWalk then
+        walkConn = game:GetService("RunService").Heartbeat:Connect(function()
+            local HRP = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+            local Hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+            if HRP and Hum then
+                HRP.CFrame = HRP.CFrame + HRP.CFrame.LookVector * (speed / 60)
+            end
+        end)
+    else
+        if walkConn then
+            walkConn:Disconnect()
+            walkConn = nil
+        end
+    end
+end)
+
+SpeedSlider.MouseButton1Click:Connect(function()
+    speed = speed + 4
+    if speed > 100 then speed = 8 end
+    SpeedLabel.Text = "⚡ Kecepatan: "..speed
+end)
 
