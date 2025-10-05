@@ -986,199 +986,135 @@ layout.Padding = UDim.new(0,10)
 layout.FillDirection = Enum.FillDirection.Vertical
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 
-local Humanoid = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
-
-LP.CharacterAdded:Connect(function(char)
-	task.wait(1)
-	Humanoid = char:FindFirstChildOfClass("Humanoid")
-end)
-
 ----------------------------------------------------------------
--- ⚡ SPEED HACK (Manual Speed)
+-- 🕹️ MANUAL WALK (ON/OFF + SPEED)
 ----------------------------------------------------------------
-local SpeedFrame = Instance.new("Frame", Container)
-SpeedFrame.Size = UDim2.new(1, -5, 0, 120)
-SpeedFrame.BackgroundColor3 = Color3.fromRGB(40,40,60)
-SpeedFrame.BorderSizePixel = 0
-Instance.new("UICorner", SpeedFrame).CornerRadius = UDim.new(0,8)
+local ManualWalkFrame = Instance.new("Frame", Container)
+ManualWalkFrame.Size = UDim2.new(1, -5, 0, 160)
+ManualWalkFrame.BackgroundColor3 = Color3.fromRGB(40,40,60)
+ManualWalkFrame.BorderSizePixel = 0
+Instance.new("UICorner", ManualWalkFrame).CornerRadius = UDim.new(0,8)
 
-local SpeedLabel = Instance.new("TextLabel", SpeedFrame)
-SpeedLabel.Size = UDim2.new(1,0,0,25)
-SpeedLabel.Text = "⚡ Speed Hack"
+local WalkLabel = Instance.new("TextLabel", ManualWalkFrame)
+WalkLabel.Size = UDim2.new(1,0,0,25)
+WalkLabel.Text = "🕹️ Manual Walk"
+WalkLabel.BackgroundTransparency = 1
+WalkLabel.TextColor3 = Color3.fromRGB(255,255,255)
+WalkLabel.Font = Enum.Font.GothamBold
+WalkLabel.TextSize = 18
+
+local WalkBtn = Instance.new("TextButton", ManualWalkFrame)
+WalkBtn.Size = UDim2.new(0.9,0,0,35)
+WalkBtn.Position = UDim2.new(0.05,0,0.25,0)
+WalkBtn.Text = "Manual Walk: OFF"
+WalkBtn.TextColor3 = Color3.fromRGB(255,255,255)
+WalkBtn.BackgroundColor3 = Color3.fromRGB(70,70,90)
+Instance.new("UICorner", WalkBtn).CornerRadius = UDim.new(0,6)
+
+local SpeedLabel = Instance.new("TextLabel", ManualWalkFrame)
+SpeedLabel.Size = UDim2.new(0.9,0,0,25)
+SpeedLabel.Position = UDim2.new(0.05,0,0.52,0)
+SpeedLabel.Text = "⚡ Kecepatan: 16"
+SpeedLabel.TextColor3 = Color3.fromRGB(255,255,0)
 SpeedLabel.BackgroundTransparency = 1
-SpeedLabel.TextColor3 = Color3.fromRGB(255,255,255)
 SpeedLabel.Font = Enum.Font.GothamBold
-SpeedLabel.TextSize = 18
+SpeedLabel.TextSize = 16
 
-local SpeedValueLabel = Instance.new("TextLabel", SpeedFrame)
-SpeedValueLabel.Size = UDim2.new(0.9,0,0,25)
-SpeedValueLabel.Position = UDim2.new(0.05,0,0.4,0)
-SpeedValueLabel.Text = "🚀 Kecepatan: 16"
-SpeedValueLabel.TextColor3 = Color3.fromRGB(255,255,0)
-SpeedValueLabel.BackgroundTransparency = 1
-SpeedValueLabel.Font = Enum.Font.GothamBold
-SpeedValueLabel.TextSize = 16
-
-local SpeedButton = Instance.new("TextButton", SpeedFrame)
-SpeedButton.Size = UDim2.new(0.9,0,0,30)
-SpeedButton.Position = UDim2.new(0.05,0,0.7,0)
-SpeedButton.Text = "Naikkan Kecepatan"
-SpeedButton.TextColor3 = Color3.fromRGB(255,255,255)
-SpeedButton.BackgroundColor3 = Color3.fromRGB(90,90,120)
-Instance.new("UICorner", SpeedButton).CornerRadius = UDim.new(0,6)
+local SpeedBtn = Instance.new("TextButton", ManualWalkFrame)
+SpeedBtn.Size = UDim2.new(0.9,0,0,30)
+SpeedBtn.Position = UDim2.new(0.05,0,0.73,0)
+SpeedBtn.Text = "Ganti kecepatan"
+SpeedBtn.TextColor3 = Color3.fromRGB(255,255,255)
+SpeedBtn.BackgroundColor3 = Color3.fromRGB(90,90,120)
+Instance.new("UICorner", SpeedBtn).CornerRadius = UDim.new(0,6)
 
 local speed = 16
-local function applySpeed()
-	if Humanoid then
-		Humanoid.WalkSpeed = speed
-	end
-end
+local manualWalk = false
+local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
 
-SpeedButton.MouseButton1Click:Connect(function()
-	speed = speed + 4
-	if speed > 100 then speed = 8 end
-	SpeedValueLabel.Text = "🚀 Kecepatan: "..speed
-	applySpeed()
+-- Tombol ON/OFF
+WalkBtn.MouseButton1Click:Connect(function()
+    manualWalk = not manualWalk
+    WalkBtn.Text = manualWalk and "Manual Walk: ON" or "Manual Walk: OFF"
+    WalkBtn.BackgroundColor3 = manualWalk and Color3.fromRGB(90,120,90) or Color3.fromRGB(70,70,90)
+
+    if manualWalk then
+        local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum.WalkSpeed = speed
+        end
+    else
+        local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum.WalkSpeed = 16
+        end
+    end
+end)
+
+-- Tombol Ubah Kecepatan
+SpeedBtn.MouseButton1Click:Connect(function()
+    speed = speed + 4
+    if speed > 100 then speed = 8 end
+    SpeedLabel.Text = "⚡ Kecepatan: "..speed
+    if manualWalk then
+        local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum.WalkSpeed = speed
+        end
+    end
 end)
 
 ----------------------------------------------------------------
--- 🦘 HIGH JUMP
+-- 🏃 AUTO RETURN RUN (LARI BALIK SUPER CEPAT)
 ----------------------------------------------------------------
-local JumpFrame = Instance.new("Frame", Container)
-JumpFrame.Size = UDim2.new(1, -5, 0, 120)
-JumpFrame.BackgroundColor3 = Color3.fromRGB(40,40,60)
-JumpFrame.BorderSizePixel = 0
-Instance.new("UICorner", JumpFrame).CornerRadius = UDim.new(0,8)
+local ReturnRunFrame = Instance.new("Frame", Container)
+ReturnRunFrame.Size = UDim2.new(1, -5, 0, 120)
+ReturnRunFrame.BackgroundColor3 = Color3.fromRGB(40,40,60)
+ReturnRunFrame.BorderSizePixel = 0
+Instance.new("UICorner", ReturnRunFrame).CornerRadius = UDim.new(0,8)
 
-local JumpLabel = Instance.new("TextLabel", JumpFrame)
-JumpLabel.Size = UDim2.new(1,0,0,25)
-JumpLabel.Text = "🦘 High Jump"
-JumpLabel.BackgroundTransparency = 1
-JumpLabel.TextColor3 = Color3.fromRGB(255,255,255)
-JumpLabel.Font = Enum.Font.GothamBold
-JumpLabel.TextSize = 18
+local ReturnLabel = Instance.new("TextLabel", ReturnRunFrame)
+ReturnLabel.Size = UDim2.new(1,0,0,25)
+ReturnLabel.Text = "🏃 Auto Return Run"
+ReturnLabel.BackgroundTransparency = 1
+ReturnLabel.TextColor3 = Color3.fromRGB(255,255,255)
+ReturnLabel.Font = Enum.Font.GothamBold
+ReturnLabel.TextSize = 18
 
-local JumpValueLabel = Instance.new("TextLabel", JumpFrame)
-JumpValueLabel.Size = UDim2.new(0.9,0,0,25)
-JumpValueLabel.Position = UDim2.new(0.05,0,0.4,0)
-JumpValueLabel.Text = "🌀 Ketinggian: 50"
-JumpValueLabel.TextColor3 = Color3.fromRGB(0,255,255)
-JumpValueLabel.BackgroundTransparency = 1
-JumpValueLabel.Font = Enum.Font.GothamBold
-JumpValueLabel.TextSize = 16
+local ReturnBtn = Instance.new("TextButton", ReturnRunFrame)
+ReturnBtn.Size = UDim2.new(0.9,0,0,35)
+ReturnBtn.Position = UDim2.new(0.05,0,0.4,0)
+ReturnBtn.Text = "Auto Return: OFF"
+ReturnBtn.TextColor3 = Color3.fromRGB(255,255,255)
+ReturnBtn.BackgroundColor3 = Color3.fromRGB(70,70,90)
+Instance.new("UICorner", ReturnBtn).CornerRadius = UDim.new(0,6)
 
-local JumpButton = Instance.new("TextButton", JumpFrame)
-JumpButton.Size = UDim2.new(0.9,0,0,30)
-JumpButton.Position = UDim2.new(0.05,0,0.7,0)
-JumpButton.Text = "Naikkan Ketinggian"
-JumpButton.TextColor3 = Color3.fromRGB(255,255,255)
-JumpButton.BackgroundColor3 = Color3.fromRGB(90,90,120)
-Instance.new("UICorner", JumpButton).CornerRadius = UDim.new(0,6)
+local returnEnabled = false
+local savedPos = nil
+local runConn = nil
+local returnSpeed = 100 -- kecepatan balik super cepat
 
-local jumpPower = 50
-local function applyJump()
-	if Humanoid then
-		Humanoid.JumpPower = jumpPower
-	end
-end
+ReturnBtn.MouseButton1Click:Connect(function()
+    local HRP = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+    local Hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+    if not HRP or not Hum then return end
 
-JumpButton.MouseButton1Click:Connect(function()
-	jumpPower = jumpPower + 20
-	if jumpPower > 300 then jumpPower = 50 end
-	JumpValueLabel.Text = "🌀 Ketinggian: "..jumpPower
-	applyJump()
-end)
+    returnEnabled = not returnEnabled
+    ReturnBtn.Text = returnEnabled and "Auto Return: ON" or "Auto Return: OFF"
+    ReturnBtn.BackgroundColor3 = returnEnabled and Color3.fromRGB(90,120,90) or Color3.fromRGB(70,70,90)
 
-----------------------------------------------------------------
--- 🛡️ ANTI FALL DAMAGE
-----------------------------------------------------------------
-local AntiFallFrame = Instance.new("Frame", Container)
-AntiFallFrame.Size = UDim2.new(1, -5, 0, 100)
-AntiFallFrame.BackgroundColor3 = Color3.fromRGB(40,40,60)
-AntiFallFrame.BorderSizePixel = 0
-Instance.new("UICorner", AntiFallFrame).CornerRadius = UDim.new(0,8)
-
-local AntiFallLabel = Instance.new("TextLabel", AntiFallFrame)
-AntiFallLabel.Size = UDim2.new(1,0,0,25)
-AntiFallLabel.Text = "🛡️ Anti Fall Damage"
-AntiFallLabel.BackgroundTransparency = 1
-AntiFallLabel.TextColor3 = Color3.fromRGB(255,255,255)
-AntiFallLabel.Font = Enum.Font.GothamBold
-AntiFallLabel.TextSize = 18
-
-local AntiFallBtn = Instance.new("TextButton", AntiFallFrame)
-AntiFallBtn.Size = UDim2.new(0.9,0,0,35)
-AntiFallBtn.Position = UDim2.new(0.05,0,0.4,0)
-AntiFallBtn.Text = "Anti Fall: OFF"
-AntiFallBtn.TextColor3 = Color3.fromRGB(255,255,255)
-AntiFallBtn.BackgroundColor3 = Color3.fromRGB(70,70,90)
-Instance.new("UICorner", AntiFallBtn).CornerRadius = UDim.new(0,6)
-
-local antiFallEnabled = false
-AntiFallBtn.MouseButton1Click:Connect(function()
-	antiFallEnabled = not antiFallEnabled
-	AntiFallBtn.Text = antiFallEnabled and "Anti Fall: ON" or "Anti Fall: OFF"
-	AntiFallBtn.BackgroundColor3 = antiFallEnabled and Color3.fromRGB(90,120,90) or Color3.fromRGB(70,70,90)
-
-	if antiFallEnabled then
-		task.spawn(function()
-			while antiFallEnabled do
-				local Hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
-				if Hum then
-					Hum:SetStateEnabled(Enum.HumanoidStateType.Freefall, true)
-					Hum:ChangeState(Enum.HumanoidStateType.Physics)
-					Hum:ChangeState(Enum.HumanoidStateType.GettingUp)
-				end
-				task.wait(0.5)
-			end
-		end)
-	end
-end)
-
-----------------------------------------------------------------
--- 🌈 TRAIL EFFECT
-----------------------------------------------------------------
-local TrailFrame = Instance.new("Frame", Container)
-TrailFrame.Size = UDim2.new(1, -5, 0, 100)
-TrailFrame.BackgroundColor3 = Color3.fromRGB(40,40,60)
-TrailFrame.BorderSizePixel = 0
-Instance.new("UICorner", TrailFrame).CornerRadius = UDim.new(0,8)
-
-local TrailLabel = Instance.new("TextLabel", TrailFrame)
-TrailLabel.Size = UDim2.new(1,0,0,25)
-TrailLabel.Text = "🌈 Trail Effect"
-TrailLabel.BackgroundTransparency = 1
-TrailLabel.TextColor3 = Color3.fromRGB(255,255,255)
-TrailLabel.Font = Enum.Font.GothamBold
-TrailLabel.TextSize = 18
-
-local TrailBtn = Instance.new("TextButton", TrailFrame)
-TrailBtn.Size = UDim2.new(0.9,0,0,35)
-TrailBtn.Position = UDim2.new(0.05,0,0.4,0)
-TrailBtn.Text = "Trail: OFF"
-TrailBtn.TextColor3 = Color3.fromRGB(255,255,255)
-TrailBtn.BackgroundColor3 = Color3.fromRGB(70,70,90)
-Instance.new("UICorner", TrailBtn).CornerRadius = UDim.new(0,6)
-
-local trailEnabled = false
-TrailBtn.MouseButton1Click:Connect(function()
-	trailEnabled = not trailEnabled
-	TrailBtn.Text = trailEnabled and "Trail: ON" or "Trail: OFF"
-	TrailBtn.BackgroundColor3 = trailEnabled and Color3.fromRGB(90,120,90) or Color3.fromRGB(70,70,90)
-
-	if trailEnabled then
-		local char = LP.Character
-		if char and not char:FindFirstChild("AAN_Trail") then
-			local trail = Instance.new("Trail")
-			trail.Name = "AAN_Trail"
-			trail.Attachment0 = Instance.new("Attachment", char:WaitForChild("Left Leg"))
-			trail.Attachment1 = Instance.new("Attachment", char:WaitForChild("Right Leg"))
-			trail.Lifetime = 0.4
-			trail.Color = ColorSequence.new(Color3.fromRGB(255,0,255), Color3.fromRGB(0,255,255))
-			trail.Parent = char
-		end
-	else
-		local t = LP.Character and LP.Character:FindFirstChild("AAN_Trail")
-		if t then t:Destroy() end
-	end
+    if returnEnabled then
+        savedPos = HRP.Position
+    else
+        -- Lari balik super cepat ke posisi awal
+        local direction = (savedPos - HRP.Position).Unit
+        local dist = (savedPos - HRP.Position).Magnitude
+        local duration = dist / returnSpeed
+        local tween = game:GetService("TweenService"):Create(
+            HRP,
+            TweenInfo.new(duration, Enum.EasingStyle.Linear),
+            {CFrame = CFrame.new(savedPos)}
+        )
+        tween:Play()
+    end
 end)
