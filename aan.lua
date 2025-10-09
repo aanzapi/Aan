@@ -1,92 +1,104 @@
--- Services
-local Players = game:GetService("Players")
-local LP = Players.LocalPlayer
-local TweenService = game:GetService("TweenService")
+--// Walvy Community GUI Base by Aanz
+--// UI Template (tanpa fitur)
 
--- ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "FishItUI"
-ScreenGui.Parent = LP:WaitForChild("PlayerGui")
-ScreenGui.ResetOnSpawn = false
+local MainFrame = Instance.new("Frame")
+local Sidebar = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local Content = Instance.new("Frame")
 
----------------------------------------------------------------------
--- 🔹 Intro Animation: A A N transparan (tanpa background hitam)
----------------------------------------------------------------------
-local IntroFrame = Instance.new("Frame", ScreenGui)
-IntroFrame.Size = UDim2.new(1,0,1,0)
-IntroFrame.BackgroundTransparency = 1 -- 🔥 transparan
-IntroFrame.ZIndex = 10
+local UICorner = Instance.new("UICorner")
+local UIListLayout = Instance.new("UIListLayout")
 
-local AANLabel = Instance.new("TextLabel", IntroFrame)
-AANLabel.Size = UDim2.new(1,0,1,0)
-AANLabel.Text = ""
-AANLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-AANLabel.Font = Enum.Font.GothamBlack
-AANLabel.TextScaled = true
-AANLabel.BackgroundTransparency = 1
-AANLabel.ZIndex = 11
+-- Sidebar Buttons
+local buttons = {"Auto Farm", "Teleport", "Shop", "User", "Utility", "Webhook", "Settings"}
 
--- Glow efek (Stroke)
-local UIStroke = Instance.new("UIStroke", AANLabel)
-UIStroke.Thickness = 2
-UIStroke.Color = Color3.fromRGB(180, 90, 255)
-UIStroke.Transparency = 0.2
+-- UI Settings
+ScreenGui.Name = "WalvyGUI"
+ScreenGui.Parent = game.CoreGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- Animasi huruf muncul
-local text = "A A N"
-for i = 1, #text do
-	task.wait(0.4)
-	AANLabel.Text = string.sub(text, 1, i)
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+MainFrame.BorderSizePixel = 0
+MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+MainFrame.Size = UDim2.new(0, 600, 0, 350)
 
-	-- Pulse glow tiap huruf muncul
-	UIStroke.Thickness = 6
-	local pulse = TweenService:Create(UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Thickness = 2})
-	pulse:Play()
+UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.Parent = MainFrame
+
+-- Sidebar
+Sidebar.Name = "Sidebar"
+Sidebar.Parent = MainFrame
+Sidebar.BackgroundColor3 = Color3.fromRGB(26, 26, 26)
+Sidebar.BorderSizePixel = 0
+Sidebar.Size = UDim2.new(0, 150, 1, 0)
+
+UIListLayout.Parent = Sidebar
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0, 6)
+
+-- Title
+Title.Parent = Sidebar
+Title.BackgroundTransparency = 1
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "Walvy Community\nPremium (Beta)"
+Title.TextColor3 = Color3.fromRGB(255, 50, 50)
+Title.TextSize = 14
+Title.TextWrapped = true
+
+-- Generate Sidebar Buttons
+for _, name in ipairs(buttons) do
+	local btn = Instance.new("TextButton")
+	btn.Name = name
+	btn.Parent = Sidebar
+	btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	btn.Size = UDim2.new(1, -10, 0, 28)
+	btn.Position = UDim2.new(0, 5, 0, 0)
+	btn.Text = name
+	btn.Font = Enum.Font.Gotham
+	btn.TextColor3 = Color3.fromRGB(220, 220, 220)
+	btn.TextSize = 13
+	btn.AutoButtonColor = false
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 5)
+	corner.Parent = btn
+
+	btn.MouseEnter:Connect(function()
+		btn.BackgroundColor3 = Color3.fromRGB(255, 30, 30)
+		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	end)
+	btn.MouseLeave:Connect(function()
+		btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+		btn.TextColor3 = Color3.fromRGB(220, 220, 220)
+	end)
 end
 
--- Animasi Glow Berdenyut (loop kecil sebelum fade)
-local keepPulsing = true
-task.spawn(function()
-	while keepPulsing do
-		local up = TweenService:Create(UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Transparency = 0.6})
-		local down = TweenService:Create(UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Transparency = 0.2})
-		up:Play()
-		up.Completed:Wait()
-		down:Play()
-		down.Completed:Wait()
-	end
-end)
+-- Content Area
+Content.Name = "Content"
+Content.Parent = MainFrame
+Content.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Content.BorderSizePixel = 0
+Content.Position = UDim2.new(0, 155, 0, 10)
+Content.Size = UDim2.new(1, -165, 1, -20)
 
--- Tunggu sebentar lalu fade out
-task.wait(1.5)
-keepPulsing = false
-local fadeTween = TweenService:Create(AANLabel, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 1})
-fadeTween:Play()
-fadeTween.Completed:Wait()
+local corner2 = Instance.new("UICorner")
+corner2.CornerRadius = UDim.new(0, 6)
+corner2.Parent = Content
 
--- Hilangkan IntroFrame
-IntroFrame:Destroy()
+-- Example label (isi konten nanti)
+local placeholder = Instance.new("TextLabel")
+placeholder.Parent = Content
+placeholder.BackgroundTransparency = 1
+placeholder.Size = UDim2.new(1, 0, 1, 0)
+placeholder.Font = Enum.Font.Gotham
+placeholder.Text = "👋 Welcome! Pilih menu di sebelah kiri"
+placeholder.TextColor3 = Color3.fromRGB(200, 200, 200)
+placeholder.TextSize = 15
+placeholder.TextWrapped = true
 
----------------------------------------------------------------------
--- 🔹 Baru Tampilkan Main UI
----------------------------------------------------------------------
-local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 450, 0, 280)
-MainFrame.Position = UDim2.new(0.5, -225, 0.5, -140)
-MainFrame.BackgroundColor3 = Color3.fromRGB(42, 21, 60)
-MainFrame.BorderSizePixel = 0
-MainFrame.Visible = false
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
-
--- Animasi muncul (zoom + fade)
-MainFrame.BackgroundTransparency = 1
-MainFrame.Size = UDim2.new(0, 200, 0, 120)
-
-task.wait(0.3)
-MainFrame.Visible = true
-TweenService:Create(MainFrame, TweenInfo.new(0.8, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-	Size = UDim2.new(0, 450, 0, 280),
-	BackgroundTransparency = 0
-}):Play()
-
--- ❗ lanjutkan isi UI panelmu di bawah sini (header, tab, dll)
+print("✅ Walvy GUI Base loaded successfully!")
