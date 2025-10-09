@@ -1,104 +1,118 @@
---// Walvy Community GUI Base by Aanz
---// UI Template (tanpa fitur)
-
+-- Langkah 1: Buat ScreenGui (Kontainer utama untuk GUI)
 local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ExecutorBaseUI"
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui") -- Tempatkan di PlayerGui pemain lokal
+
+-- Langkah 2: Buat Frame (Jendela atau panel utama)
 local MainFrame = Instance.new("Frame")
-local Sidebar = Instance.new("Frame")
-local Title = Instance.new("TextLabel")
-local Content = Instance.new("Frame")
-
-local UICorner = Instance.new("UICorner")
-local UIListLayout = Instance.new("UIListLayout")
-
--- Sidebar Buttons
-local buttons = {"Auto Farm", "Teleport", "Shop", "User", "Utility", "Webhook", "Settings"}
-
--- UI Settings
-ScreenGui.Name = "WalvyGUI"
-ScreenGui.Parent = game.CoreGui
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
-MainFrame.Name = "MainFrame"
-MainFrame.Parent = ScreenGui
-MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+MainFrame.Name = "ExecutorWindow"
+MainFrame.Size = UDim2.new(0.3, 0, 0.4, 0) -- Ukuran: 30% lebar, 40% tinggi layar
+MainFrame.Position = UDim2.new(0.35, 0, 0.3, 0) -- Posisi: Tengah (sekitar)
+MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40) -- Warna abu-abu gelap
 MainFrame.BorderSizePixel = 0
-MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-MainFrame.Size = UDim2.new(0, 600, 0, 350)
+MainFrame.Parent = ScreenGui
 
-UICorner.CornerRadius = UDim.new(0, 8)
+-- Tambahkan UI Corner untuk tampilan yang lebih modern (sudut melengkung)
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 8) -- Radius 8 pixel
 UICorner.Parent = MainFrame
 
--- Sidebar
-Sidebar.Name = "Sidebar"
-Sidebar.Parent = MainFrame
-Sidebar.BackgroundColor3 = Color3.fromRGB(26, 26, 26)
-Sidebar.BorderSizePixel = 0
-Sidebar.Size = UDim2.new(0, 150, 1, 0)
+-- Langkah 3: Buat Label Judul
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Name = "TitleLabel"
+TitleLabel.Size = UDim2.new(1, 0, 0.1, 0) -- Lebar penuh Frame, 10% tinggi Frame
+TitleLabel.Position = UDim2.new(0, 0, 0, 0)
+TitleLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+TitleLabel.Text = "Basic Roblox Executor"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.TextScaled = true
+TitleLabel.Font = Enum.Font.SourceSansBold
+TitleLabel.BorderSizePixel = 0
+TitleLabel.Parent = MainFrame
 
-UIListLayout.Parent = Sidebar
-UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-UIListLayout.Padding = UDim.new(0, 6)
+-- Langkah 4: Buat TextBox (Tempat pengguna mengetik kode)
+local CodeTextBox = Instance.new("TextBox")
+CodeTextBox.Name = "CodeInput"
+CodeTextBox.Size = UDim2.new(0.9, 0, 0.65, 0) -- 90% lebar Frame, 65% tinggi Frame
+CodeTextBox.Position = UDim2.new(0.05, 0, 0.12, 0) -- Sedikit ke bawah dan ke tengah
+CodeTextBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+CodeTextBox.PlaceholderText = "Ketik kode Lua Anda di sini..."
+CodeTextBox.Text = ""
+CodeTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+CodeTextBox.TextSize = 14
+CodeTextBox.MultiLine = true -- Memungkinkan banyak baris
+CodeTextBox.TextXAlignment = Enum.TextXAlignment.Left
+CodeTextBox.TextYAlignment = Enum.TextYAlignment.Top
+CodeTextBox.Parent = MainFrame
 
--- Title
-Title.Parent = Sidebar
-Title.BackgroundTransparency = 1
-Title.Size = UDim2.new(1, 0, 0, 40)
-Title.Font = Enum.Font.GothamBold
-Title.Text = "Walvy Community\nPremium (Beta)"
-Title.TextColor3 = Color3.fromRGB(255, 50, 50)
-Title.TextSize = 14
-Title.TextWrapped = true
+-- Tambahkan UI Corner ke TextBox
+local TextBoxUICorner = Instance.new("UICorner")
+TextBoxUICorner.CornerRadius = UDim.new(0, 6)
+TextBoxUICorner.Parent = CodeTextBox
 
--- Generate Sidebar Buttons
-for _, name in ipairs(buttons) do
-	local btn = Instance.new("TextButton")
-	btn.Name = name
-	btn.Parent = Sidebar
-	btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-	btn.Size = UDim2.new(1, -10, 0, 28)
-	btn.Position = UDim2.new(0, 5, 0, 0)
-	btn.Text = name
-	btn.Font = Enum.Font.Gotham
-	btn.TextColor3 = Color3.fromRGB(220, 220, 220)
-	btn.TextSize = 13
-	btn.AutoButtonColor = false
+-- Langkah 5: Buat TextButton (Tombol untuk menjalankan kode)
+local ExecuteButton = Instance.new("TextButton")
+ExecuteButton.Name = "ExecuteButton"
+ExecuteButton.Size = UDim2.new(0.9, 0, 0.15, 0) -- 90% lebar Frame, 15% tinggi Frame
+ExecuteButton.Position = UDim2.new(0.05, 0, 0.8, 0) -- Di bagian bawah Frame
+ExecuteButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255) -- Warna biru cerah
+ExecuteButton.Text = "EXECUTE"
+ExecuteButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ExecuteButton.TextScaled = true
+ExecuteButton.Font = Enum.Font.SourceSansBold
+ExecuteButton.Parent = MainFrame
 
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 5)
-	corner.Parent = btn
+-- Tambahkan UI Corner ke Button
+local ButtonUICorner = Instance.new("UICorner")
+ButtonUICorner.CornerRadius = UDim.new(0, 6)
+ButtonUICorner.Parent = ExecuteButton
 
-	btn.MouseEnter:Connect(function()
-		btn.BackgroundColor3 = Color3.fromRGB(255, 30, 30)
-		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	end)
-	btn.MouseLeave:Connect(function()
-		btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-		btn.TextColor3 = Color3.fromRGB(220, 220, 220)
-	end)
-end
+-- Langkah 6: Tambahkan fungsionalitas dasar (simulasi eksekusi)
+ExecuteButton.MouseButton1Click:Connect(function()
+    local codeToExecute = CodeTextBox.Text
+    if string.len(codeToExecute) > 0 then
+        -- Pada executor nyata, di sini akan ada fungsi 'loadstring' atau semacamnya
+        -- *NAMUN*, fungsi 'loadstring' dinonaktifkan di Roblox, dan menjalankan kode
+        -- arbitrer dari pengguna di game *asli* Roblox sangat tidak disarankan
+        -- karena alasan keamanan dan exploit.
+        
+        -- Untuk tujuan contoh UI ini, kita hanya menampilkan pesan:
+        print("Mengeksekusi kode...")
+        print("---")
+        print(codeToExecute)
+        
+        -- Anda bisa mengganti warna tombol sementara untuk memberikan feedback
+        ExecuteButton.BackgroundColor3 = Color3.fromRGB(0, 200, 0) -- Hijau
+        wait(0.2)
+        ExecuteButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255) -- Kembali ke biru
+    else
+        print("TextBox kosong, tidak ada yang dieksekusi.")
+    end
+end)
 
--- Content Area
-Content.Name = "Content"
-Content.Parent = MainFrame
-Content.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-Content.BorderSizePixel = 0
-Content.Position = UDim2.new(0, 155, 0, 10)
-Content.Size = UDim2.new(1, -165, 1, -20)
+-- Langkah 7: Tambahkan fungsionalitas drag/seret (opsional, tetapi penting untuk executor UI)
+local isDragging = false
+local dragStartPos = nil
 
-local corner2 = Instance.new("UICorner")
-corner2.CornerRadius = UDim.new(0, 6)
-corner2.Parent = Content
+TitleLabel.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        isDragging = true
+        dragStartPos = input.Position - MainFrame.Position.Offset
+        TitleLabel.BackgroundTransparency = 0.5 -- Berikan visual feedback
+    end
+end)
 
--- Example label (isi konten nanti)
-local placeholder = Instance.new("TextLabel")
-placeholder.Parent = Content
-placeholder.BackgroundTransparency = 1
-placeholder.Size = UDim2.new(1, 0, 1, 0)
-placeholder.Font = Enum.Font.Gotham
-placeholder.Text = "👋 Welcome! Pilih menu di sebelah kiri"
-placeholder.TextColor3 = Color3.fromRGB(200, 200, 200)
-placeholder.TextSize = 15
-placeholder.TextWrapped = true
+TitleLabel.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        isDragging = false
+        TitleLabel.BackgroundTransparency = 0 -- Kembali normal
+    end
+end)
 
-print("✅ Walvy GUI Base loaded successfully!")
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        MainFrame.Position = UDim2.new(0, input.Position.X - dragStartPos.X, 0, input.Position.Y - dragStartPos.Y)
+    end
+end)
+
+print("UI Executor Dasar telah dimuat.")
