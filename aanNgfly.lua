@@ -1118,3 +1118,131 @@ ReturnBtn.MouseButton1Click:Connect(function()
         tween:Play()
     end
 end)
+
+---------------- PAGE 6 (Fishing Utility) ----------------
+local Page6 = createTab("Fishing Utility", "🎣")
+
+local Container = Instance.new("Frame", Page6)
+Container.Size = UDim2.new(0.95,0,0.9,0)
+Container.Position = UDim2.new(0.025,0,0.05,0)
+Container.BackgroundTransparency = 1
+
+local layout = Instance.new("UIListLayout", Container)
+layout.Padding = UDim.new(0,10)
+layout.FillDirection = Enum.FillDirection.Vertical
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+----------------------------------------------------------------
+-- ⚙️ AUTO FISH SETTINGS
+----------------------------------------------------------------
+local AutoFishFrame = Instance.new("Frame", Container)
+AutoFishFrame.Size = UDim2.new(1, -5, 0, 230)
+AutoFishFrame.BackgroundColor3 = Color3.fromRGB(40,40,60)
+AutoFishFrame.BorderSizePixel = 0
+Instance.new("UICorner", AutoFishFrame).CornerRadius = UDim.new(0,8)
+
+local Title = Instance.new("TextLabel", AutoFishFrame)
+Title.Size = UDim2.new(1,0,0,25)
+Title.Text = "🎣 Auto Fishing Utility"
+Title.BackgroundTransparency = 1
+Title.TextColor3 = Color3.fromRGB(255,255,255)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 18
+
+-- Delay Slider Label
+local DelayLabel = Instance.new("TextLabel", AutoFishFrame)
+DelayLabel.Size = UDim2.new(1,0,0,25)
+DelayLabel.Position = UDim2.new(0,0,0.18,0)
+DelayLabel.Text = "⏱️ Delay (detik): 0.8"
+DelayLabel.BackgroundTransparency = 1
+DelayLabel.TextColor3 = Color3.fromRGB(255,255,0)
+DelayLabel.Font = Enum.Font.GothamBold
+DelayLabel.TextSize = 16
+
+-- Slider Dummy (karena GUI manual)
+local DelayBtn = Instance.new("TextButton", AutoFishFrame)
+DelayBtn.Size = UDim2.new(0.9,0,0,30)
+DelayBtn.Position = UDim2.new(0.05,0,0.33,0)
+DelayBtn.Text = "Ubah Delay"
+DelayBtn.TextColor3 = Color3.fromRGB(255,255,255)
+DelayBtn.BackgroundColor3 = Color3.fromRGB(90,90,120)
+Instance.new("UICorner", DelayBtn).CornerRadius = UDim.new(0,6)
+
+local delayValue = 0.8
+DelayBtn.MouseButton1Click:Connect(function()
+	delayValue = delayValue + 0.2
+	if delayValue > 3 then delayValue = 0.2 end
+	DelayLabel.Text = "⏱️ Delay (detik): "..delayValue
+end)
+
+----------------------------------------------------------------
+-- 💰 AUTO SELL FISH
+----------------------------------------------------------------
+local SellLabel = Instance.new("TextLabel", AutoFishFrame)
+SellLabel.Size = UDim2.new(1,0,0,25)
+SellLabel.Position = UDim2.new(0,0,0.55,0)
+SellLabel.Text = "💰 Auto Sell Fish Catch Threshold (contoh: 3000)"
+SellLabel.TextColor3 = Color3.fromRGB(255,255,255)
+SellLabel.BackgroundTransparency = 1
+SellLabel.Font = Enum.Font.GothamBold
+SellLabel.TextSize = 14
+
+local SellInput = Instance.new("TextBox", AutoFishFrame)
+SellInput.Size = UDim2.new(0.9,0,0,30)
+SellInput.Position = UDim2.new(0.05,0,0.7,0)
+SellInput.PlaceholderText = "Masukkan angka threshold..."
+SellInput.TextColor3 = Color3.fromRGB(255,255,255)
+SellInput.BackgroundColor3 = Color3.fromRGB(70,70,90)
+Instance.new("UICorner", SellInput).CornerRadius = UDim.new(0,6)
+
+----------------------------------------------------------------
+-- ⚙️ TOGGLE AUTO FISH & PERFECT CAST
+----------------------------------------------------------------
+local BtnFrame = Instance.new("Frame", Container)
+BtnFrame.Size = UDim2.new(1, -5, 0, 100)
+BtnFrame.BackgroundColor3 = Color3.fromRGB(40,40,60)
+BtnFrame.BorderSizePixel = 0
+Instance.new("UICorner", BtnFrame).CornerRadius = UDim.new(0,8)
+
+local AutoFishBtn = Instance.new("TextButton", BtnFrame)
+AutoFishBtn.Size = UDim2.new(0.9,0,0,35)
+AutoFishBtn.Position = UDim2.new(0.05,0,0.1,0)
+AutoFishBtn.Text = "🎯 Enable Auto Fishing: OFF"
+AutoFishBtn.TextColor3 = Color3.fromRGB(255,255,255)
+AutoFishBtn.BackgroundColor3 = Color3.fromRGB(70,70,90)
+Instance.new("UICorner", AutoFishBtn).CornerRadius = UDim.new(0,6)
+
+local PerfectCastBtn = Instance.new("TextButton", BtnFrame)
+PerfectCastBtn.Size = UDim2.new(0.9,0,0,35)
+PerfectCastBtn.Position = UDim2.new(0.05,0,0.6,0)
+PerfectCastBtn.Text = "⭐ Perfect Cast: OFF"
+PerfectCastBtn.TextColor3 = Color3.fromRGB(255,255,255)
+PerfectCastBtn.BackgroundColor3 = Color3.fromRGB(70,70,90)
+Instance.new("UICorner", PerfectCastBtn).CornerRadius = UDim.new(0,6)
+
+-- State
+local autoFish = false
+local perfectCast = false
+
+AutoFishBtn.MouseButton1Click:Connect(function()
+	autoFish = not autoFish
+	AutoFishBtn.Text = autoFish and "🎯 Enable Auto Fishing: ON" or "🎯 Enable Auto Fishing: OFF"
+	AutoFishBtn.BackgroundColor3 = autoFish and Color3.fromRGB(90,120,90) or Color3.fromRGB(70,70,90)
+end)
+
+PerfectCastBtn.MouseButton1Click:Connect(function()
+	perfectCast = not perfectCast
+	PerfectCastBtn.Text = perfectCast and "⭐ Perfect Cast: ON" or "⭐ Perfect Cast: OFF"
+	PerfectCastBtn.BackgroundColor3 = perfectCast and Color3.fromRGB(120,90,90) or Color3.fromRGB(70,70,90)
+end)
+
+----------------------------------------------------------------
+-- ⚙️ AUTO FISHING LOGIC (Placeholder)
+----------------------------------------------------------------
+-- Nanti kamu bisa isi logic mancingnya di bawah sini:
+-- while autoFish do
+--     pcall(function()
+--         -- Logic lempar pancing, tunggu delayValue detik, tarik ikan
+--         wait(delayValue)
+--     end)
+-- end
