@@ -1,71 +1,125 @@
 --[[
     ================================================================
-    Base UI Script (Menggunakan DrRay-UI-Library)
+    Base UI Script (Menggunakan Rayfield UI Library)
     ================================================================
     
-    Ini adalah template dasar untuk membuat GUI (Graphical User Interface)
-    di dalam executor. Anda bisa menambahkan lebih banyak tab, tombol,
-    slider, dan fungsi lainnya sesuai kebutuhan.
+    Ini adalah template dasar untuk Rayfield.
+    Script ini sudah menyertakan:
+    1.  Window (Jendela utama)
+    2.  Tab (Untuk memilah fitur)
+    3.  Button (Tombol)
+    4.  Toggle (Tombol On/Off)
+    5.  Slider (Penggeser nilai)
+    6.  Input (Kotak teks)
+    
+    Dokumentasi resmi: https://github.com/shlexware/Rayfield
 ]]
 
--- 1. Memuat Library UI
--- Baris ini mengunduh dan menjalankan kode library dari GitHub.
-local DrRayLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/AZYsGithub/DrRay-UI-Library/main/DrRay.lua"))()
+-- 1. Memuat Library Rayfield
+-- Ini adalah baris wajib untuk mengunduh dan menjalankan library-nya
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Rayfield/main/source'))()
 
 -- 2. Membuat Jendela (Window) Utama
--- "Nama Script Anda" = Judul jendela
--- "Default" = Tema (bisa juga "Dark", "Light", "Minimal", dll. tergantung library)
-local window = DrRayLibrary:Load("Nama Script Anda", "Default")
+local Window = Rayfield:CreateWindow({
+    Name = "Nama Script Anda v1.0",
+    LoadingTitle = "Memuat Script...",
+    LoadingSubtitle = "oleh [Nama Anda]",
+    ConfigurationSaving = {
+        Enabled = true,
+        FileName = "ConfigScriptSaya" -- Nama file untuk menyimpan setelan (toggle, slider)
+    },
+    KeySystem = false -- Ganti ke 'true' jika Anda ingin menggunakan sistem kunci
+})
 
 -- 3. Membuat Tab
--- Anda bisa membuat beberapa tab untuk mengorganisir fitur.
-local mainTab = window:newTab("Main", "rbxassetid://13511613008") -- Ganti ID ikon jika mau
+-- Anda bisa membuat beberapa tab jika fiturnya banyak
+local MainTab = Window:CreateTab("Fitur Utama", "rbxassetid://4483345998") -- Ganti ikon jika mau
+local MiscTab = Window:CreateTab("Lain-lain", "rbxassetid://4483345998") -- Contoh tab kedua
 
--- 4. Menambahkan Komponen (Elemen UI)
+-- 4. Menambahkan Komponen (Elemen UI) ke 'MainTab'
 
 --- Contoh Tombol (Button)
-mainTab:newButton("Klik Saya!", "Ini adalah deskripsi tombol.", function()
-    -- Kode yang akan dijalankan saat tombol diklik:
-    print("Tombol telah diklik!")
-    
-    -- Contoh: Memberikan item ke pemain
-    -- game.Players.LocalPlayer.Character.Humanoid:EquipTool(game.ReplicatedStorage.Tools.Sword)
-end)
+MainTab:CreateButton({
+    Name = "Cetak Pesan",
+    Description = "Mencetak 'Tombol Ditekan!' di konsol (F9).",
+    Callback = function()
+        -- Kode yang dijalankan saat tombol diklik:
+        print("Tombol Ditekan!")
+        Rayfield:Notify({
+            Title = "Notifikasi",
+            Content = "Anda baru saja menekan tombol!",
+            Duration = 5
+        })
+    end
+})
 
 --- Contoh Toggle (Tombol On/Off)
-mainTab:newToggle("Auto Farm", "Aktifkan untuk farming otomatis.", false, function(state)
-    -- 'state' akan bernilai 'true' jika ON dan 'false' jika OFF.
-    if state then
-        print("Auto Farm DIAKTIFKAN")
-        -- Masukkan fungsi untuk memulai auto farm di sini
-    else
-        print("Auto Farm DIMATIKAN")
-        -- Masukkan fungsi untuk menghentikan auto farm di sini
+MainTab:CreateToggle({
+    Name = "Auto Farm",
+    Description = "Aktifkan untuk farming otomatis (contoh).",
+    Default = false, -- Nilai awal (false = mati)
+    Callback = function(state)
+        -- 'state' adalah true (jika ON) atau false (jika OFF)
+        if state then
+            print("Auto Farm DIAKTIFKAN")
+            -- Masukkan fungsi untuk MEMULAI auto farm di sini
+        else
+            print("Auto Farm DIMATIKAN")
+            -- Masukkan fungsi untuk MENGHENTIKAN auto farm di sini
+        end
     end
-end)
+})
 
 --- Contoh Slider
-mainTab:newSlider("WalkSpeed", "Mengatur kecepatan berjalan.", 250, 16, function(value)
-    -- 'value' adalah angka yang dipilih slider (antara 16 dan 250).
-    print("WalkSpeed diatur ke: " .. value)
-    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
-end)
+MainTab:CreateSlider({
+    Name = "WalkSpeed",
+    Description = "Mengatur kecepatan berjalan karakter.",
+    Min = 16,      -- Nilai minimum
+    Max = 200,     -- Nilai maksimum
+    Default = 16,  -- Nilai saat UI pertama kali dimuat
+    Callback = function(value)
+        -- 'value' adalah angka yang dipilih dari slider
+        print("WalkSpeed diatur ke: " .. value)
+        if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
+            game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
+        end
+    end
+})
 
 --- Contoh Text Input (Kotak Teks)
-mainTab:newInput("Nama Player", "Masukkan nama player yang dituju.", function(text)
-    -- 'text' adalah apa yang diketik oleh pengguna.
-    print("Teks yang dimasukkan: " .. text)
-    
-    -- Contoh: Teleport ke player
-    -- local targetPlayer = game.Players:FindFirstChild(text)
-    -- if targetPlayer and targetPlayer.Character then
-    --     game.Players.LocalPlayer.Character:MoveTo(targetPlayer.Character.HumanoidRootPart.Position)
-    -- end
-end)
+MainTab:CreateInput({
+    Name = "Teleport ke Player",
+    Description = "Masukkan nama lengkap player yang ingin Anda tuju.",
+    PlaceholderText = "Ketik nama di sini...",
+    Callback = function(text)
+        -- 'text' adalah apa yang diketik oleh pengguna
+        print("Mencoba teleport ke: " .. text)
+        
+        -- Contoh fungsi teleport sederhana:
+        local targetPlayer = game.Players:FindFirstChild(text)
+        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame
+            Rayfield:Notify({ Title = "Teleport", Content = "Berhasil teleport ke " .. text, Duration = 5 })
+        else
+            Rayfield:Notify({ Title = "Error", Content = "Player '" .. text .. "' tidak ditemukan!", Duration = 5 })
+        end
+    end
+})
 
--- 5. (Opsional) Membuka/Menutup UI
--- Anda bisa mengatur tombol untuk membuka/menutup UI.
--- Contoh: Menggunakan tombol RightShift (Tombol Shift Kanan)
-window:ToggleKey(Enum.KeyCode.RightShift)
+-- 5. Menambahkan Komponen ke 'MiscTab' (Contoh Tab Kedua)
 
-print("UI Berhasil Dimuat! Tekan 'RightShift' untuk membuka/menutup.")
+MiscTab:CreateButton({
+    Name = "Reset Karakter",
+    Description = "Membuat karakter Anda reset.",
+    Callback = function()
+        game.Players.LocalPlayer.Character:BreakJoints()
+    end
+})
+
+-- 6. (Opsional) Mengatur Tombol Buka/Tutup UI
+-- 'RightControl' (Ctrl Kanan) adalah tombol yang umum digunakan.
+Window:ToggleKey(Enum.KeyCode.RightControl)
+
+-- 7. Konfirmasi
+print("Rayfield UI Berhasil Dimuat!")
+print("Tekan 'RightControl' (Ctrl Kanan) untuk membuka/menutup UI.")
