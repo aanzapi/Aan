@@ -274,6 +274,7 @@ flyTab:CreateToggle("Fly Mode", false, function(state)
         flyTab:CreateNotification("Fly", "Mode Terbang Dimatikan ❌", 2)
     end
 end)
+local flyTab = Tabs["Setting"] or DrRayLibrary:CreateTab("Setting")
 
 -- Slider kecepatan fly
 flyTab:CreateSlider("Fly Speed", 1, 1000, flySpeed, function(value)
