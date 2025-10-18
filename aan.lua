@@ -116,7 +116,6 @@ local function createTab(name, text)
 	TabContents[name] = Frame
 end
 
-createTab("Settings", "⚙️ Settings Tab\nTempat untuk pengaturan utama UI kamu.")
 createTab("Teleport", "📍 Teleport Tab\nNantinya akan berisi fitur teleport manual.")
 createTab("Auto Teleport", "🚀 Auto Teleport Tab\nFitur otomatisasi teleport akan dibuat di sini.")
 createTab("Menu Lain", "📚 Menu Lain\nKumpulan fitur tambahan akan muncul di sini.")
@@ -145,7 +144,7 @@ switchTab("Settings") -- Tab default
 -- === ✈️ Fly + Teleport (Tab: Setting) ===
 -- ==========================================
 
-local PageSetting = Tabs["Setting"]
+local PageSetting = createTab("Setting", "⚙️ Pengaturan utama seperti Fly & Speed")
 
 -- Tombol Fly
 local FlyBtn = Instance.new("TextButton", PageSetting)
