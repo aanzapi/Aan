@@ -1,11 +1,12 @@
 --[[
 ===========================================================
-    Custom Base UI (With Tabs v2)
+    Custom Base UI (4 Tabs Version)
     Dibuat oleh aanstok & ChatGPT (Realistic Style)
     Fitur:
     - Tombol Close & Hide
-    - 5 Tab: Home, Settings, About, Scripts, Credits
+    - Tab: Settings, Teleport, Auto Teleport, Menu Lain
     - Transisi halus antar tab
+    - Desain profesional & rapi
 ===========================================================
 ]]
 
@@ -14,9 +15,9 @@ local TweenService = game:GetService("TweenService")
 
 -- Hapus UI lama jika ada
 for _, ui in ipairs({"BaseUI", "HideButton"}) do
-    if CoreGui:FindFirstChild(ui) then
-        CoreGui[ui]:Destroy()
-    end
+	if CoreGui:FindFirstChild(ui) then
+		CoreGui[ui]:Destroy()
+	end
 end
 
 -- === ScreenGui ===
@@ -41,7 +42,7 @@ UIStroke.Thickness = 1.5
 local Title = Instance.new("TextLabel", MainFrame)
 Title.Size = UDim2.new(1, -40, 0, 30)
 Title.Position = UDim2.new(0, 10, 0, 5)
-Title.Text = "Base UI - Tabs v2"
+Title.Text = "Base UI - 4 Tabs"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 18
 Title.Font = Enum.Font.GothamBold
@@ -72,13 +73,13 @@ TabHolder.Position = UDim2.new(0, 0, 0, 40)
 TabHolder.BackgroundTransparency = 1
 
 local Tabs = {}
-local TabNames = {"Home", "Settings", "About", "Scripts", "Credits"}
+local TabNames = {"Settings", "Teleport", "Auto Teleport", "Menu Lain"}
 local CurrentTab = nil
 
 for i, name in ipairs(TabNames) do
 	local TabButton = Instance.new("TextButton", TabHolder)
-	TabButton.Size = UDim2.new(0, 80, 1, 0)
-	TabButton.Position = UDim2.new(0, (i - 1) * 85 + 10, 0, 0)
+	TabButton.Size = UDim2.new(0, 95, 1, 0)
+	TabButton.Position = UDim2.new(0, (i - 1) * 100 + 10, 0, 0)
 	TabButton.Text = name
 	TabButton.Font = Enum.Font.GothamSemibold
 	TabButton.TextSize = 14
@@ -115,11 +116,10 @@ local function createTab(name, text)
 	TabContents[name] = Frame
 end
 
-createTab("Home", "🏠 Welcome to the Home Tab!\nPlace your UI buttons or content here.")
-createTab("Settings", "⚙️ Settings Area\nConfigure your UI or exploit preferences.")
-createTab("About", "ℹ️ Base UI v2\nCreated by aanstok & ChatGPT\nMinimalist + Realistic UI")
-createTab("Scripts", "💻 Script List Area\nAdd script buttons or utilities here.")
-createTab("Credits", "❤️ Credits:\n- aanstok: Main Developer\n- ChatGPT: Design & Code Help\nThanks for using this UI!")
+createTab("Settings", "⚙️ Settings Tab\nTempat untuk pengaturan utama UI kamu.")
+createTab("Teleport", "📍 Teleport Tab\nNantinya akan berisi fitur teleport manual.")
+createTab("Auto Teleport", "🚀 Auto Teleport Tab\nFitur otomatisasi teleport akan dibuat di sini.")
+createTab("Menu Lain", "📚 Menu Lain\nKumpulan fitur tambahan akan muncul di sini.")
 
 -- === Fungsi Ganti Tab ===
 local function switchTab(name)
@@ -140,7 +140,7 @@ for name, btn in pairs(Tabs) do
 	end)
 end
 
-switchTab("Home") -- Tab default
+switchTab("Settings") -- Tab default
 
 -- === Tombol Hide ===
 local HideGui = Instance.new("ScreenGui", CoreGui)
@@ -182,4 +182,4 @@ HideButton.MouseButton1Click:Connect(function()
 	HideButton.Visible = false
 end)
 
-print("✅ Base UI Tabs v2 Loaded Successfully.")
+print("✅ Base UI (4 Tabs) Loaded Successfully.")
