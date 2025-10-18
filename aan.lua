@@ -178,23 +178,19 @@ HideButton.MouseButton1Click:Connect(function()
 end)
 
 -----------------------------------------------------------
--- ✈️ Fly System (UI Mirip Auto Instant Fishing)
------------------------------------------------------------
-
-
-	-----------------------------------------------------------
--- ✈️ Fly System (Gaya Auto Fishing / Auto Farm)
+-- ✈️ Fly + Walk System (Gaya Walvy - Auto Farm UI)
 -----------------------------------------------------------
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 local LP = Players.LocalPlayer
 
 local PageSetting = TabContents["Settings"]
 
 -----------------------------------------------------------
--- === STYLE HELPER FUNCTION ===
+-- 🔧 Helper: Buat Kotak Setting (Judul + Deskripsi + Toggle)
 -----------------------------------------------------------
 local function createSettingBox(parent, titleText, descText)
 	local box = Instance.new("Frame")
@@ -253,112 +249,121 @@ local function createSettingBox(parent, titleText, descText)
 
 	toggle.MouseButton1Click:Connect(toggleSwitch)
 
-	return box, toggle, function() return state end, function(v)
-		state = v
-		if state then
-			toggle.BackgroundColor3 = Color3.fromRGB(100, 180, 100)
-			circle.Position = UDim2.new(0.55, 0, 0.05, 0)
-		else
-			toggle.BackgroundColor3 = Color3.fromRGB(70, 70, 90)
-			circle.Position = UDim2.new(0.05, 0, 0.05, 0)
-		end
-	end
+	return box, toggle, function() return state end
 end
 
 -----------------------------------------------------------
--- === FRAME UTAMA (HALAMAN FLY)
+-- 🔧 Helper: Buat Slider Delay (Gaya Auto Fishing)
+-----------------------------------------------------------
+local function createSlider(parent, title, desc)
+	local box = Instance.new("Frame", parent)
+	box.Size = UDim2.new(1, -10, 0, 55)
+	box.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+	box.BackgroundTransparency = 0.2
+	Instance.new("UICorner", box).CornerRadius = UDim.new(0, 8)
+
+	local label = Instance.new("TextLabel", box)
+	label.Text = title
+	label.Size = UDim2.new(0.7, 0, 0, 22)
+	label.Position = UDim2.new(0.05, 0, 0.1, 0)
+	label.Font = Enum.Font.GothamBold
+	label.TextSize = 15
+	label.TextColor3 = Color3.fromRGB(255, 255, 255)
+	label.BackgroundTransparency = 1
+	label.TextXAlignment = Enum.TextXAlignment.Left
+
+	local descLabel = Instance.new("TextLabel", box)
+	descLabel.Text = desc
+	descLabel.Size = UDim2.new(0.7, 0, 0, 20)
+	descLabel.Position = UDim2.new(0.05, 0, 0.55, 0)
+	descLabel.Font = Enum.Font.Gotham
+	descLabel.TextSize = 13
+	descLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+	descLabel.BackgroundTransparency = 1
+	descLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+	local slider = Instance.new("Frame", box)
+	slider.Size = UDim2.new(0.9, 0, 0, 8)
+	slider.Position = UDim2.new(0.05, 0, 0.8, 0)
+	slider.BackgroundColor3 = Color3.fromRGB(65, 65, 90)
+	Instance.new("UICorner", slider).CornerRadius = UDim.new(1, 0)
+
+	local fill = Instance.new("Frame", slider)
+	fill.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+	fill.Size = UDim2.new(0.5, 0, 1, 0)
+	Instance.new("UICorner", fill).CornerRadius = UDim.new(1, 0)
+
+	local value = 500
+	local dragging = false
+
+	local function updateSlider(x)
+		local rel = math.clamp((x - slider.AbsolutePosition.X) / slider.AbsoluteSize.X, 0, 1)
+		value = math.floor(1 + (1000 - 1) * rel)
+		fill.Size = UDim2.new(rel, 0, 1, 0)
+	end
+
+	slider.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = true
+			updateSlider(input.Position.X)
+		end
+	end)
+
+	UIS.InputChanged:Connect(function(input)
+		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+			updateSlider(input.Position.X)
+		end
+	end)
+
+	UIS.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = false
+		end
+	end)
+
+	return box, function() return value end
+end
+
+-----------------------------------------------------------
+-- 🧩 Frame Container
 -----------------------------------------------------------
 local FlyContainer = Instance.new("Frame", PageSetting)
-FlyContainer.Size = UDim2.new(1, -10, 0, 150)
+FlyContainer.Size = UDim2.new(1, -10, 0, 250)
 FlyContainer.Position = UDim2.new(0, 5, 0.05, 0)
 FlyContainer.BackgroundTransparency = 1
 
 -----------------------------------------------------------
--- === FITUR 1: AUTO FLY
+-- ✈️ Auto Fly
 -----------------------------------------------------------
-local FlyBox, FlyToggle, FlyState = createSettingBox(FlyContainer, "Auto Fly", "Fly freely in the air with adjustable speed.")
-
+local FlyBox, FlyToggle, FlyState = createSettingBox(FlyContainer, "Auto Fly", "Fly freely in the air.")
 FlyBox.Position = UDim2.new(0, 0, 0, 0)
 
------------------------------------------------------------
--- === FITUR 2: DELAY SPEED
------------------------------------------------------------
-local DelayBox = Instance.new("Frame", FlyContainer)
-DelayBox.Size = UDim2.new(1, -10, 0, 55)
-DelayBox.Position = UDim2.new(0, 0, 0, 60)
-DelayBox.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-DelayBox.BackgroundTransparency = 0.2
-Instance.new("UICorner", DelayBox).CornerRadius = UDim.new(0, 8)
-
-local DelayLabel = Instance.new("TextLabel", DelayBox)
-DelayLabel.Text = "Fly Delay Speed"
-DelayLabel.Size = UDim2.new(0.7, 0, 0, 22)
-DelayLabel.Position = UDim2.new(0.05, 0, 0.1, 0)
-DelayLabel.Font = Enum.Font.GothamBold
-DelayLabel.TextSize = 15
-DelayLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-DelayLabel.BackgroundTransparency = 1
-DelayLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-local DelayDesc = Instance.new("TextLabel", DelayBox)
-DelayDesc.Text = "Adjust delay between fly movements."
-DelayDesc.Size = UDim2.new(0.7, 0, 0, 20)
-DelayDesc.Position = UDim2.new(0.05, 0, 0.55, 0)
-DelayDesc.Font = Enum.Font.Gotham
-DelayDesc.TextSize = 13
-DelayDesc.TextColor3 = Color3.fromRGB(180, 180, 180)
-DelayDesc.BackgroundTransparency = 1
-DelayDesc.TextXAlignment = Enum.TextXAlignment.Left
-
-local DelaySlider = Instance.new("TextButton", DelayBox)
-DelaySlider.Size = UDim2.new(0.9, 0, 0, 8)
-DelaySlider.Position = UDim2.new(0.05, 0, 0.78, 0)
-DelaySlider.BackgroundColor3 = Color3.fromRGB(65, 65, 90)
-DelaySlider.Text = ""
-Instance.new("UICorner", DelaySlider).CornerRadius = UDim.new(1, 0)
-
-local Fill = Instance.new("Frame", DelaySlider)
-Fill.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
-Fill.Size = UDim2.new(0.5, 0, 1, 0)
-Instance.new("UICorner", Fill).CornerRadius = UDim.new(1, 0)
-
-local delaySpeed = 500
-local dragging = false
-
-DelaySlider.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = true
-	end
-end)
-
-DelaySlider.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = false
-	end
-end)
-
-game:GetService("UserInputService").InputChanged:Connect(function(input)
-	if dragging then
-		local rel = math.clamp((input.Position.X - DelaySlider.AbsolutePosition.X) / DelaySlider.AbsoluteSize.X, 0, 1)
-		delaySpeed = math.floor(1 + (1000 - 1) * rel)
-		Fill.Size = UDim2.new(rel, 0, 1, 0)
-	end
-end)
+local FlyDelayBox, getFlyDelay = createSlider(FlyContainer, "Fly Delay Speed", "Adjust delay for fly control.")
+FlyDelayBox.Position = UDim2.new(0, 0, 0, 60)
 
 -----------------------------------------------------------
--- === LOGIC FLY
+-- 🚶 Walk Speed Control
+-----------------------------------------------------------
+local WalkBox, WalkToggle, WalkState = createSettingBox(FlyContainer, "Walk Speed", "Custom walking speed.")
+WalkBox.Position = UDim2.new(0, 0, 0, 120)
+
+local WalkDelayBox, getWalkDelay = createSlider(FlyContainer, "Walk Delay Speed", "Smoothness of walking change.")
+WalkDelayBox.Position = UDim2.new(0, 0, 0, 180)
+
+-----------------------------------------------------------
+-- ✈️ Fly Logic
 -----------------------------------------------------------
 local flying = false
-local speed = 60
 local bv
 local flyY = 0
+local speed = 60
 local upHeld, downHeld = false, false
 
 local FlyGui = Instance.new("ScreenGui", CoreGui)
 FlyGui.Name = "FlyControl"
 FlyGui.Enabled = false
 
-local function createButton(text, posY)
+local function createBtn(text, posY)
 	local btn = Instance.new("TextButton", FlyGui)
 	btn.Size = UDim2.new(0, 60, 0, 60)
 	btn.Position = UDim2.new(0.93, 0, posY, 0)
@@ -371,8 +376,8 @@ local function createButton(text, posY)
 	return btn
 end
 
-local UpBtn = createButton("⬆️", 0.8)
-local DownBtn = createButton("⬇️", 0.87)
+local UpBtn = createBtn("⬆️", 0.8)
+local DownBtn = createBtn("⬇️", 0.87)
 
 UpBtn.MouseButton1Down:Connect(function() if flying then upHeld = true end end)
 UpBtn.MouseButton1Up:Connect(function() upHeld = false end)
@@ -382,32 +387,43 @@ DownBtn.MouseButton1Up:Connect(function() downHeld = false end)
 local function startFly()
 	local HRP = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
 	if not HRP then return end
-
 	if not bv then
 		bv = Instance.new("BodyVelocity")
 		bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-		bv.Velocity = Vector3.zero
 		bv.Parent = HRP
 	end
 
-	RunService.RenderStepped:Connect(function()
+	RunService.Heartbeat:Connect(function(dt)
 		if flying and bv and HRP then
-			local moveDir = LP.Character:FindFirstChildOfClass("Humanoid").MoveDirection
+			local move = LP.Character:FindFirstChildOfClass("Humanoid").MoveDirection
+			local delayMs = getFlyDelay() / 1000
 			if upHeld then flyY = speed elseif downHeld then flyY = -speed else flyY = 0 end
-			bv.Velocity = Vector3.new(moveDir.X * speed, flyY, moveDir.Z * speed)
+			bv.Velocity = Vector3.new(move.X * speed, flyY, move.Z * speed)
+			task.wait(delayMs)
 		end
 	end)
 end
 
 FlyToggle.MouseButton1Click:Connect(function()
 	flying = not flying
-	FlyState(flying)
 	FlyGui.Enabled = flying
-	if flying then
-		startFly()
-	else
-		if bv then bv:Destroy() bv = nil end
+	if flying then startFly() else if bv then bv:Destroy() bv = nil end end
+end)
+
+-----------------------------------------------------------
+-- 🚶 Walk Speed Logic
+-----------------------------------------------------------
+local humanoid = LP.Character:WaitForChild("Humanoid")
+local targetSpeed = 16
+local currentSpeed = humanoid.WalkSpeed
+
+RunService.Heartbeat:Connect(function()
+	if WalkState() then
+		local delayMs = getWalkDelay() / 1000
+		currentSpeed = currentSpeed + (targetSpeed - currentSpeed) * 0.2
+		humanoid.WalkSpeed = currentSpeed
+		task.wait(delayMs)
 	end
-end)         
+end)		        
 
 print("✅ Base UI + Fly System Loaded Successfully.")
