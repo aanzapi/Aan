@@ -400,6 +400,11 @@ RunService.RenderStepped:Connect(function()
 	-- Walk Mode
 	if GetWalk() then
 		hum.WalkSpeed = WalkSpeedGetter()
+	else
+		-- 🧠 FIX: Reset kecepatan normal kalau walk off
+		if hum.WalkSpeed ~= 16 then
+			hum.WalkSpeed = 16
+		end
 	end
 end)
 
