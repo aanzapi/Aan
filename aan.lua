@@ -1,50 +1,66 @@
 --[[
     ================================================================
-    Base UI Script (DrRay UI + Fix Android + Teleport)
+    Base UI Script (Menggunakan Fluxus/V3rmillion UI Library)
     ================================================================
+    
+    Library ini sangat bagus, sering diperbarui, dan kompatibel
+    dengan banyak executor, termasuk di Android (Delta).
 ]]
 
--- 1. Memuat Library (versi mobile friendly)
-local DrRayLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/BatusaBoy/DrRay-UI-Library/main/DrRay.lua"))()
+-- 1. Memuat Library UI
+-- Ini adalah versi terbaru dari script loader (mungkin perlu disesuaikan jika library diperbarui)
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/wally-rblx/v3rmillion-ui/main/source.lua"))()
 
--- 2. Membuat Window
-local window = DrRayLibrary:Load("Script Teleport GUI", "Default")
-task.wait(1) -- Delay agar UI render dengan sempurna
+-- 2. Membuat Jendela (Window) Utama
+local Window = Library:CreateWindow("Nama Script Anda ✨")
 
 -- 3. Membuat Tab
-local mainTab = window:newTab("Main", "rbxassetid://13511613008")
+local CombatTab = Window:AddTab("Combat ⚔️")
+local PlayerTab = Window:AddTab("Player 🏃")
 
--- 4. Tambahkan Elemen UI
+-- 4. Menambahkan Komponen ke 'CombatTab'
 
-mainTab:newButton("Klik Saya!", "Tombol contoh.", function()
-    print("Tombol diklik!")
+--- Contoh Tombol (Button)
+CombatTab:AddButton("Execute Aimbot", function()
+    print("Aimbot script executed!")
+    -- Masukkan kode untuk menjalankan fungsi Aimbot/Aimlock di sini
 end)
 
-mainTab:newToggle("Auto Farm", "Aktifkan auto farm.", false, function(state)
+--- Contoh Toggle (Tombol On/Off)
+CombatTab:AddToggle("Kill Aura", false, function(state)
+    -- 'state' adalah true (ON) atau false (OFF)
     if state then
-        print("Auto Farm ON")
+        print("Kill Aura: ON")
+        -- Mulai fungsi Kill Aura
     else
-        print("Auto Farm OFF")
+        print("Kill Aura: OFF")
+        -- Hentikan fungsi Kill Aura
     end
 end)
 
-mainTab:newSlider("WalkSpeed", "Atur kecepatan jalan.", 250, 16, function(value)
-    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
-    print("WalkSpeed diatur ke: " .. value)
+-- 5. Menambahkan Komponen ke 'PlayerTab'
+
+--- Contoh Slider
+PlayerTab:AddSlider("Jump Power", 50, 50, 100, function(value)
+    -- 'value' adalah nilai angka dari slider
+    print("Jump Power diatur ke: " .. value)
+    game.Players.LocalPlayer.Character.Humanoid.JumpPower = value
 end)
 
-mainTab:newInput("Teleport ke Player", "Masukkan nama player.", function(text)
-    local player = game.Players.LocalPlayer
-    local target = game.Players:FindFirstChild(text)
-    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-        player.Character:MoveTo(target.Character.HumanoidRootPart.Position + Vector3.new(0,3,0))
-        print("✅ Teleport ke " .. target.Name)
-    else
-        warn("⚠️ Player tidak ditemukan!")
+--- Contoh Dropdown
+PlayerTab:AddDropdown("Teleport Lokasi", {"Lobby", "Arena A", "Shop"}, function(location)
+    -- 'location' adalah string yang dipilih dari menu dropdown
+    print("Teleporting ke: " .. location)
+    if location == "Lobby" then
+        -- Masukkan koordinat atau fungsi teleport ke Lobby
+        -- game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(0, 100, 0)
+    elseif location == "Arena A" then
+        -- Masukkan koordinat atau fungsi teleport ke Arena A
     end
 end)
 
--- 5. Toggle Key
-window:ToggleKey(Enum.KeyCode.RightShift)
+-- 6. Mengatur Hotkey (Opsional)
+-- Tombol yang umum digunakan: Insert, RightControl, RightShift
+Window:SetKey(Enum.KeyCode.Insert) -- Tekan 'Insert' untuk membuka/menutup UI
 
-print("✅ GUI Siap! Tekan 'RightShift' untuk buka/tutup.")
+print("Fluxus/V3rmillion UI Berhasil Dimuat! Tekan 'Insert' untuk Toggle.")
