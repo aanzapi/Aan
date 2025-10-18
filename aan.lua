@@ -178,54 +178,72 @@ HideButton.MouseButton1Click:Connect(function()
 end)
 
 -----------------------------------------------------------
--- ✈️ Fly + Walk System (Gaya Walvy - Auto Farm UI)
+-- ⚙️ Settings Tab - Fly & Walk System (Versi Final)
 -----------------------------------------------------------
 
 local Players = game:GetService("Players")
+local LP = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
-local CoreGui = game:GetService("CoreGui")
-local LP = Players.LocalPlayer
 
 local PageSetting = TabContents["Settings"]
 
 -----------------------------------------------------------
--- 🔧 Helper: Buat Kotak Setting (Judul + Deskripsi + Toggle)
+-- SCROLLABLE CONTAINER
 -----------------------------------------------------------
-local function createSettingBox(parent, titleText, descText)
+local Scroll = Instance.new("ScrollingFrame", PageSetting)
+Scroll.Size = UDim2.new(1, 0, 1, 0)
+Scroll.CanvasSize = UDim2.new(0, 0, 2, 0)
+Scroll.ScrollBarThickness = 6
+Scroll.BackgroundTransparency = 1
+
+local List = Instance.new("UIListLayout", Scroll)
+List.Padding = UDim.new(0, 6)
+List.SortOrder = Enum.SortOrder.LayoutOrder
+
+-----------------------------------------------------------
+-- UTILITY: CREATE SMALL SETTING BOX
+-----------------------------------------------------------
+local function CreateBox(title, desc)
 	local box = Instance.new("Frame")
-	box.Parent = parent
 	box.Size = UDim2.new(1, -10, 0, 55)
 	box.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-	box.BackgroundTransparency = 0.2
-	box.BorderSizePixel = 0
+	box.BackgroundTransparency = 0.15
 	Instance.new("UICorner", box).CornerRadius = UDim.new(0, 8)
 
-	local title = Instance.new("TextLabel", box)
-	title.Text = titleText
-	title.Size = UDim2.new(0.7, 0, 0, 22)
-	title.Position = UDim2.new(0.05, 0, 0.1, 0)
-	title.Font = Enum.Font.GothamBold
-	title.TextSize = 15
-	title.TextColor3 = Color3.fromRGB(255, 255, 255)
-	title.BackgroundTransparency = 1
-	title.TextXAlignment = Enum.TextXAlignment.Left
+	local titleLabel = Instance.new("TextLabel", box)
+	titleLabel.Text = title
+	titleLabel.Font = Enum.Font.GothamBold
+	titleLabel.TextSize = 15
+	titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	titleLabel.BackgroundTransparency = 1
+	titleLabel.Size = UDim2.new(0.7, 0, 0, 22)
+	titleLabel.Position = UDim2.new(0.05, 0, 0.1, 0)
+	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-	local desc = Instance.new("TextLabel", box)
-	desc.Text = descText
-	desc.Size = UDim2.new(0.7, 0, 0, 20)
-	desc.Position = UDim2.new(0.05, 0, 0.55, 0)
-	desc.Font = Enum.Font.Gotham
-	desc.TextSize = 13
-	desc.TextColor3 = Color3.fromRGB(180, 180, 180)
-	desc.BackgroundTransparency = 1
-	desc.TextXAlignment = Enum.TextXAlignment.Left
+	local descLabel = Instance.new("TextLabel", box)
+	descLabel.Text = desc
+	descLabel.Font = Enum.Font.Gotham
+	descLabel.TextSize = 13
+	descLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+	descLabel.BackgroundTransparency = 1
+	descLabel.Size = UDim2.new(0.7, 0, 0, 20)
+	descLabel.Position = UDim2.new(0.05, 0, 0.55, 0)
+	descLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-	local toggle = Instance.new("TextButton", box)
+	box.Parent = Scroll
+	return box
+end
+
+-----------------------------------------------------------
+-- TOGGLE BUTTON (Switch ON/OFF)
+-----------------------------------------------------------
+local function CreateToggle(parent)
+	local toggle = Instance.new("TextButton", parent)
 	toggle.Size = UDim2.new(0, 40, 0, 20)
 	toggle.Position = UDim2.new(0.9, 0, 0.35, 0)
-	toggle.Text = ""
 	toggle.BackgroundColor3 = Color3.fromRGB(70, 70, 90)
+	toggle.Text = ""
 	toggle.AutoButtonColor = false
 	Instance.new("UICorner", toggle).CornerRadius = UDim.new(1, 0)
 
@@ -236,194 +254,153 @@ local function createSettingBox(parent, titleText, descText)
 	Instance.new("UICorner", circle).CornerRadius = UDim.new(1, 0)
 
 	local state = false
-	local function toggleSwitch()
+	toggle.MouseButton1Click:Connect(function()
 		state = not state
 		if state then
-			toggle.BackgroundColor3 = Color3.fromRGB(100, 180, 100)
+			toggle.BackgroundColor3 = Color3.fromRGB(100, 200, 100)
 			circle:TweenPosition(UDim2.new(0.55, 0, 0.05, 0), "Out", "Quad", 0.15)
 		else
 			toggle.BackgroundColor3 = Color3.fromRGB(70, 70, 90)
 			circle:TweenPosition(UDim2.new(0.05, 0, 0.05, 0), "Out", "Quad", 0.15)
 		end
+	end)
+
+	return function() return state end, function(v)
+		state = v
+		if v then
+			toggle.BackgroundColor3 = Color3.fromRGB(100, 200, 100)
+			circle.Position = UDim2.new(0.55, 0, 0.05, 0)
+		else
+			toggle.BackgroundColor3 = Color3.fromRGB(70, 70, 90)
+			circle.Position = UDim2.new(0.05, 0, 0.05, 0)
+		end
 	end
-
-	toggle.MouseButton1Click:Connect(toggleSwitch)
-
-	return box, toggle, function() return state end
 end
 
 -----------------------------------------------------------
--- 🔧 Helper: Buat Slider Delay (Gaya Auto Fishing)
+-- VALUE BOX (+ / -)
 -----------------------------------------------------------
-local function createSlider(parent, title, desc)
-	local box = Instance.new("Frame", parent)
-	box.Size = UDim2.new(1, -10, 0, 55)
-	box.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-	box.BackgroundTransparency = 0.2
-	Instance.new("UICorner", box).CornerRadius = UDim.new(0, 8)
+local function CreateValue(parent, default, min, max)
+	local minus = Instance.new("TextButton", parent)
+	minus.Text = "−"
+	minus.Font = Enum.Font.GothamBold
+	minus.TextSize = 20
+	minus.Size = UDim2.new(0, 25, 0, 25)
+	minus.Position = UDim2.new(0.75, 0, 0.35, 0)
+	minus.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+	Instance.new("UICorner", minus).CornerRadius = UDim.new(1, 0)
 
-	local label = Instance.new("TextLabel", box)
-	label.Text = title
-	label.Size = UDim2.new(0.7, 0, 0, 22)
-	label.Position = UDim2.new(0.05, 0, 0.1, 0)
-	label.Font = Enum.Font.GothamBold
-	label.TextSize = 15
-	label.TextColor3 = Color3.fromRGB(255, 255, 255)
-	label.BackgroundTransparency = 1
-	label.TextXAlignment = Enum.TextXAlignment.Left
+	local plus = Instance.new("TextButton", parent)
+	plus.Text = "+"
+	plus.Font = Enum.Font.GothamBold
+	plus.TextSize = 20
+	plus.Size = UDim2.new(0, 25, 0, 25)
+	plus.Position = UDim2.new(0.92, 0, 0.35, 0)
+	plus.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+	Instance.new("UICorner", plus).CornerRadius = UDim.new(1, 0)
 
-	local descLabel = Instance.new("TextLabel", box)
-	descLabel.Text = desc
-	descLabel.Size = UDim2.new(0.7, 0, 0, 20)
-	descLabel.Position = UDim2.new(0.05, 0, 0.55, 0)
-	descLabel.Font = Enum.Font.Gotham
-	descLabel.TextSize = 13
-	descLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
-	descLabel.BackgroundTransparency = 1
-	descLabel.TextXAlignment = Enum.TextXAlignment.Left
+	local valueLabel = Instance.new("TextLabel", parent)
+	valueLabel.Text = tostring(default)
+	valueLabel.Font = Enum.Font.GothamBold
+	valueLabel.TextSize = 14
+	valueLabel.TextColor3 = Color3.new(1, 1, 1)
+	valueLabel.Size = UDim2.new(0, 40, 0, 25)
+	valueLabel.Position = UDim2.new(0.82, 0, 0.35, 0)
+	valueLabel.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+	Instance.new("UICorner", valueLabel).CornerRadius = UDim.new(1, 0)
 
-	local slider = Instance.new("Frame", box)
-	slider.Size = UDim2.new(0.9, 0, 0, 8)
-	slider.Position = UDim2.new(0.05, 0, 0.8, 0)
-	slider.BackgroundColor3 = Color3.fromRGB(65, 65, 90)
-	Instance.new("UICorner", slider).CornerRadius = UDim.new(1, 0)
-
-	local fill = Instance.new("Frame", slider)
-	fill.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
-	fill.Size = UDim2.new(0.5, 0, 1, 0)
-	Instance.new("UICorner", fill).CornerRadius = UDim.new(1, 0)
-
-	local value = 500
-	local dragging = false
-
-	local function updateSlider(x)
-		local rel = math.clamp((x - slider.AbsolutePosition.X) / slider.AbsoluteSize.X, 0, 1)
-		value = math.floor(1 + (1000 - 1) * rel)
-		fill.Size = UDim2.new(rel, 0, 1, 0)
-	end
-
-	slider.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			dragging = true
-			updateSlider(input.Position.X)
-		end
+	local val = default
+	plus.MouseButton1Click:Connect(function()
+		val = math.clamp(val + 1, min, max)
+		valueLabel.Text = tostring(val)
+	end)
+	minus.MouseButton1Click:Connect(function()
+		val = math.clamp(val - 1, min, max)
+		valueLabel.Text = tostring(val)
 	end)
 
-	UIS.InputChanged:Connect(function(input)
-		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-			updateSlider(input.Position.X)
-		end
-	end)
-
-	UIS.InputEnded:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			dragging = false
-		end
-	end)
-
-	return box, function() return value end
+	return function() return val end
 end
 
 -----------------------------------------------------------
--- 🧩 Frame Container
+-- ✈️ Fly Section
 -----------------------------------------------------------
-local FlyContainer = Instance.new("Frame", PageSetting)
-FlyContainer.Size = UDim2.new(1, -10, 0, 250)
-FlyContainer.Position = UDim2.new(0, 5, 0.05, 0)
-FlyContainer.BackgroundTransparency = 1
+local FlyBox = CreateBox("✈️ Fly Mode", "Enable fly and control up/down.")
+local GetFly, SetFly = CreateToggle(FlyBox)
+local FlyDelayGetter = CreateValue(CreateBox("Fly Delay Speed", "Adjust fly delay (1–1000)."), 10, 1, 1000)
 
 -----------------------------------------------------------
--- ✈️ Auto Fly
+-- 🚶 Walk Section
 -----------------------------------------------------------
-local FlyBox, FlyToggle, FlyState = createSettingBox(FlyContainer, "Auto Fly", "Fly freely in the air.")
-FlyBox.Position = UDim2.new(0, 0, 0, 0)
-
-local FlyDelayBox, getFlyDelay = createSlider(FlyContainer, "Fly Delay Speed", "Adjust delay for fly control.")
-FlyDelayBox.Position = UDim2.new(0, 0, 0, 60)
-
------------------------------------------------------------
--- 🚶 Walk Speed Control
------------------------------------------------------------
-local WalkBox, WalkToggle, WalkState = createSettingBox(FlyContainer, "Walk Speed", "Custom walking speed.")
-WalkBox.Position = UDim2.new(0, 0, 0, 120)
-
-local WalkDelayBox, getWalkDelay = createSlider(FlyContainer, "Walk Delay Speed", "Smoothness of walking change.")
-WalkDelayBox.Position = UDim2.new(0, 0, 0, 180)
+local WalkBox = CreateBox("🚶 Walk Speed", "Enable walk speed customization.")
+local GetWalk, SetWalk = CreateToggle(WalkBox)
+local WalkSpeedGetter = CreateValue(CreateBox("Walk Speed", "Adjust walking speed (8–100)."), 16, 8, 100)
+local WalkDelayGetter = CreateValue(CreateBox("Walk Delay Speed", "Adjust walk delay (1–1000)."), 10, 1, 1000)
 
 -----------------------------------------------------------
--- ✈️ Fly Logic
+-- LOGIC
 -----------------------------------------------------------
-local flying = false
-local bv
-local flyY = 0
-local speed = 60
+local flyBV
 local upHeld, downHeld = false, false
 
-local FlyGui = Instance.new("ScreenGui", CoreGui)
-FlyGui.Name = "FlyControl"
-FlyGui.Enabled = false
+-- Tombol naik turun
+local function createFlyButtons()
+	local gui = Instance.new("ScreenGui", LP:WaitForChild("PlayerGui"))
+	gui.Name = "FlyControl"
 
-local function createBtn(text, posY)
-	local btn = Instance.new("TextButton", FlyGui)
-	btn.Size = UDim2.new(0, 60, 0, 60)
-	btn.Position = UDim2.new(0.93, 0, posY, 0)
-	btn.Text = text
-	btn.TextColor3 = Color3.new(1, 1, 1)
-	btn.Font = Enum.Font.GothamBold
-	btn.TextSize = 26
-	btn.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
-	Instance.new("UICorner", btn).CornerRadius = UDim.new(1, 0)
-	return btn
+	local up = Instance.new("TextButton", gui)
+	up.Size = UDim2.new(0, 55, 0, 55)
+	up.Position = UDim2.new(0.88, 0, 0.75, 0)
+	up.Text = "⬆️"
+	up.Font = Enum.Font.GothamBold
+	up.TextSize = 28
+	up.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
+	up.TextColor3 = Color3.new(1, 1, 1)
+	Instance.new("UICorner", up).CornerRadius = UDim.new(1, 0)
+
+	local down = up:Clone()
+	down.Text = "⬇️"
+	down.Position = UDim2.new(0.88, 0, 0.83, 0)
+	down.Parent = gui
+
+	up.MouseButton1Down:Connect(function() upHeld = true end)
+	up.MouseButton1Up:Connect(function() upHeld = false end)
+	down.MouseButton1Down:Connect(function() downHeld = true end)
+	down.MouseButton1Up:Connect(function() downHeld = false end)
+
+	return gui
 end
 
-local UpBtn = createBtn("⬆️", 0.8)
-local DownBtn = createBtn("⬇️", 0.87)
+local FlyUI
 
-UpBtn.MouseButton1Down:Connect(function() if flying then upHeld = true end end)
-UpBtn.MouseButton1Up:Connect(function() upHeld = false end)
-DownBtn.MouseButton1Down:Connect(function() if flying then downHeld = true end end)
-DownBtn.MouseButton1Up:Connect(function() downHeld = false end)
+RunService.RenderStepped:Connect(function()
+	local char = LP.Character
+	local hum = char and char:FindFirstChildOfClass("Humanoid")
+	local hrp = char and char:FindFirstChild("HumanoidRootPart")
 
-local function startFly()
-	local HRP = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
-	if not HRP then return end
-	if not bv then
-		bv = Instance.new("BodyVelocity")
-		bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-		bv.Parent = HRP
-	end
+	if not hum or not hrp then return end
 
-	RunService.Heartbeat:Connect(function(dt)
-		if flying and bv and HRP then
-			local move = LP.Character:FindFirstChildOfClass("Humanoid").MoveDirection
-			local delayMs = getFlyDelay() / 1000
-			if upHeld then flyY = speed elseif downHeld then flyY = -speed else flyY = 0 end
-			bv.Velocity = Vector3.new(move.X * speed, flyY, move.Z * speed)
-			task.wait(delayMs)
+	-- Fly Mode
+	if GetFly() then
+		SetWalk(false)
+		if not flyBV then
+			flyBV = Instance.new("BodyVelocity", hrp)
+			flyBV.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+			FlyUI = FlyUI or createFlyButtons()
 		end
-	end)
-end
-
-FlyToggle.MouseButton1Click:Connect(function()
-	flying = not flying
-	FlyGui.Enabled = flying
-	if flying then startFly() else if bv then bv:Destroy() bv = nil end end
-end)
-
------------------------------------------------------------
--- 🚶 Walk Speed Logic
------------------------------------------------------------
-local humanoid = LP.Character:WaitForChild("Humanoid")
-local targetSpeed = 16
-local currentSpeed = humanoid.WalkSpeed
-
-RunService.Heartbeat:Connect(function()
-	if WalkState() then
-		local delayMs = getWalkDelay() / 1000
-		currentSpeed = currentSpeed + (targetSpeed - currentSpeed) * 0.2
-		humanoid.WalkSpeed = currentSpeed
-		task.wait(delayMs)
+		local dir = hum.MoveDirection
+		local y = 0
+		if upHeld then y = 60 elseif downHeld then y = -60 end
+		flyBV.Velocity = Vector3.new(dir.X * 60, y, dir.Z * 60)
+	else
+		if flyBV then flyBV:Destroy() flyBV = nil end
+		if FlyUI then FlyUI:Destroy() FlyUI = nil end
 	end
-end)		        
+
+	-- Walk Mode
+	if GetWalk() then
+		hum.WalkSpeed = WalkSpeedGetter()
+	end
+end)
 
 print("✅ Base UI + Fly System Loaded Successfully.")
