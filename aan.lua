@@ -1,61 +1,106 @@
 --[[
     ================================================================
-    Base UI Script (Versi Auto Open)
-    Menggunakan DrRay-UI-Library
+    Base UI Script (Versi Lengkap)
+    Menggunakan DrRay-UI-Library (by .chill.z.)
     ================================================================
-    ✅ Fitur:
-    - UI langsung muncul tanpa tekan tombol
-    - Tab, Tombol, Toggle, Slider, Input sudah siap
-    - Bisa kamu edit dan tambah fitur sendiri
+    Fitur:
+    - UI langsung terbuka otomatis
+    - 2 Tab (Main & Settings)
+    - Contoh Button, Toggle, Input, Dropdown, Slider, Keybind
+    - Tema warna custom (Dark Blue Style)
 ]]
 
--- 1. Memuat Library UI
+-- 1. Muat Library DrRay
 local success, DrRayLibrary = pcall(function()
-    return loadstring(game:HttpGet("https://raw.githubusercontent.com/aanzapi/DrRay-UI-Library/main/DrRay.lua"))()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/AZYsGithub/DrRay-UI-Library/main/DrRay.lua"))()
 end)
 
 if not success or not DrRayLibrary then
-    warn("❌ Gagal memuat UI Library! Cek koneksi atau executor kamu.")
+    warn("❌ Gagal memuat DrRay UI Library. Pastikan koneksi dan executor support HTTP!")
     return
 end
 
--- 2. Membuat Jendela (Window) Utama
-local window = DrRayLibrary:Load("🚀 Aanz Base UI", "Dark")
+-- 2. Buat Window Utama
+local window = DrRayLibrary:Load("🚀 Aanz Base UI", "Default")
 
--- 3. Membuat Tab Utama
-local mainTab = window:newTab("Main", "rbxassetid://13511613008")
+-- (Opsional) Ubah Tema Warna
+local mainColor = Color3.fromRGB(20, 25, 45)
+local secondColor = Color3.fromRGB(0, 120, 255)
+window:SetTheme(mainColor, secondColor)
 
--- 4. Tambahkan Komponen / Fitur
+-- 3. Buat Tab
+local mainTab = DrRayLibrary.newTab("Main", "rbxassetid://13511613008")
+local settingsTab = DrRayLibrary.newTab("Settings", "rbxassetid://4483345998")
 
---- Tombol (Button)
-mainTab:newButton("Klik Saya!", "Contoh tombol yang bisa kamu ubah.", function()
-    print("✅ Tombol diklik!")
+-- =============================
+-- 🔹 TAB 1: MAIN
+-- =============================
+
+-- Tombol
+mainTab.newButton("Say Hello", "Menampilkan pesan di console", function()
+    print("👋 Hello from Aanz Base UI!")
 end)
 
---- Toggle (On/Off)
-mainTab:newToggle("Auto Farm", "Aktifkan untuk farming otomatis.", false, function(state)
+-- Toggle
+mainTab.newToggle("Auto Farm", "Aktifkan mode farming otomatis", false, function(state)
     if state then
-        print("⚙️ Auto Farm: AKTIF")
+        print("⚙️ Auto Farm AKTIF")
     else
-        print("❌ Auto Farm: MATI")
+        print("❌ Auto Farm MATI")
     end
 end)
 
---- Slider
-mainTab:newSlider("WalkSpeed", "Atur kecepatan jalan.", 250, 16, function(value)
+-- Input
+mainTab.newInput("Nama Player", "Masukkan nama target untuk teleport", function(text)
+    print("🎯 Target player:", text)
+end)
+
+-- Slider
+mainTab.newSlider("WalkSpeed", "Atur kecepatan jalan", 250, false, function(value)
     game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
     print("🚶 WalkSpeed diatur ke:", value)
 end)
 
---- Input Box
-mainTab:newInput("Nama Player", "Masukkan nama player tujuan.", function(text)
-    print("🎯 Input player:", text)
+-- Dropdown
+mainTab.newDropdown("Pilih Senjata", "Pilih senjata favoritmu!", {"Sword", "Gun", "Bow", "Magic"}, function(selected)
+    print("🔫 Senjata terpilih:", selected)
 end)
 
--- 5. Buka UI secara otomatis (tanpa tombol)
--- Fungsi ini membuka UI langsung setelah script dijalankan
+-- Keybind
+mainTab.newKeybind("Keybind Test", "Tekan tombol apa pun!", function(key)
+    print("⌨️ Kamu menekan tombol:", key)
+end)
+
+-- =============================
+-- 🔧 TAB 2: SETTINGS
+-- =============================
+
+-- Tombol Tutup
+settingsTab.newButton("Tutup UI", "Menutup tampilan UI", function()
+    window:Close()
+    print("❌ UI ditutup.")
+end)
+
+-- Tombol Buka Lagi
+settingsTab.newButton("Buka UI", "Membuka kembali UI", function()
+    window:Open()
+    print("✅ UI dibuka kembali.")
+end)
+
+-- Toggle Tema
+settingsTab.newToggle("Tema Gelap", "Ubah ke warna gelap/terang", false, function(state)
+    if state then
+        window:SetTheme(Color3.fromRGB(20, 20, 20), Color3.fromRGB(255, 85, 0))
+        print("🌑 Tema gelap diaktifkan.")
+    else
+        window:SetTheme(mainColor, secondColor)
+        print("🌕 Tema default dikembalikan.")
+    end
+end)
+
+-- 4. Buka UI secara otomatis
 task.defer(function()
     window:Open()
 end)
 
-print("✅ UI berhasil dimuat & langsung dibuka!")
+print("✅ DrRay Base UI berhasil dimuat dan ditampilkan!")
