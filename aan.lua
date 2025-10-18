@@ -1,71 +1,89 @@
---[[
-    ================================================================
-    Base UI Script (Menggunakan DrRay-UI-Library)
-    ================================================================
-    
-    Ini adalah template dasar untuk membuat GUI (Graphical User Interface)
-    di dalam executor. Anda bisa menambahkan lebih banyak tab, tombol,
-    slider, dan fungsi lainnya sesuai kebutuhan.
-]]
+--[[==========================================================
+ Base UI Template (OrionLib)
+ Dibuat oleh AanzAI - versi dasar untuk executor Roblox
+==========================================================]]
 
--- 1. Memuat Library UI
--- Baris ini mengunduh dan menjalankan kode library dari GitHub.
-local DrRayLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/AZYsGithub/DrRay-UI-Library/main/DrRay.lua"))()
+-- Load Orion Library
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
--- 2. Membuat Jendela (Window) Utama
--- "Nama Script Anda" = Judul jendela
--- "Default" = Tema (bisa juga "Dark", "Light", "Minimal", dll. tergantung library)
-local window = DrRayLibrary:Load("Nama Script Anda", "Default")
+-- Buat Window Utama
+local Window = OrionLib:MakeWindow({
+    Name = "🔥 Aanz Hub - Base UI 🔥", 
+    HidePremium = false,
+    SaveConfig = true,
+    ConfigFolder = "AanzHubConfig"
+})
 
--- 3. Membuat Tab
--- Anda bisa membuat beberapa tab untuk mengorganisir fitur.
-local mainTab = window:newTab("Main", "rbxassetid://13511613008") -- Ganti ID ikon jika mau
+--[[======================
+         TAB 1
+======================]]
+local Tab = Window:MakeTab({
+	Name = "Main",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
 
--- 4. Menambahkan Komponen (Elemen UI)
+Tab:AddParagraph("Welcome!", "Gunakan tombol di bawah untuk mengaktifkan fitur.")
 
---- Contoh Tombol (Button)
-mainTab:newButton("Klik Saya!", "Ini adalah deskripsi tombol.", function()
-    -- Kode yang akan dijalankan saat tombol diklik:
-    print("Tombol telah diklik!")
-    
-    -- Contoh: Memberikan item ke pemain
-    -- game.Players.LocalPlayer.Character.Humanoid:EquipTool(game.ReplicatedStorage.Tools.Sword)
-end)
+Tab:AddButton({
+	Name = "Aktifkan Fitur 1",
+	Callback = function()
+       print("Fitur 1 diaktifkan!")
+       OrionLib:MakeNotification({
+           Name = "✅ Fitur Aktif",
+           Content = "Fitur 1 berhasil diaktifkan!",
+           Image = "rbxassetid://4483345998",
+           Time = 3
+       })
+   end    
+})
 
---- Contoh Toggle (Tombol On/Off)
-mainTab:newToggle("Auto Farm", "Aktifkan untuk farming otomatis.", false, function(state)
-    -- 'state' akan bernilai 'true' jika ON dan 'false' jika OFF.
-    if state then
-        print("Auto Farm DIAKTIFKAN")
-        -- Masukkan fungsi untuk memulai auto farm di sini
-    else
-        print("Auto Farm DIMATIKAN")
-        -- Masukkan fungsi untuk menghentikan auto farm di sini
-    end
-end)
+Tab:AddToggle({
+	Name = "Mode Otomatis",
+	Default = false,
+	Callback = function(Value)
+		print("Mode Otomatis:", Value)
+	end    
+})
 
---- Contoh Slider
-mainTab:newSlider("WalkSpeed", "Mengatur kecepatan berjalan.", 250, 16, function(value)
-    -- 'value' adalah angka yang dipilih slider (antara 16 dan 250).
-    print("WalkSpeed diatur ke: " .. value)
-    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
-end)
+Tab:AddSlider({
+	Name = "Kecepatan",
+	Min = 1,
+	Max = 100,
+	Default = 50,
+	Color = Color3.fromRGB(255,0,0),
+	Increment = 1,
+	ValueName = "Speed",
+	Callback = function(Value)
+		print("Kecepatan diatur ke:", Value)
+	end    
+})
 
---- Contoh Text Input (Kotak Teks)
-mainTab:newInput("Nama Player", "Masukkan nama player yang dituju.", function(text)
-    -- 'text' adalah apa yang diketik oleh pengguna.
-    print("Teks yang dimasukkan: " .. text)
-    
-    -- Contoh: Teleport ke player
-    -- local targetPlayer = game.Players:FindFirstChild(text)
-    -- if targetPlayer and targetPlayer.Character then
-    --     game.Players.LocalPlayer.Character:MoveTo(targetPlayer.Character.HumanoidRootPart.Position)
-    -- end
-end)
+Tab:AddTextbox({
+	Name = "Masukkan Nama",
+	Default = "",
+	TextDisappear = true,
+	Callback = function(Value)
+		print("Nama:", Value)
+	end	  
+})
 
--- 5. (Opsional) Membuka/Menutup UI
--- Anda bisa mengatur tombol untuk membuka/menutup UI.
--- Contoh: Menggunakan tombol RightShift (Tombol Shift Kanan)
-window:ToggleKey(Enum.KeyCode.RightShift)
+--[[======================
+         TAB 2
+======================]]
+local Tab2 = Window:MakeTab({
+	Name = "Extra",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
 
-print("UI Berhasil Dimuat! Tekan 'RightShift' untuk membuka/menutup.")
+Tab2:AddParagraph("Info", "Tab tambahan untuk fitur lain.")
+Tab2:AddButton({
+	Name = "Teleport ke Spawn",
+	Callback = function()
+		game.Players.LocalPlayer.Character:MoveTo(Vector3.new(0, 10, 0))
+	end    
+})
+
+-- Inisialisasi UI
+OrionLib:Init()
