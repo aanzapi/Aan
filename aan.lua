@@ -177,109 +177,188 @@ HideButton.MouseButton1Click:Connect(function()
 	HideButton.Visible = false
 end)
 
---===============================================================
--- Fly System with Speed Slider (Clean Roblox Style)
---===============================================================
+-----------------------------------------------------------
+-- ✈️ Fly System (UI Mirip Auto Instant Fishing)
+-----------------------------------------------------------
 
 local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local root = character:WaitForChild("HumanoidRootPart")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
 
+local LP = Players.LocalPlayer
+local PlayerGui = LP:WaitForChild("PlayerGui")
+
+local PageSetting = TabContents["Settings"]
+
+-----------------------------------------------------------
+-- FRAME UTAMA
+-----------------------------------------------------------
+local FlyFrame = Instance.new("Frame")
+FlyFrame.Name = "FlyFrame"
+FlyFrame.Parent = PageSetting
+FlyFrame.Size = UDim2.new(0.95, 0, 0, 160)
+FlyFrame.Position = UDim2.new(0.025, 0, 0.05, 0)
+FlyFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+FlyFrame.BackgroundTransparency = 0.05
+Instance.new("UICorner", FlyFrame).CornerRadius = UDim.new(0, 10)
+
+-----------------------------------------------------------
+-- LABEL UTAMA
+-----------------------------------------------------------
+local Title = Instance.new("TextLabel")
+Title.Parent = FlyFrame
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Position = UDim2.new(0, 0, 0, 5)
+Title.BackgroundTransparency = 1
+Title.Text = "✈️ Auto Fly"
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 18
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+-----------------------------------------------------------
+-- TOGGLE FLY
+-----------------------------------------------------------
+local FlyToggle = Instance.new("TextButton")
+FlyToggle.Parent = FlyFrame
+FlyToggle.Size = UDim2.new(0.9, 0, 0, 40)
+FlyToggle.Position = UDim2.new(0.05, 0, 0.25, 0)
+FlyToggle.Text = "Auto Fly: OFF"
+FlyToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+FlyToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+FlyToggle.Font = Enum.Font.GothamBold
+FlyToggle.TextSize = 16
+Instance.new("UICorner", FlyToggle).CornerRadius = UDim.new(0, 8)
+
+-----------------------------------------------------------
+-- SLIDER DELAY SPEED
+-----------------------------------------------------------
+local DelayLabel = Instance.new("TextLabel")
+DelayLabel.Parent = FlyFrame
+DelayLabel.Size = UDim2.new(0.9, 0, 0, 30)
+DelayLabel.Position = UDim2.new(0.05, 0, 0.55, 0)
+DelayLabel.Text = "Delay Speed: 500"
+DelayLabel.Font = Enum.Font.GothamBold
+DelayLabel.TextSize = 14
+DelayLabel.BackgroundTransparency = 1
+DelayLabel.TextColor3 = Color3.fromRGB(255, 255, 200)
+
+local DelaySlider = Instance.new("TextButton")
+DelaySlider.Parent = FlyFrame
+DelaySlider.Size = UDim2.new(0.9, 0, 0, 25)
+DelaySlider.Position = UDim2.new(0.05, 0, 0.73, 0)
+DelaySlider.BackgroundColor3 = Color3.fromRGB(65, 65, 90)
+DelaySlider.Text = ""
+Instance.new("UICorner", DelaySlider).CornerRadius = UDim.new(0, 8)
+
+local Fill = Instance.new("Frame")
+Fill.Parent = DelaySlider
+Fill.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+Fill.Size = UDim2.new(0.5, 0, 1, 0)
+Instance.new("UICorner", Fill).CornerRadius = UDim.new(0, 8)
+
+local delaySpeed = 500
+local dragging = false
+
+DelaySlider.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+	end
+end)
+
+DelaySlider.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = false
+	end
+end)
+
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+	if dragging then
+		local rel = math.clamp((input.Position.X - DelaySlider.AbsolutePosition.X) / DelaySlider.AbsoluteSize.X, 0, 1)
+		delaySpeed = math.floor(1 + (1000 - 1) * rel)
+		Fill.Size = UDim2.new(rel, 0, 1, 0)
+		DelayLabel.Text = "Delay Speed: " .. delaySpeed
+	end
+end)
+
+-----------------------------------------------------------
+-- FLY LOGIC
+-----------------------------------------------------------
 local flying = false
-local flySpeed = 50 -- default speed
-local upButton, downButton = nil, nil
-local bodyVelocity = nil
+local speed = 60
+local bv
+local flyY = 0
+local upHeld, downHeld = false, false
 
--- Fungsi buat tombol UI sederhana (natural style)
-local function createButton(text, position, callback)
-    local button = Instance.new("TextButton")
-    button.Size = UDim2.new(0, 60, 0, 60)
-    button.Position = position
-    button.Text = text
-    button.TextScaled = true
-    button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    button.BackgroundTransparency = 0.4
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.BorderSizePixel = 0
-    button.Parent = game:GetService("CoreGui")
-    button.AutoButtonColor = true
-    button.ZIndex = 10
-    button.MouseButton1Down:Connect(callback)
-    return button
-end
+local FlyGui = Instance.new("ScreenGui")
+FlyGui.Name = "FlyControl"
+FlyGui.Parent = CoreGui
+FlyGui.Enabled = false
 
--- Mulai Fly
+-- Tombol Naik & Turun
+local UpBtn = Instance.new("TextButton")
+UpBtn.Parent = FlyGui
+UpBtn.Size = UDim2.new(0, 60, 0, 60)
+UpBtn.Position = UDim2.new(0.93, 0, 0.8, 0)
+UpBtn.Text = "⬆️"
+UpBtn.TextColor3 = Color3.new(1,1,1)
+UpBtn.Font = Enum.Font.GothamBold
+UpBtn.TextSize = 26
+UpBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
+Instance.new("UICorner", UpBtn).CornerRadius = UDim.new(1, 0)
+
+local DownBtn = Instance.new("TextButton")
+DownBtn.Parent = FlyGui
+DownBtn.Size = UDim2.new(0, 60, 0, 60)
+DownBtn.Position = UDim2.new(0.93, 0, 0.87, 0)
+DownBtn.Text = "⬇️"
+DownBtn.TextColor3 = Color3.new(1,1,1)
+DownBtn.Font = Enum.Font.GothamBold
+DownBtn.TextSize = 26
+DownBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
+Instance.new("UICorner", DownBtn).CornerRadius = UDim.new(1, 0)
+
+UpBtn.MouseButton1Down:Connect(function() if flying then upHeld = true end end)
+UpBtn.MouseButton1Up:Connect(function() upHeld = false end)
+DownBtn.MouseButton1Down:Connect(function() if flying then downHeld = true end end)
+DownBtn.MouseButton1Up:Connect(function() downHeld = false end)
+
+-----------------------------------------------------------
+-- FLY CORE FUNCTION
+-----------------------------------------------------------
 local function startFly()
-    if flying then return end
-    flying = true
+	local HRP = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+	if not HRP then return end
 
-    bodyVelocity = Instance.new("BodyVelocity")
-    bodyVelocity.MaxForce = Vector3.new(4000, 4000, 4000)
-    bodyVelocity.Velocity = Vector3.zero
-    bodyVelocity.Parent = root
+	if not bv then
+		bv = Instance.new("BodyVelocity")
+		bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+		bv.Velocity = Vector3.zero
+		bv.Parent = HRP
+	end
 
-    -- Bikin tombol naik turun di sebelah tombol lompat Roblox
-    local jumpButton = player:WaitForChild("PlayerGui"):WaitForChild("TouchGui"):WaitForChild("TouchControlFrame"):WaitForChild("JumpButton")
-
-    upButton = createButton("⬆", jumpButton.Position - UDim2.new(0, 70, 0, 0), function()
-        root.CFrame = root.CFrame + Vector3.new(0, flySpeed/50, 0)
-    end)
-
-    downButton = createButton("⬇", jumpButton.Position + UDim2.new(0, -70, 0, 70), function()
-        root.CFrame = root.CFrame - Vector3.new(0, flySpeed/50, 0)
-    end)
-
-    task.spawn(function()
-        while flying and character and bodyVelocity do
-            local moveDir = Vector3.zero
-            if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-                moveDir = moveDir + workspace.CurrentCamera.CFrame.LookVector
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-                moveDir = moveDir - workspace.CurrentCamera.CFrame.LookVector
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-                moveDir = moveDir - workspace.CurrentCamera.CFrame.RightVector
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-                moveDir = moveDir + workspace.CurrentCamera.CFrame.RightVector
-            end
-
-            bodyVelocity.Velocity = moveDir * (flySpeed / 10)
-            task.wait(0.01)
-        end
-    end)
+	RunService.RenderStepped:Connect(function()
+		if flying and bv and HRP then
+			local moveDir = LP.Character:FindFirstChildOfClass("Humanoid").MoveDirection
+			if upHeld then flyY = speed elseif downHeld then flyY = -speed else flyY = 0 end
+			bv.Velocity = Vector3.new(moveDir.X * speed, flyY, moveDir.Z * speed)
+		end
+	end)
 end
 
--- Berhenti Fly
-local function stopFly()
-    flying = false
-    if bodyVelocity then bodyVelocity:Destroy() end
-    if upButton then upButton:Destroy() end
-    if downButton then downButton:Destroy() end
-end
+-----------------------------------------------------------
+-- TOGGLE BEHAVIOR
+-----------------------------------------------------------
+FlyToggle.MouseButton1Click:Connect(function()
+	flying = not flying
+	FlyToggle.Text = flying and "Auto Fly: ON" or "Auto Fly: OFF"
+	FlyToggle.BackgroundColor3 = flying and Color3.fromRGB(70, 120, 70) or Color3.fromRGB(50, 50, 70)
+	FlyGui.Enabled = flying
 
---===============================================================
--- BAGIAN UI DI TAB SETTINGS (nyatu sama base mu)
---===============================================================
--- Toggle Fly ON/OFF
-flyTab:CreateToggle("Fly Mode", false, function(state)
-    if state then
-        startFly()
-        flyTab:CreateNotification("Fly", "Mode Terbang Aktif ✅", 2)
-    else
-        stopFly()
-        flyTab:CreateNotification("Fly", "Mode Terbang Dimatikan ❌", 2)
-    end
-end)
-local flyTab = Tabs["Setting"] or DrRayLibrary:CreateTab("Setting")
-
--- Slider kecepatan fly
-flyTab:CreateSlider("Fly Speed", 1, 1000, flySpeed, function(value)
-    flySpeed = value
-end)
-
+	if flying then
+		startFly()
+	else
+		if bv then bv:Destroy() bv = nil end
+	end
+end)          
 
 print("✅ Base UI + Fly System Loaded Successfully.")
