@@ -181,80 +181,146 @@ end)
 -- ✈️ Fly System (UI Mirip Auto Instant Fishing)
 -----------------------------------------------------------
 
+
+	-----------------------------------------------------------
+-- ✈️ Fly System (Gaya Auto Fishing / Auto Farm)
+-----------------------------------------------------------
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
-
 local LP = Players.LocalPlayer
-local PlayerGui = LP:WaitForChild("PlayerGui")
 
 local PageSetting = TabContents["Settings"]
 
 -----------------------------------------------------------
--- FRAME UTAMA
+-- === STYLE HELPER FUNCTION ===
 -----------------------------------------------------------
-local FlyFrame = Instance.new("Frame")
-FlyFrame.Name = "FlyFrame"
-FlyFrame.Parent = PageSetting
-FlyFrame.Size = UDim2.new(0.95, 0, 0, 160)
-FlyFrame.Position = UDim2.new(0.025, 0, 0.05, 0)
-FlyFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
-FlyFrame.BackgroundTransparency = 0.05
-Instance.new("UICorner", FlyFrame).CornerRadius = UDim.new(0, 10)
+local function createSettingBox(parent, titleText, descText)
+	local box = Instance.new("Frame")
+	box.Parent = parent
+	box.Size = UDim2.new(1, -10, 0, 55)
+	box.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+	box.BackgroundTransparency = 0.2
+	box.BorderSizePixel = 0
+	Instance.new("UICorner", box).CornerRadius = UDim.new(0, 8)
+
+	local title = Instance.new("TextLabel", box)
+	title.Text = titleText
+	title.Size = UDim2.new(0.7, 0, 0, 22)
+	title.Position = UDim2.new(0.05, 0, 0.1, 0)
+	title.Font = Enum.Font.GothamBold
+	title.TextSize = 15
+	title.TextColor3 = Color3.fromRGB(255, 255, 255)
+	title.BackgroundTransparency = 1
+	title.TextXAlignment = Enum.TextXAlignment.Left
+
+	local desc = Instance.new("TextLabel", box)
+	desc.Text = descText
+	desc.Size = UDim2.new(0.7, 0, 0, 20)
+	desc.Position = UDim2.new(0.05, 0, 0.55, 0)
+	desc.Font = Enum.Font.Gotham
+	desc.TextSize = 13
+	desc.TextColor3 = Color3.fromRGB(180, 180, 180)
+	desc.BackgroundTransparency = 1
+	desc.TextXAlignment = Enum.TextXAlignment.Left
+
+	local toggle = Instance.new("TextButton", box)
+	toggle.Size = UDim2.new(0, 40, 0, 20)
+	toggle.Position = UDim2.new(0.9, 0, 0.35, 0)
+	toggle.Text = ""
+	toggle.BackgroundColor3 = Color3.fromRGB(70, 70, 90)
+	toggle.AutoButtonColor = false
+	Instance.new("UICorner", toggle).CornerRadius = UDim.new(1, 0)
+
+	local circle = Instance.new("Frame", toggle)
+	circle.Size = UDim2.new(0, 18, 0, 18)
+	circle.Position = UDim2.new(0.05, 0, 0.05, 0)
+	circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	Instance.new("UICorner", circle).CornerRadius = UDim.new(1, 0)
+
+	local state = false
+	local function toggleSwitch()
+		state = not state
+		if state then
+			toggle.BackgroundColor3 = Color3.fromRGB(100, 180, 100)
+			circle:TweenPosition(UDim2.new(0.55, 0, 0.05, 0), "Out", "Quad", 0.15)
+		else
+			toggle.BackgroundColor3 = Color3.fromRGB(70, 70, 90)
+			circle:TweenPosition(UDim2.new(0.05, 0, 0.05, 0), "Out", "Quad", 0.15)
+		end
+	end
+
+	toggle.MouseButton1Click:Connect(toggleSwitch)
+
+	return box, toggle, function() return state end, function(v)
+		state = v
+		if state then
+			toggle.BackgroundColor3 = Color3.fromRGB(100, 180, 100)
+			circle.Position = UDim2.new(0.55, 0, 0.05, 0)
+		else
+			toggle.BackgroundColor3 = Color3.fromRGB(70, 70, 90)
+			circle.Position = UDim2.new(0.05, 0, 0.05, 0)
+		end
+	end
+end
 
 -----------------------------------------------------------
--- LABEL UTAMA
+-- === FRAME UTAMA (HALAMAN FLY)
 -----------------------------------------------------------
-local Title = Instance.new("TextLabel")
-Title.Parent = FlyFrame
-Title.Size = UDim2.new(1, 0, 0, 30)
-Title.Position = UDim2.new(0, 0, 0, 5)
-Title.BackgroundTransparency = 1
-Title.Text = "✈️ Auto Fly"
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 18
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+local FlyContainer = Instance.new("Frame", PageSetting)
+FlyContainer.Size = UDim2.new(1, -10, 0, 150)
+FlyContainer.Position = UDim2.new(0, 5, 0.05, 0)
+FlyContainer.BackgroundTransparency = 1
 
 -----------------------------------------------------------
--- TOGGLE FLY
+-- === FITUR 1: AUTO FLY
 -----------------------------------------------------------
-local FlyToggle = Instance.new("TextButton")
-FlyToggle.Parent = FlyFrame
-FlyToggle.Size = UDim2.new(0.9, 0, 0, 40)
-FlyToggle.Position = UDim2.new(0.05, 0, 0.25, 0)
-FlyToggle.Text = "Auto Fly: OFF"
-FlyToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-FlyToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
-FlyToggle.Font = Enum.Font.GothamBold
-FlyToggle.TextSize = 16
-Instance.new("UICorner", FlyToggle).CornerRadius = UDim.new(0, 8)
+local FlyBox, FlyToggle, FlyState = createSettingBox(FlyContainer, "Auto Fly", "Fly freely in the air with adjustable speed.")
+
+FlyBox.Position = UDim2.new(0, 0, 0, 0)
 
 -----------------------------------------------------------
--- SLIDER DELAY SPEED
+-- === FITUR 2: DELAY SPEED
 -----------------------------------------------------------
-local DelayLabel = Instance.new("TextLabel")
-DelayLabel.Parent = FlyFrame
-DelayLabel.Size = UDim2.new(0.9, 0, 0, 30)
-DelayLabel.Position = UDim2.new(0.05, 0, 0.55, 0)
-DelayLabel.Text = "Delay Speed: 500"
+local DelayBox = Instance.new("Frame", FlyContainer)
+DelayBox.Size = UDim2.new(1, -10, 0, 55)
+DelayBox.Position = UDim2.new(0, 0, 0, 60)
+DelayBox.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+DelayBox.BackgroundTransparency = 0.2
+Instance.new("UICorner", DelayBox).CornerRadius = UDim.new(0, 8)
+
+local DelayLabel = Instance.new("TextLabel", DelayBox)
+DelayLabel.Text = "Fly Delay Speed"
+DelayLabel.Size = UDim2.new(0.7, 0, 0, 22)
+DelayLabel.Position = UDim2.new(0.05, 0, 0.1, 0)
 DelayLabel.Font = Enum.Font.GothamBold
-DelayLabel.TextSize = 14
+DelayLabel.TextSize = 15
+DelayLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 DelayLabel.BackgroundTransparency = 1
-DelayLabel.TextColor3 = Color3.fromRGB(255, 255, 200)
+DelayLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-local DelaySlider = Instance.new("TextButton")
-DelaySlider.Parent = FlyFrame
-DelaySlider.Size = UDim2.new(0.9, 0, 0, 25)
-DelaySlider.Position = UDim2.new(0.05, 0, 0.73, 0)
+local DelayDesc = Instance.new("TextLabel", DelayBox)
+DelayDesc.Text = "Adjust delay between fly movements."
+DelayDesc.Size = UDim2.new(0.7, 0, 0, 20)
+DelayDesc.Position = UDim2.new(0.05, 0, 0.55, 0)
+DelayDesc.Font = Enum.Font.Gotham
+DelayDesc.TextSize = 13
+DelayDesc.TextColor3 = Color3.fromRGB(180, 180, 180)
+DelayDesc.BackgroundTransparency = 1
+DelayDesc.TextXAlignment = Enum.TextXAlignment.Left
+
+local DelaySlider = Instance.new("TextButton", DelayBox)
+DelaySlider.Size = UDim2.new(0.9, 0, 0, 8)
+DelaySlider.Position = UDim2.new(0.05, 0, 0.78, 0)
 DelaySlider.BackgroundColor3 = Color3.fromRGB(65, 65, 90)
 DelaySlider.Text = ""
-Instance.new("UICorner", DelaySlider).CornerRadius = UDim.new(0, 8)
+Instance.new("UICorner", DelaySlider).CornerRadius = UDim.new(1, 0)
 
-local Fill = Instance.new("Frame")
-Fill.Parent = DelaySlider
+local Fill = Instance.new("Frame", DelaySlider)
 Fill.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
 Fill.Size = UDim2.new(0.5, 0, 1, 0)
-Instance.new("UICorner", Fill).CornerRadius = UDim.new(0, 8)
+Instance.new("UICorner", Fill).CornerRadius = UDim.new(1, 0)
 
 local delaySpeed = 500
 local dragging = false
@@ -276,12 +342,11 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
 		local rel = math.clamp((input.Position.X - DelaySlider.AbsolutePosition.X) / DelaySlider.AbsoluteSize.X, 0, 1)
 		delaySpeed = math.floor(1 + (1000 - 1) * rel)
 		Fill.Size = UDim2.new(rel, 0, 1, 0)
-		DelayLabel.Text = "Delay Speed: " .. delaySpeed
 	end
 end)
 
 -----------------------------------------------------------
--- FLY LOGIC
+-- === LOGIC FLY
 -----------------------------------------------------------
 local flying = false
 local speed = 60
@@ -289,42 +354,31 @@ local bv
 local flyY = 0
 local upHeld, downHeld = false, false
 
-local FlyGui = Instance.new("ScreenGui")
+local FlyGui = Instance.new("ScreenGui", CoreGui)
 FlyGui.Name = "FlyControl"
-FlyGui.Parent = CoreGui
 FlyGui.Enabled = false
 
--- Tombol Naik & Turun
-local UpBtn = Instance.new("TextButton")
-UpBtn.Parent = FlyGui
-UpBtn.Size = UDim2.new(0, 60, 0, 60)
-UpBtn.Position = UDim2.new(0.93, 0, 0.8, 0)
-UpBtn.Text = "⬆️"
-UpBtn.TextColor3 = Color3.new(1,1,1)
-UpBtn.Font = Enum.Font.GothamBold
-UpBtn.TextSize = 26
-UpBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
-Instance.new("UICorner", UpBtn).CornerRadius = UDim.new(1, 0)
+local function createButton(text, posY)
+	local btn = Instance.new("TextButton", FlyGui)
+	btn.Size = UDim2.new(0, 60, 0, 60)
+	btn.Position = UDim2.new(0.93, 0, posY, 0)
+	btn.Text = text
+	btn.TextColor3 = Color3.new(1, 1, 1)
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 26
+	btn.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(1, 0)
+	return btn
+end
 
-local DownBtn = Instance.new("TextButton")
-DownBtn.Parent = FlyGui
-DownBtn.Size = UDim2.new(0, 60, 0, 60)
-DownBtn.Position = UDim2.new(0.93, 0, 0.87, 0)
-DownBtn.Text = "⬇️"
-DownBtn.TextColor3 = Color3.new(1,1,1)
-DownBtn.Font = Enum.Font.GothamBold
-DownBtn.TextSize = 26
-DownBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
-Instance.new("UICorner", DownBtn).CornerRadius = UDim.new(1, 0)
+local UpBtn = createButton("⬆️", 0.8)
+local DownBtn = createButton("⬇️", 0.87)
 
 UpBtn.MouseButton1Down:Connect(function() if flying then upHeld = true end end)
 UpBtn.MouseButton1Up:Connect(function() upHeld = false end)
 DownBtn.MouseButton1Down:Connect(function() if flying then downHeld = true end end)
 DownBtn.MouseButton1Up:Connect(function() downHeld = false end)
 
------------------------------------------------------------
--- FLY CORE FUNCTION
------------------------------------------------------------
 local function startFly()
 	local HRP = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
 	if not HRP then return end
@@ -345,20 +399,15 @@ local function startFly()
 	end)
 end
 
------------------------------------------------------------
--- TOGGLE BEHAVIOR
------------------------------------------------------------
 FlyToggle.MouseButton1Click:Connect(function()
 	flying = not flying
-	FlyToggle.Text = flying and "Auto Fly: ON" or "Auto Fly: OFF"
-	FlyToggle.BackgroundColor3 = flying and Color3.fromRGB(70, 120, 70) or Color3.fromRGB(50, 50, 70)
+	FlyState(flying)
 	FlyGui.Enabled = flying
-
 	if flying then
 		startFly()
 	else
 		if bv then bv:Destroy() bv = nil end
 	end
-end)          
+end)         
 
 print("✅ Base UI + Fly System Loaded Successfully.")
