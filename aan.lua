@@ -1,20 +1,24 @@
 --[[
 ===========================================================
-    Custom Base UI (4 Tabs Version)
+    Custom Base UI (4 Tabs Version) + Fly System
     Dibuat oleh aanstok & ChatGPT (Realistic Style)
     Fitur:
     - Tombol Close & Hide
     - Tab: Settings, Teleport, Auto Teleport, Menu Lain
     - Transisi halus antar tab
-    - Desain profesional & rapi
+    - Fly + Speed control
+    - Tombol naik & turun di luar UI (dekat tombol jump)
 ===========================================================
 ]]
 
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local LP = Players.LocalPlayer
 
 -- Hapus UI lama jika ada
-for _, ui in ipairs({"BaseUI", "HideButton"}) do
+for _, ui in ipairs({"BaseUI", "HideButton", "FlyButtons"}) do
 	if CoreGui:FindFirstChild(ui) then
 		CoreGui[ui]:Destroy()
 	end
@@ -98,27 +102,20 @@ ContentFrame.BackgroundTransparency = 1
 
 local TabContents = {}
 
-local function createTab(name, text)
+local function createTab(name)
 	local Frame = Instance.new("Frame", ContentFrame)
 	Frame.Size = UDim2.new(1, 0, 1, 0)
 	Frame.BackgroundTransparency = 1
 	Frame.Visible = false
-
-	local Label = Instance.new("TextLabel", Frame)
-	Label.Size = UDim2.new(1, 0, 0, 50)
-	Label.Text = text
-	Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-	Label.TextSize = 16
-	Label.Font = Enum.Font.GothamMedium
-	Label.BackgroundTransparency = 1
-	Label.TextWrapped = true
-
 	TabContents[name] = Frame
+	return Frame
 end
 
-createTab("Teleport", "📍 Teleport Tab\nNantinya akan berisi fitur teleport manual.")
-createTab("Auto Teleport", "🚀 Auto Teleport Tab\nFitur otomatisasi teleport akan dibuat di sini.")
-createTab("Menu Lain", "📚 Menu Lain\nKumpulan fitur tambahan akan muncul di sini.")
+-- === Buat Tab ===
+local PageSetting = createTab("Settings")
+local PageTeleport = createTab("Teleport")
+local PageAutoTeleport = createTab("Auto Teleport")
+local PageMenu = createTab("Menu Lain")
 
 -- === Fungsi Ganti Tab ===
 local function switchTab(name)
@@ -139,14 +136,50 @@ for name, btn in pairs(Tabs) do
 	end)
 end
 
-switchTab("Settings") -- Tab default
--- ==========================================
--- === ✈️ Fly + Teleport (Tab: Setting) ===
--- ==========================================
+switchTab("Settings")
 
-local PageSetting = createTab("Setting", "⚙️ Pengaturan utama seperti Fly & Speed")
+-- === Tombol Hide ===
+local HideGui = Instance.new("ScreenGui", CoreGui)
+HideGui.Name = "HideButton"
 
--- Tombol Fly
+local HideButton = Instance.new("TextButton", HideGui)
+HideButton.Text = "Show UI"
+HideButton.Size = UDim2.new(0, 100, 0, 35)
+HideButton.Position = UDim2.new(0.02, 0, 0.4, 0)
+HideButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+HideButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+HideButton.Font = Enum.Font.GothamBold
+HideButton.TextSize = 14
+HideButton.Visible = false
+Instance.new("UICorner", HideButton).CornerRadius = UDim.new(0, 6)
+
+HideButton.MouseEnter:Connect(function()
+	TweenService:Create(HideButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 60)}):Play()
+end)
+HideButton.MouseLeave:Connect(function()
+	TweenService:Create(HideButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}):Play()
+end)
+
+CloseButton.MouseButton1Click:Connect(function()
+	TweenService:Create(MainFrame, TweenInfo.new(0.3), {
+		Size = UDim2.new(0, 0, 0, 0),
+		BackgroundTransparency = 1
+	}):Play()
+	task.wait(0.3)
+	MainFrame.Visible = false
+	HideButton.Visible = true
+end)
+
+HideButton.MouseButton1Click:Connect(function()
+	MainFrame.Visible = true
+	MainFrame.Size = UDim2.new(0, 420, 0, 260)
+	MainFrame.BackgroundTransparency = 0
+	HideButton.Visible = false
+end)
+
+-----------------------------------------------------------
+-- ✈️ Fly System (Tab Settings)
+-----------------------------------------------------------
 local FlyBtn = Instance.new("TextButton", PageSetting)
 FlyBtn.Size = UDim2.new(0.9, 0, 0, 40)
 FlyBtn.Position = UDim2.new(0.05, 0, 0.05, 0)
@@ -157,7 +190,6 @@ FlyBtn.Font = Enum.Font.GothamBold
 FlyBtn.TextSize = 18
 Instance.new("UICorner", FlyBtn).CornerRadius = UDim.new(0, 8)
 
--- Label Speed
 local SpeedLabel = Instance.new("TextLabel", PageSetting)
 SpeedLabel.Size = UDim2.new(0.9, 0, 0, 25)
 SpeedLabel.Position = UDim2.new(0.05, 0, 0.15, 0)
@@ -167,7 +199,6 @@ SpeedLabel.TextColor3 = Color3.fromRGB(255, 255, 200)
 SpeedLabel.Font = Enum.Font.GothamBold
 SpeedLabel.TextSize = 16
 
--- Tombol Speed + dan -
 local PlusBtn = Instance.new("TextButton", PageSetting)
 PlusBtn.Size = UDim2.new(0.43, 0, 0, 30)
 PlusBtn.Position = UDim2.new(0.05, 0, 0.22, 0)
@@ -188,13 +219,11 @@ MinusBtn.Font = Enum.Font.GothamBold
 MinusBtn.TextSize = 14
 Instance.new("UICorner", MinusBtn).CornerRadius = UDim.new(0, 8)
 
---------------------------------------------------------
--- Tombol Naik & Turun di luar UI (dekat tombol Jump)
---------------------------------------------------------
-local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-ScreenGui.Name = "FlyButtons"
+-- Tombol luar UI
+local FlyGui = Instance.new("ScreenGui", CoreGui)
+FlyGui.Name = "FlyButtons"
 
-local UpBtn = Instance.new("TextButton", ScreenGui)
+local UpBtn = Instance.new("TextButton", FlyGui)
 UpBtn.Size = UDim2.new(0, 60, 0, 60)
 UpBtn.Position = UDim2.new(0.9, 0, 0.8, 0)
 UpBtn.Text = "⬆️"
@@ -206,7 +235,7 @@ Instance.new("UICorner", UpBtn).CornerRadius = UDim.new(1, 0)
 UpBtn.Active = true
 UpBtn.Draggable = true
 
-local DownBtn = Instance.new("TextButton", ScreenGui)
+local DownBtn = Instance.new("TextButton", FlyGui)
 DownBtn.Size = UDim2.new(0, 60, 0, 60)
 DownBtn.Position = UDim2.new(0.9, 0, 0.87, 0)
 DownBtn.Text = "⬇️"
@@ -218,16 +247,11 @@ Instance.new("UICorner", DownBtn).CornerRadius = UDim.new(1, 0)
 DownBtn.Active = true
 DownBtn.Draggable = true
 
-----------------------------------------------------------------
--- === Sistem Fly ===
-----------------------------------------------------------------
 local flying = false
 local speed = 60
 local bv
 local flyY = 0
 local upHeld, downHeld = false, false
-local LP = game.Players.LocalPlayer
-local RunService = game:GetService("RunService")
 
 local function startFly()
 	local HRP = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
@@ -255,7 +279,6 @@ PlusBtn.MouseButton1Click:Connect(function()
 	speed = speed+10
 	SpeedLabel.Text = "⚡ Speed: "..speed
 end)
-
 MinusBtn.MouseButton1Click:Connect(function()
 	speed = math.max(10, speed-10)
 	SpeedLabel.Text = "⚡ Speed: "..speed
@@ -268,44 +291,4 @@ FlyBtn.MouseButton1Click:Connect(function()
 	if flying then startFly() else if bv then bv:Destroy() bv=nil end end
 end)
 
--- === Tombol Hide ===
-local HideGui = Instance.new("ScreenGui", CoreGui)
-HideGui.Name = "HideButton"
-
-local HideButton = Instance.new("TextButton", HideGui)
-HideButton.Text = "Show UI"
-HideButton.Size = UDim2.new(0, 100, 0, 35)
-HideButton.Position = UDim2.new(0.02, 0, 0.4, 0)
-HideButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-HideButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-HideButton.Font = Enum.Font.GothamBold
-HideButton.TextSize = 14
-HideButton.Visible = false
-Instance.new("UICorner", HideButton).CornerRadius = UDim.new(0, 6)
-
-HideButton.MouseEnter:Connect(function()
-	TweenService:Create(HideButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 60)}):Play()
-end)
-HideButton.MouseLeave:Connect(function()
-	TweenService:Create(HideButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}):Play()
-end)
-
--- === Fungsi Close & Show ===
-CloseButton.MouseButton1Click:Connect(function()
-	TweenService:Create(MainFrame, TweenInfo.new(0.3), {
-		Size = UDim2.new(0, 0, 0, 0),
-		BackgroundTransparency = 1
-	}):Play()
-	task.wait(0.3)
-	MainFrame.Visible = false
-	HideButton.Visible = true
-end)
-
-HideButton.MouseButton1Click:Connect(function()
-	MainFrame.Visible = true
-	MainFrame.Size = UDim2.new(0, 420, 0, 260)
-	MainFrame.BackgroundTransparency = 0
-	HideButton.Visible = false
-end)
-
-print("✅ Base UI (4 Tabs) Loaded Successfully.")
+print("✅ Base UI + Fly System Loaded Successfully.")
