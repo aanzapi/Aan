@@ -1,332 +1,178 @@
---[[
-    ================================================================
-    CUSTOM UI SCRIPT V2.0: MODERN DARK MODE (10x UPGRADE)
-    ================================================================
-    
-    Fitur Utama:
-    1.  Desain Modern Dark Mode dengan sudut melengkung.
-    2.  Pembagian fitur menggunakan TabSystem sederhana.
-    3.  Animasi hover pada tombol.
-    4.  Logika Toggle & Button yang bersih.
-    
-    CATATAN: Di Roblox Studio, CoreGui dan fitur Blur tidak selalu
-             berfungsi sama seperti di executor. Hasil terbaik
-             akan terlihat saat dieksekusi.
-]]
+--=========================================================
+-- Base UI Template (DrRay Minimal Edition)
+--=========================================================
 
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local LocalPlayer = Players.LocalPlayer
+--==[ GUI Container ]==--
+local ScreenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+ScreenGui.Name = "BaseUI"
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.IgnoreGuiInset = true
 
--- ====================================================================
--- 1. SETUP DASAR GUI
--- ====================================================================
-
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "CustomModernUI"
-ScreenGui.Parent = game:GetService("CoreGui")
-ScreenGui.ResetOnSpawn = false
-
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0.4, 0, 0.6, 0) -- Ukuran lebih besar
-MainFrame.Position = UDim2.new(0.3, 0, 0.2, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 24) -- Background lebih gelap
+--==[ Main Frame ]==--
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0.45, 0, 0.55, 0)
+MainFrame.Position = UDim2.new(0.275, 0, 0.2, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(42, 42, 58)
 MainFrame.BorderSizePixel = 0
-MainFrame.Active = true -- Diperlukan untuk dragging
-MainFrame.ZIndex = 100 -- Pastikan selalu di atas
-MainFrame.Parent = ScreenGui
+MainFrame.Name = "MainFrame"
 
--- Efek Sudut Melengkung (Rounded Corners)
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
+local MainCorner = Instance.new("UICorner", MainFrame)
+MainCorner.CornerRadius = UDim.new(0.03, 0)
 
--- ====================================================================
--- 2. TITLE BAR & CLOSE BUTTON
--- ====================================================================
+--==[ Title Bar ]==--
+local TopBar = Instance.new("Frame", MainFrame)
+TopBar.Size = UDim2.new(1, 0, 0.1, 0)
+TopBar.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+TopBar.BorderSizePixel = 0
 
-local TitleBar = Instance.new("Frame")
-TitleBar.Name = "TitleBar"
-TitleBar.Size = UDim2.new(1, 0, 0.08, 0) -- Lebih tipis
-TitleBar.Position = UDim2.new(0, 0, 0, 0)
-TitleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Warna Title Bar
-TitleBar.BorderSizePixel = 0
-TitleBar.Active = true
-TitleBar.Draggable = true -- Aktifkan Draggable
-TitleBar.Parent = MainFrame
+local Title = Instance.new("TextLabel", TopBar)
+Title.Size = UDim2.new(0.9, 0, 1, 0)
+Title.Position = UDim2.new(0.05, 0, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "DrRay Base UI"
+Title.Font = Enum.Font.GothamBold
+Title.TextScaled = true
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 
--- Label Judul
-local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Size = UDim2.new(0.9, 0, 1, 0)
-TitleLabel.Position = UDim2.new(0, 10, 0, 0)
-TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-TitleLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-TitleLabel.BackgroundTransparency = 1
-TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleLabel.Text = "CUSTOM MODERN UI | V2.0"
-TitleLabel.Font = Enum.Font.SourceSansBold
-TitleLabel.TextSize = 16
-TitleLabel.Parent = TitleBar
-
--- Tombol Tutup (X)
-local CloseButton = Instance.new("TextButton")
-CloseButton.Name = "CloseButton"
-CloseButton.Size = UDim2.new(0.08, 0, 1, 0)
-CloseButton.Position = UDim2.new(0.92, 0, 0, 0)
-CloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Merah
-CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+local CloseButton = Instance.new("TextButton", TopBar)
+CloseButton.Size = UDim2.new(0.08, 0, 0.8, 0)
+CloseButton.Position = UDim2.new(0.92, 0, 0.1, 0)
 CloseButton.Text = "X"
-CloseButton.Font = Enum.Font.SourceSansBold
-CloseButton.TextSize = 16
-CloseButton.Parent = TitleBar
-
--- Logika Tombol Tutup
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+CloseButton.TextScaled = true
+CloseButton.TextColor3 = Color3.new(1, 1, 1)
+CloseButton.BorderSizePixel = 0
+Instance.new("UICorner", CloseButton).CornerRadius = UDim.new(0.2, 0)
 CloseButton.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- ====================================================================
--- 3. CONTAINER DAN TAB SYSTEM
--- ====================================================================
-
-local TabBar = Instance.new("Frame")
-TabBar.Name = "TabBar"
-TabBar.Size = UDim2.new(0.2, 0, 0.92, 0) -- 20% Lebar untuk Tab
-TabBar.Position = UDim2.new(0, 0, 0.08, 0)
-TabBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35) -- Warna Tab Bar
+--==[ Tab Navigation Bar ]==--
+local TabBar = Instance.new("Frame", MainFrame)
+TabBar.Size = UDim2.new(0.25, 0, 0.9, 0)
+TabBar.Position = UDim2.new(0, 0, 0.1, 0)
+TabBar.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
 TabBar.BorderSizePixel = 0
-TabBar.Parent = MainFrame
+TabBar.Name = "TabBar"
 
-local ContentFrame = Instance.new("Frame")
-ContentFrame.Name = "ContentFrame"
-ContentFrame.Size = UDim2.new(0.8, 0, 0.92, 0) -- 80% Lebar untuk Konten
-ContentFrame.Position = UDim2.new(0.2, 0, 0.08, 0)
-ContentFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+local TabList = Instance.new("UIListLayout", TabBar)
+TabList.Padding = UDim.new(0.02, 0)
+TabList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+TabList.SortOrder = Enum.SortOrder.LayoutOrder
+TabList.VerticalAlignment = Enum.VerticalAlignment.Top
+
+--==[ Tab Button Function ]==--
+local function createTab(name)
+	local button = Instance.new("TextButton")
+	button.Size = UDim2.new(0.9, 0, 0.08, 0)
+	button.BackgroundColor3 = Color3.fromRGB(60, 60, 90)
+	button.Text = name
+	button.TextScaled = true
+	button.TextColor3 = Color3.new(1, 1, 1)
+	button.Font = Enum.Font.GothamBold
+	button.BorderSizePixel = 0
+	Instance.new("UICorner", button).CornerRadius = UDim.new(0.2, 0)
+	button.Parent = TabBar
+	return button
+end
+
+--==[ Content Area ]==--
+local ContentFrame = Instance.new("Frame", MainFrame)
+ContentFrame.Size = UDim2.new(0.75, 0, 0.9, 0)
+ContentFrame.Position = UDim2.new(0.25, 0, 0.1, 0)
+ContentFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
 ContentFrame.BorderSizePixel = 0
-ContentFrame.Parent = MainFrame
 
--- Layout untuk Tab Bar
-local TabListLayout = Instance.new("UIListLayout")
-TabListLayout.Parent = TabBar
-TabListLayout.Padding = UDim.new(0, 5)
-TabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+local UIPadding = Instance.new("UIPadding", ContentFrame)
+UIPadding.PaddingTop = UDim.new(0.04, 0)
+UIPadding.PaddingLeft = UDim.new(0.04, 0)
 
-local Tabs = {}
-local CurrentTab = nil
+--==[ Dropdown Template ]==--
+local function createDropdown(title, options)
+	local frame = Instance.new("Frame", ContentFrame)
+	frame.Size = UDim2.new(0.9, 0, 0.12, 0)
+	frame.BackgroundColor3 = Color3.fromRGB(45, 50, 75)
+	frame.BorderSizePixel = 0
+	frame.Name = title
+	Instance.new("UICorner", frame).CornerRadius = UDim.new(0.2, 0)
 
--- Fungsi untuk membuat Tab
-local function CreateTab(name, order)
-    local tabButton = Instance.new("TextButton")
-    tabButton.Name = name .. "Button"
-    tabButton.Text = name
-    tabButton.Size = UDim2.new(1, 0, 0, 40) -- Tinggi 40px
-    tabButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    tabButton.TextColor3 = Color3.fromRGB(150, 150, 150) -- Teks abu-abu
-    tabButton.Font = Enum.Font.SourceSansBold
-    tabButton.TextSize = 14
-    tabButton.LayoutOrder = order
-    tabButton.Parent = TabBar
+	local label = Instance.new("TextLabel", frame)
+	label.Text = title
+	label.Size = UDim2.new(0.6, 0, 1, 0)
+	label.BackgroundTransparency = 1
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.TextScaled = true
+	label.Font = Enum.Font.GothamBold
 
-    local tabContent = Instance.new("ScrollingFrame")
-    tabContent.Name = name .. "Content"
-    tabContent.Size = UDim2.new(1, 0, 1, 0)
-    tabContent.Position = UDim2.new(0, 0, 0, 0)
-    tabContent.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
-    tabContent.BackgroundTransparency = 1
-    tabContent.BorderSizePixel = 0
-    tabContent.ScrollBarThickness = 6
-    tabContent.CanvasSize = UDim2.new(0, 0, 0, 0) -- Disesuaikan nanti
-    tabContent.Visible = false
-    tabContent.Parent = ContentFrame
-    
-    -- Layout untuk konten tab
-    local ContentLayout = Instance.new("UIListLayout")
-    ContentLayout.Name = "ListLayout"
-    ContentLayout.Padding = UDim.new(0, 10)
-    ContentLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    ContentLayout.Parent = tabContent
-    
-    -- Tambahkan Padding (Penyangga)
-    Instance.new("UIPadding", tabContent).Padding = UDim.new(0, 10)
-    
-    Tabs[name] = {Button = tabButton, Content = tabContent, Layout = ContentLayout}
-    
-    -- Logika Klik Tab
-    tabButton.MouseButton1Click:Connect(function()
-        if CurrentTab then
-            -- Nonaktifkan Tab sebelumnya
-            Tabs[CurrentTab].Content.Visible = false
-            Tabs[CurrentTab].Button.TextColor3 = Color3.fromRGB(150, 150, 150)
-        end
-        
-        -- Aktifkan Tab baru
-        CurrentTab = name
-        tabContent.Visible = true
-        tabButton.TextColor3 = Color3.fromRGB(0, 191, 255) -- Warna biru cerah
-    end)
-    
-    return tabContent
+	local drop = Instance.new("TextButton", frame)
+	drop.Size = UDim2.new(0.35, 0, 0.8, 0)
+	drop.Position = UDim2.new(0.62, 0, 0.1, 0)
+	drop.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
+	drop.Text = "Select"
+	drop.TextColor3 = Color3.new(1, 1, 1)
+	drop.TextScaled = true
+	drop.Font = Enum.Font.GothamBold
+	drop.BorderSizePixel = 0
+	Instance.new("UICorner", drop).CornerRadius = UDim.new(0.2, 0)
+
+	local current = options[1] or "None"
+	local open = false
+
+	local dropdownFrame = Instance.new("Frame", frame)
+	dropdownFrame.Position = UDim2.new(0, 0, 1.05, 0)
+	dropdownFrame.Size = UDim2.new(1, 0, 0, 0)
+	dropdownFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
+	dropdownFrame.BorderSizePixel = 0
+	dropdownFrame.Visible = false
+	Instance.new("UICorner", dropdownFrame).CornerRadius = UDim.new(0.1, 0)
+
+	local list = Instance.new("UIListLayout", dropdownFrame)
+	list.Padding = UDim.new(0.02, 0)
+
+	for _, opt in ipairs(options) do
+		local optBtn = Instance.new("TextButton", dropdownFrame)
+		optBtn.Size = UDim2.new(1, 0, 0.2, 0)
+		optBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+		optBtn.Text = opt
+		optBtn.TextScaled = true
+		optBtn.TextColor3 = Color3.new(1, 1, 1)
+		optBtn.Font = Enum.Font.GothamBold
+		optBtn.BorderSizePixel = 0
+		optBtn.MouseButton1Click:Connect(function()
+			drop.Text = opt
+			open = false
+			dropdownFrame.Visible = false
+		end)
+	end
+
+	drop.MouseButton1Click:Connect(function()
+		open = not open
+		dropdownFrame.Visible = open
+	end)
+
+	return frame
 end
 
--- ====================================================================
--- 4. FUNGSIONALITAS KOMPONEN (BUTTON, TOGGLE)
--- ====================================================================
+--==[ Example Tabs and Content ]==--
+local tab1 = createTab("Main")
+local tab2 = createTab("Settings")
 
--- Fungsi untuk membuat Button (dengan efek Hover)
-local function CreateButton(tabContent, name, callback)
-    local button = Instance.new("TextButton")
-    button.Name = name
-    button.Text = name
-    button.Size = UDim2.new(1, 0, 0, 30) -- Lebar 100%, Tinggi 30px
-    button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.Font = Enum.Font.SourceSans
-    button.TextSize = 14
-    button.Parent = tabContent
-    
-    Instance.new("UICorner", button).CornerRadius = UDim.new(0, 4)
+local mainDropdown = createDropdown("Choose Mode", {"Easy", "Medium", "Hard"})
+mainDropdown.Position = UDim2.new(0, 0, 0.05, 0)
 
-    -- Animasi Hover
-    button.MouseEnter:Connect(function()
-        TweenService:Create(button, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(60, 60, 60)}):Play()
-    end)
-    button.MouseLeave:Connect(function()
-        TweenService:Create(button, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(40, 40, 40)}):Play()
-    end)
+local exampleBtn = Instance.new("TextButton", ContentFrame)
+exampleBtn.Size = UDim2.new(0.9, 0, 0.12, 0)
+exampleBtn.Position = UDim2.new(0, 0, 0.25, 0)
+exampleBtn.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
+exampleBtn.Text = "Activate"
+exampleBtn.TextScaled = true
+exampleBtn.TextColor3 = Color3.new(1, 1, 1)
+exampleBtn.Font = Enum.Font.GothamBold
+exampleBtn.BorderSizePixel = 0
+Instance.new("UICorner", exampleBtn).CornerRadius = UDim.new(0.2, 0)
 
-    -- Logika Klik
-    button.MouseButton1Click:Connect(callback)
-    
-    -- Sesuaikan CanvasSize (penting untuk ScrollingFrame)
-    local listLayout = tabContent:FindFirstChild("ListLayout")
-    if listLayout then
-        listLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-            tabContent.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y + 20)
-        end)
-    end
-end
-
--- Fungsi untuk membuat Toggle (dengan visual feedback)
-local function CreateToggle(tabContent, name, defaultState, callback)
-    local state = defaultState
-    
-    local toggleFrame = Instance.new("Frame")
-    toggleFrame.Name = name .. "Toggle"
-    toggleFrame.Size = UDim2.new(1, 0, 0, 30)
-    toggleFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    toggleFrame.BorderSizePixel = 0
-    toggleFrame.Parent = tabContent
-    Instance.new("UICorner", toggleFrame).CornerRadius = UDim.new(0, 4)
-
-    local toggleButton = Instance.new("TextButton")
-    toggleButton.Size = UDim2.new(1, 0, 1, 0)
-    toggleButton.Text = name
-    toggleButton.TextXAlignment = Enum.TextXAlignment.Left
-    toggleButton.TextLabel.Position = UDim2.new(0, 10, 0, 0)
-    toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    toggleButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    toggleButton.BackgroundTransparency = 1
-    toggleButton.Font = Enum.Font.SourceSans
-    toggleButton.TextSize = 14
-    toggleButton.Parent = toggleFrame
-    
-    local Indicator = Instance.new("Frame")
-    Indicator.Size = UDim2.new(0, 15, 0, 15)
-    Indicator.Position = UDim2.new(1, -25, 0.5, -7.5)
-    Indicator.BackgroundColor3 = state and Color3.fromRGB(0, 191, 255) or Color3.fromRGB(60, 60, 60)
-    Indicator.BorderSizePixel = 0
-    Indicator.Parent = toggleFrame
-    Instance.new("UICorner", Indicator).CornerRadius = UDim.new(0, 7.5) -- Lingkaran
-
-    local function updateVisuals()
-        local color = state and Color3.fromRGB(0, 191, 255) or Color3.fromRGB(60, 60, 60)
-        TweenService:Create(Indicator, TweenInfo.new(0.2), {BackgroundColor3 = color}):Play()
-    end
-    
-    -- Logika Klik
-    toggleButton.MouseButton1Click:Connect(function()
-        state = not state
-        updateVisuals()
-        callback(state)
-    end)
-    
-    -- Animasi Hover Frame Luar
-    toggleFrame.MouseEnter:Connect(function()
-        TweenService:Create(toggleFrame, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(60, 60, 60)}):Play()
-    end)
-    toggleFrame.MouseLeave:Connect(function()
-        TweenService:Create(toggleFrame, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(40, 40, 40)}):Play()
-    end)
-
-    -- Sesuaikan CanvasSize
-    local listLayout = tabContent:FindFirstChild("ListLayout")
-    if listLayout then
-        listLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-            tabContent.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y + 20)
-        end)
-    end
-    
-    updateVisuals() -- Inisialisasi visual awal
-end
-
-
--- ====================================================================
--- 5. IMPLEMENTASI FITUR (CONTOH)
--- ====================================================================
-
--- Buat Tab
-local MainContent = CreateTab("PLAYER", 1)
-local CombatContent = CreateTab("COMBAT", 2)
-local MiscContent = CreateTab("MISC", 3)
-
--- Tab PLAYER
-CreateToggle(MainContent, "Anti-AFK", false, function(state)
-    if state then
-        -- Logika Anti-AFK
-        print("Anti-AFK Aktif")
-    else
-        print("Anti-AFK Non-Aktif")
-    end
+exampleBtn.MouseButton1Click:Connect(function()
+	print("Activated!")
 end)
 
-CreateButton(MainContent, "Set WalkSpeed ke 50", function()
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid.WalkSpeed = 50
-        print("WalkSpeed diatur ke 50")
-    end
-end)
-
--- Tab COMBAT
-CreateToggle(CombatContent, "Aimbot (Toggle)", false, function(state)
-    if state then
-        print("Aimbot Aktif")
-    else
-        print("Aimbot Non-Aktif")
-    end
-end)
-
-CreateButton(CombatContent, "Insta-Kill Boss", function()
-    print("Mencoba Insta-Kill...")
-end)
-
--- Tab MISC
-CreateButton(MiscContent, "Reset Character", function()
-    LocalPlayer.Character:BreakJoints()
-end)
-
--- ====================================================================
--- 6. INISIALISASI
--- ====================================================================
-
--- Aktifkan Tab pertama secara default
-Tabs["PLAYER"].Button.MouseButton1Click:Fire()
-
--- Logika Toggle UI dengan hotkey (misalnya, Insert)
-UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
-    if input.KeyCode == Enum.KeyCode.Insert and not gameProcessedEvent then
-        MainFrame.Visible = not MainFrame.Visible
-        print("UI Toggled: " .. tostring(MainFrame.Visible))
-    end
-end)
-
-print("Custom Modern UI V2.0 (10x Upgrade) Loaded! Press INSERT to Toggle.")
+print("[✅] DrRay Base UI Loaded")
