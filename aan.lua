@@ -409,16 +409,16 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -----------------------------------------------------------
--- 🌍 Teleport Tab (Natural Style + Scroll Support)
+-- 🌍 Teleport Tab (Player + Pulau System)
 -----------------------------------------------------------
 
 local Players = game:GetService("Players")
 local LP = Players.LocalPlayer
 
--- === TAB UTAMA ===
+-- === TAB TELEPORT ===
 local Page2 = TabContents["Teleport"]
 
--- === SCROLL CONTAINER (biar bisa tambah fitur banyak) ===
+-- === SCROLL CONTAINER ===
 local ScrollMain = Instance.new("ScrollingFrame", Page2)
 ScrollMain.Size = UDim2.new(1, 0, 1, 0)
 ScrollMain.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -438,52 +438,47 @@ paddingMain.PaddingRight = UDim.new(0, 10)
 paddingMain.PaddingBottom = UDim.new(0, 10)
 
 -----------------------------------------------------------
--- 🧭 TELEPORT PLAYER FRAME
+-- 🧭 TELEPORT PLAYER SYSTEM
 -----------------------------------------------------------
 
 local TeleFrame = Instance.new("Frame", ScrollMain)
 TeleFrame.Size = UDim2.new(1, -10, 0, 270)
 TeleFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
-TeleFrame.BackgroundTransparency = 0.1
 Instance.new("UICorner", TeleFrame).CornerRadius = UDim.new(0, 10)
 Instance.new("UIStroke", TeleFrame).Color = Color3.fromRGB(60, 60, 90)
 
 local Title = Instance.new("TextLabel", TeleFrame)
 Title.Size = UDim2.new(1, 0, 0, 30)
 Title.Position = UDim2.new(0, 0, 0, 5)
-Title.Text = "🌍 Teleport Player System"
+Title.Text = "👤 Teleport Player System"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 18
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.BackgroundTransparency = 1
 
--- === DROPDOWN BUTTON ===
 local DropDown = Instance.new("TextButton", TeleFrame)
-DropDown.Size = UDim2.new(0.9, 0, 0, 35)
+DropDown.Size = UDim2.new(0.9, 0, 0, 40)
 DropDown.Position = UDim2.new(0.05, 0, 0.17, 0)
-DropDown.Text = "👥 Open Player List"
+DropDown.Text = "📜 Player List"
 DropDown.TextColor3 = Color3.fromRGB(255, 255, 255)
 DropDown.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
 DropDown.Font = Enum.Font.GothamBold
 DropDown.TextSize = 16
-DropDown.AutoButtonColor = true
 Instance.new("UICorner", DropDown).CornerRadius = UDim.new(0, 8)
-Instance.new("UIStroke", DropDown).Color = Color3.fromRGB(70, 70, 100)
+Instance.new("UIStroke", DropDown).Color = Color3.fromRGB(75, 75, 100)
 
--- === REFRESH BUTTON ===
 local RefreshBtn = Instance.new("TextButton", TeleFrame)
-RefreshBtn.Size = UDim2.new(0.9, 0, 0, 32)
+RefreshBtn.Size = UDim2.new(0.9, 0, 0, 35)
 RefreshBtn.Position = UDim2.new(0.05, 0, 0.33, 0)
 RefreshBtn.Text = "🔄 Refresh Player List"
 RefreshBtn.TextColor3 = Color3.fromRGB(230, 230, 230)
-RefreshBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 90)
+RefreshBtn.BackgroundColor3 = Color3.fromRGB(65, 65, 90)
 RefreshBtn.Font = Enum.Font.GothamBold
 RefreshBtn.TextSize = 14
 RefreshBtn.Visible = false
 Instance.new("UICorner", RefreshBtn).CornerRadius = UDim.new(0, 8)
-Instance.new("UIStroke", RefreshBtn).Color = Color3.fromRGB(80, 80, 120)
+Instance.new("UIStroke", RefreshBtn).Color = Color3.fromRGB(90, 90, 130)
 
--- === LIST FRAME (SCROLLABLE) ===
 local ListFrame = Instance.new("ScrollingFrame", TeleFrame)
 ListFrame.Size = UDim2.new(0.9, 0, 0, 160)
 ListFrame.Position = UDim2.new(0.05, 0, 0.47, 0)
@@ -497,17 +492,12 @@ Instance.new("UICorner", ListFrame).CornerRadius = UDim.new(0, 8)
 
 local layout = Instance.new("UIListLayout", ListFrame)
 layout.Padding = UDim.new(0, 6)
-layout.FillDirection = Enum.FillDirection.Vertical
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 
 local padding = Instance.new("UIPadding", ListFrame)
 padding.PaddingTop = UDim.new(0, 6)
 padding.PaddingLeft = UDim.new(0, 6)
 padding.PaddingRight = UDim.new(0, 6)
-
------------------------------------------------------------
--- 🧭 TELEPORT PLAYER FUNCTION
------------------------------------------------------------
 
 local function refreshPlayers()
 	for _, child in pairs(ListFrame:GetChildren()) do
@@ -520,10 +510,9 @@ local function refreshPlayers()
 		if plr ~= LP then
 			local ItemFrame = Instance.new("Frame", ListFrame)
 			ItemFrame.Size = UDim2.new(1, -6, 0, 36)
-			ItemFrame.BackgroundColor3 = Color3.fromRGB(55, 55, 85)
-			ItemFrame.BackgroundTransparency = 0.05
+			ItemFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
 			Instance.new("UICorner", ItemFrame).CornerRadius = UDim.new(0, 6)
-			Instance.new("UIStroke", ItemFrame).Color = Color3.fromRGB(75, 75, 110)
+			Instance.new("UIStroke", ItemFrame).Color = Color3.fromRGB(70, 70, 100)
 
 			local NameLabel = Instance.new("TextLabel", ItemFrame)
 			NameLabel.Size = UDim2.new(0.7, 0, 1, 0)
@@ -540,10 +529,9 @@ local function refreshPlayers()
 			TeleBtn.Position = UDim2.new(0.7, 0, 0.125, 0)
 			TeleBtn.Text = "Teleport"
 			TeleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-			TeleBtn.BackgroundColor3 = Color3.fromRGB(85, 85, 130)
+			TeleBtn.BackgroundColor3 = Color3.fromRGB(65, 65, 90)
 			TeleBtn.Font = Enum.Font.GothamBold
 			TeleBtn.TextSize = 14
-			TeleBtn.AutoButtonColor = true
 			Instance.new("UICorner", TeleBtn).CornerRadius = UDim.new(0, 6)
 
 			TeleBtn.MouseButton1Click:Connect(function()
@@ -555,10 +543,6 @@ local function refreshPlayers()
 		end
 	end
 end
-
------------------------------------------------------------
--- ⚙️ LOGIC BUKA / REFRESH
------------------------------------------------------------
 
 Players.PlayerAdded:Connect(refreshPlayers)
 Players.PlayerRemoving:Connect(refreshPlayers)
@@ -574,5 +558,88 @@ DropDown.MouseButton1Click:Connect(function()
 end)
 
 refreshPlayers()
+
+-----------------------------------------------------------
+-- 🌴 TELEPORT PULAU SYSTEM
+-----------------------------------------------------------
+
+local Locations = { -- nanti kamu isi lokasi-lokasi di sini
+	{Name = "🏝️ Pulau Utama", Position = Vector3.new(0, 10, 0)},
+	{Name = "🔥 Pulau Lava", Position = Vector3.new(500, 30, -200)},
+	{Name = "❄️ Pulau Es", Position = Vector3.new(-300, 25, 400)},
+}
+
+local PulauFrame = Instance.new("Frame", ScrollMain)
+PulauFrame.Size = UDim2.new(1, -10, 0, 250)
+PulauFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+Instance.new("UICorner", PulauFrame).CornerRadius = UDim.new(0, 10)
+Instance.new("UIStroke", PulauFrame).Color = Color3.fromRGB(60, 60, 90)
+
+local PulauTitle = Instance.new("TextLabel", PulauFrame)
+PulauTitle.Size = UDim2.new(1, 0, 0, 30)
+PulauTitle.Position = UDim2.new(0, 0, 0, 5)
+PulauTitle.Text = "🌴 Teleport Pulau / Area"
+PulauTitle.Font = Enum.Font.GothamBold
+PulauTitle.TextSize = 18
+PulauTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+PulauTitle.BackgroundTransparency = 1
+
+local PulauList = Instance.new("ScrollingFrame", PulauFrame)
+PulauList.Size = UDim2.new(0.9, 0, 0, 190)
+PulauList.Position = UDim2.new(0.05, 0, 0.18, 0)
+PulauList.CanvasSize = UDim2.new(0, 0, 0, 0)
+PulauList.AutomaticCanvasSize = Enum.AutomaticSize.Y
+PulauList.ScrollBarThickness = 6
+PulauList.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+PulauList.BackgroundTransparency = 0.15
+Instance.new("UICorner", PulauList).CornerRadius = UDim.new(0, 8)
+
+local layout2 = Instance.new("UIListLayout", PulauList)
+layout2.Padding = UDim.new(0, 6)
+layout2.SortOrder = Enum.SortOrder.LayoutOrder
+
+local function refreshPulau()
+	for _, child in pairs(PulauList:GetChildren()) do
+		if child:IsA("Frame") then
+			child:Destroy()
+		end
+	end
+
+	for _, loc in ipairs(Locations) do
+		local ItemFrame = Instance.new("Frame", PulauList)
+		ItemFrame.Size = UDim2.new(1, -6, 0, 36)
+		ItemFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+		Instance.new("UICorner", ItemFrame).CornerRadius = UDim.new(0, 6)
+		Instance.new("UIStroke", ItemFrame).Color = Color3.fromRGB(70, 70, 100)
+
+		local NameLabel = Instance.new("TextLabel", ItemFrame)
+		NameLabel.Size = UDim2.new(0.7, 0, 1, 0)
+		NameLabel.Position = UDim2.new(0.05, 0, 0, 0)
+		NameLabel.Text = loc.Name
+		NameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+		NameLabel.BackgroundTransparency = 1
+		NameLabel.Font = Enum.Font.Gotham
+		NameLabel.TextSize = 15
+		NameLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+		local TeleBtn = Instance.new("TextButton", ItemFrame)
+		TeleBtn.Size = UDim2.new(0.25, 0, 0.75, 0)
+		TeleBtn.Position = UDim2.new(0.7, 0, 0.125, 0)
+		TeleBtn.Text = "Go"
+		TeleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		TeleBtn.BackgroundColor3 = Color3.fromRGB(65, 65, 90)
+		TeleBtn.Font = Enum.Font.GothamBold
+		TeleBtn.TextSize = 14
+		Instance.new("UICorner", TeleBtn).CornerRadius = UDim.new(0, 6)
+
+		TeleBtn.MouseButton1Click:Connect(function()
+			if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
+				LP.Character.HumanoidRootPart.CFrame = CFrame.new(loc.Position + Vector3.new(0, 5, 0))
+			end
+		end)
+	end
+end
+
+refreshPulau()
 
 print("✅ Base UI + Fly System Loaded Successfully.")
