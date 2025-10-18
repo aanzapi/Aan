@@ -178,57 +178,86 @@ HideButton.MouseButton1Click:Connect(function()
 end)
 
 -----------------------------------------------------------
--- ✈️ Fly System (Tab Settings)
+-- ✈️ Fly System (Tab Settings - Versi Rapi)
 -----------------------------------------------------------
-local FlyBtn = Instance.new("TextButton", PageSetting)
-FlyBtn.Size = UDim2.new(0.9, 0, 0, 40)
-FlyBtn.Position = UDim2.new(0.05, 0, 0.05, 0)
+
+local LP = game:GetService("Players").LocalPlayer
+local RunService = game:GetService("RunService")
+
+local PageSetting = TabContents["Settings"] -- tab Settings yang udah ada
+
+-- === FRAME DALAM SETTINGS ===
+local FlyFrame = Instance.new("Frame", PageSetting)
+FlyFrame.Size = UDim2.new(0.95, 0, 0, 180)
+FlyFrame.Position = UDim2.new(0.025, 0, 0.05, 0)
+FlyFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+FlyFrame.BackgroundTransparency = 0.1
+Instance.new("UICorner", FlyFrame).CornerRadius = UDim.new(0, 10)
+
+local Title = Instance.new("TextLabel", FlyFrame)
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Position = UDim2.new(0, 0, 0, 5)
+Title.Text = "✈️ Fly Controller"
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 18
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundTransparency = 1
+
+-- === TOMBOL FLY ===
+local FlyBtn = Instance.new("TextButton", FlyFrame)
+FlyBtn.Size = UDim2.new(0.45, 0, 0, 40)
+FlyBtn.Position = UDim2.new(0.05, 0, 0.25, 0)
 FlyBtn.Text = "✈️ Fly: OFF"
 FlyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-FlyBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+FlyBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
 FlyBtn.Font = Enum.Font.GothamBold
-FlyBtn.TextSize = 18
+FlyBtn.TextSize = 16
 Instance.new("UICorner", FlyBtn).CornerRadius = UDim.new(0, 8)
 
-local SpeedLabel = Instance.new("TextLabel", PageSetting)
-SpeedLabel.Size = UDim2.new(0.9, 0, 0, 25)
-SpeedLabel.Position = UDim2.new(0.05, 0, 0.15, 0)
-SpeedLabel.BackgroundTransparency = 1
+-- === LABEL SPEED ===
+local SpeedLabel = Instance.new("TextLabel", FlyFrame)
+SpeedLabel.Size = UDim2.new(0.45, 0, 0, 40)
+SpeedLabel.Position = UDim2.new(0.5, 0, 0.25, 0)
 SpeedLabel.Text = "⚡ Speed: 60"
 SpeedLabel.TextColor3 = Color3.fromRGB(255, 255, 200)
 SpeedLabel.Font = Enum.Font.GothamBold
 SpeedLabel.TextSize = 16
+SpeedLabel.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+Instance.new("UICorner", SpeedLabel).CornerRadius = UDim.new(0, 8)
 
-local PlusBtn = Instance.new("TextButton", PageSetting)
-PlusBtn.Size = UDim2.new(0.43, 0, 0, 30)
-PlusBtn.Position = UDim2.new(0.05, 0, 0.22, 0)
+-- === PLUS / MINUS SPEED ===
+local PlusBtn = Instance.new("TextButton", FlyFrame)
+PlusBtn.Size = UDim2.new(0.43, 0, 0, 35)
+PlusBtn.Position = UDim2.new(0.05, 0, 0.55, 0)
 PlusBtn.Text = "+ Speed"
 PlusBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-PlusBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 80)
+PlusBtn.BackgroundColor3 = Color3.fromRGB(65, 65, 90)
 PlusBtn.Font = Enum.Font.GothamBold
 PlusBtn.TextSize = 14
 Instance.new("UICorner", PlusBtn).CornerRadius = UDim.new(0, 8)
 
-local MinusBtn = Instance.new("TextButton", PageSetting)
-MinusBtn.Size = UDim2.new(0.43, 0, 0, 30)
-MinusBtn.Position = UDim2.new(0.52, 0, 0.22, 0)
+local MinusBtn = Instance.new("TextButton", FlyFrame)
+MinusBtn.Size = UDim2.new(0.43, 0, 0, 35)
+MinusBtn.Position = UDim2.new(0.52, 0, 0.55, 0)
 MinusBtn.Text = "- Speed"
 MinusBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-MinusBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 80)
+MinusBtn.BackgroundColor3 = Color3.fromRGB(65, 65, 90)
 MinusBtn.Font = Enum.Font.GothamBold
 MinusBtn.TextSize = 14
 Instance.new("UICorner", MinusBtn).CornerRadius = UDim.new(0, 8)
 
--- Tombol luar UI
+-----------------------------------------------------------
+-- 🔧 FLY LOGIC
+-----------------------------------------------------------
 local FlyGui = Instance.new("ScreenGui", CoreGui)
 FlyGui.Name = "FlyButtons"
 
 local UpBtn = Instance.new("TextButton", FlyGui)
 UpBtn.Size = UDim2.new(0, 60, 0, 60)
-UpBtn.Position = UDim2.new(0.9, 0, 0.8, 0)
+UpBtn.Position = UDim2.new(0.93, 0, 0.8, 0)
 UpBtn.Text = "⬆️"
-UpBtn.TextColor3 = Color3.fromRGB(255,255,255)
-UpBtn.BackgroundColor3 = Color3.fromRGB(50,50,80)
+UpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+UpBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
 UpBtn.Font = Enum.Font.GothamBold
 UpBtn.TextSize = 26
 Instance.new("UICorner", UpBtn).CornerRadius = UDim.new(1, 0)
@@ -237,10 +266,10 @@ UpBtn.Draggable = true
 
 local DownBtn = Instance.new("TextButton", FlyGui)
 DownBtn.Size = UDim2.new(0, 60, 0, 60)
-DownBtn.Position = UDim2.new(0.9, 0, 0.87, 0)
+DownBtn.Position = UDim2.new(0.93, 0, 0.87, 0)
 DownBtn.Text = "⬇️"
-DownBtn.TextColor3 = Color3.fromRGB(255,255,255)
-DownBtn.BackgroundColor3 = Color3.fromRGB(50,50,80)
+DownBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+DownBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
 DownBtn.Font = Enum.Font.GothamBold
 DownBtn.TextSize = 26
 Instance.new("UICorner", DownBtn).CornerRadius = UDim.new(1, 0)
@@ -258,37 +287,40 @@ local function startFly()
 	if not HRP then return end
 	bv = Instance.new("BodyVelocity")
 	bv.Velocity = Vector3.zero
-	bv.MaxForce = Vector3.new(1e5,1e5,1e5)
+	bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
 	bv.Parent = HRP
 
 	RunService.RenderStepped:Connect(function()
 		if flying and HRP and bv then
 			local moveDir = LP.Character:FindFirstChild("Humanoid").MoveDirection
 			if upHeld then flyY = speed elseif downHeld then flyY = -speed else flyY = 0 end
-			bv.Velocity = Vector3.new(moveDir.X*speed, flyY, moveDir.Z*speed)
+			bv.Velocity = Vector3.new(moveDir.X * speed, flyY, moveDir.Z * speed)
 		end
 	end)
 end
 
-UpBtn.MouseButton1Down:Connect(function() if flying then upHeld=true end end)
-UpBtn.MouseButton1Up:Connect(function() upHeld=false end)
-DownBtn.MouseButton1Down:Connect(function() if flying then downHeld=true end end)
-DownBtn.MouseButton1Up:Connect(function() downHeld=false end)
+UpBtn.MouseButton1Down:Connect(function() if flying then upHeld = true end end)
+UpBtn.MouseButton1Up:Connect(function() upHeld = false end)
+DownBtn.MouseButton1Down:Connect(function() if flying then downHeld = true end end)
+DownBtn.MouseButton1Up:Connect(function() downHeld = false end)
 
 PlusBtn.MouseButton1Click:Connect(function()
-	speed = speed+10
-	SpeedLabel.Text = "⚡ Speed: "..speed
+	speed += 10
+	SpeedLabel.Text = "⚡ Speed: " .. speed
 end)
 MinusBtn.MouseButton1Click:Connect(function()
-	speed = math.max(10, speed-10)
-	SpeedLabel.Text = "⚡ Speed: "..speed
+	speed = math.max(10, speed - 10)
+	SpeedLabel.Text = "⚡ Speed: " .. speed
 end)
 
 FlyBtn.MouseButton1Click:Connect(function()
 	flying = not flying
 	FlyBtn.Text = flying and "✈️ Fly: ON" or "✈️ Fly: OFF"
 	flyY = 0
-	if flying then startFly() else if bv then bv:Destroy() bv=nil end end
+	if flying then
+		startFly()
+	else
+		if bv then bv:Destroy() bv = nil end
+	end
 end)
-
 print("✅ Base UI + Fly System Loaded Successfully.")
