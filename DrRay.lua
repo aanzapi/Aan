@@ -1,424 +1,303 @@
--- Mobile-Friendly Premium GUI (Theoretical for Android)
+-- Delta Executor UI Premium - Mobile Android
+-- Base tampilan dengan fitur geser, hide, notifikasi, dan 5 page
+
 local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local GuiService = game:GetService("GuiService")
-local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 
--- Detect platform
-local isMobile = UserInputService.TouchEnabled and not UserInputService.MouseEnabled
-local isDesktop = UserInputService.MouseEnabled
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
--- Create ScreenGui
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "MobilePremiumGUI"
-ScreenGui.Parent = game.CoreGui
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.ResetOnSpawn = false
+-- Main Screen GUI
+local DeltaGUI = Instance.new("ScreenGui")
+DeltaGUI.Name = "DeltaExecutorPremium"
+DeltaGUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+DeltaGUI.DisplayOrder = 999
 
--- Mobile detection
-if isMobile then
-    SendNotification("Mobile Mode", "Touch-optimized GUI Activated", 3)
-end
+-- Main Frame (Bisa di-geser)
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 350, 0, 400)
+MainFrame.Position = UDim2.new(0.5, -175, 0.5, -200)
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
+MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
 
--- Adaptive sizing for mobile
-local baseWidth = isMobile and 350 or 500
-local baseHeight = isMobile and 500 or 450
+-- Corner Radius
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.Parent = MainFrame
 
--- Main Container
-local MainContainer = Instance.new("Frame")
-MainContainer.Name = "MainContainer"
-MainContainer.Size = UDim2.new(0, baseWidth, 0, baseHeight)
-MainContainer.Position = UDim2.new(0.5, -baseWidth/2, 0.5, -baseHeight/2)
-MainContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-MainContainer.BorderSizePixel = 0
-MainContainer.ClipsDescendants = true
-MainContainer.Parent = ScreenGui
+-- Drop Shadow
+local DropShadow = Instance.new("ImageLabel")
+DropShadow.Name = "DropShadow"
+DropShadow.Parent = MainFrame
+DropShadow.AnchorPoint = Vector2.new(0.5, 0.5)
+DropShadow.Position = UDim2.new(0.5, 0, 0.5, 0)
+DropShadow.Size = UDim2.new(1, 40, 1, 40)
+DropShadow.BackgroundTransparency = 1
+DropShadow.Image = "rbxassetid://6015897843"
+DropShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+DropShadow.ImageTransparency = 0.5
+DropShadow.ScaleType = Enum.ScaleType.Slice
+DropShadow.SliceCenter = Rect.new(49, 49, 450, 450)
+DropShadow.ZIndex = 0
 
-local ContainerCorner = Instance.new("UICorner")
-ContainerCorner.CornerRadius = UDim.new(0, isMobile and 10 or 15)
-ContainerCorner.Parent = MainContainer
+-- Title Bar (Untuk drag)
+local TitleBar = Instance.new("Frame")
+TitleBar.Name = "TitleBar"
+TitleBar.Size = UDim2.new(1, 0, 0, 40)
+TitleBar.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+TitleBar.BorderSizePixel = 0
 
--- Touch-friendly Header (larger for mobile)
-local Header = Instance.new("Frame")
-Header.Name = "Header"
-Header.Size = UDim2.new(1, 0, 0, isMobile and 50 or 45)
-Header.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
-Header.BorderSizePixel = 0
-Header.Parent = MainContainer
+local TitleBarCorner = Instance.new("UICorner")
+TitleBarCorner.CornerRadius = UDim.new(0, 8)
+TitleBarCorner.Parent = TitleBar
 
-local HeaderCorner = Instance.new("UICorner")
-HeaderCorner.CornerRadius = UDim.new(0, isMobile and 10 or 15)
-HeaderCorner.Parent = Header
-
--- Premium Badge (larger text for mobile)
-local PremiumBadge = Instance.new("Frame")
-PremiumBadge.Size = UDim2.new(0, isMobile and 100 or 120, 0, isMobile and 30 or 25)
-PremiumBadge.Position = UDim2.new(0, 10, 0.5, isMobile and -15 or -12)
-PremiumBadge.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
-PremiumBadge.BorderSizePixel = 0
-PremiumBadge.Parent = Header
-
-local PremiumCorner = Instance.new("UICorner")
-PremiumCorner.CornerRadius = UDim.new(0, 6)
-PremiumCorner.Parent = PremiumBadge
-
-local PremiumLabel = Instance.new("TextLabel")
-PremiumLabel.Size = UDim2.new(1, 0, 1, 0)
-PremiumLabel.BackgroundTransparency = 1
-PremiumLabel.Text = "📱 PREMIUM"
-PremiumLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-PremiumLabel.TextSize = isMobile and 12 or 14
-PremiumLabel.Font = Enum.Font.GothamBold
-PremiumLabel.Parent = PremiumBadge
-
--- Title (adaptive sizing)
 local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Size = UDim2.new(1, -120, 1, 0)
-TitleLabel.Position = UDim2.new(0, 120, 0, 0)
+TitleLabel.Name = "TitleLabel"
+TitleLabel.Size = UDim2.new(0, 200, 1, 0)
+TitleLabel.Position = UDim2.new(0, 10, 0, 0)
 TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = isMobile and "DELTA MOBILE" or "DELTA EXECUTOR"
+TitleLabel.Text = "DELTA EXECUTOR PREMIUM"
 TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleLabel.TextSize = isMobile and 16 or 18
+TitleLabel.TextSize = 14
 TitleLabel.Font = Enum.Font.GothamBold
 TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-TitleLabel.Parent = Header
 
--- Mobile-friendly Control Buttons (larger touch targets)
-local ControlsFrame = Instance.new("Frame")
-ControlsFrame.Size = UDim2.new(0, isMobile and 100 or 80, 1, 0)
-ControlsFrame.Position = UDim2.new(1, isMobile and -105 or -85, 0, 0)
-ControlsFrame.BackgroundTransparency = 1
-ControlsFrame.Parent = Header
-
--- Hide Button (larger for touch)
+-- Hide Button
 local HideButton = Instance.new("TextButton")
 HideButton.Name = "HideButton"
-HideButton.Size = UDim2.new(0, isMobile and 25 : 20, 0, isMobile and 25 : 20)
-HideButton.Position = UDim2.new(0, 5, 0.5, isMobile and -12 : -10)
-HideButton.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+HideButton.Size = UDim2.new(0, 30, 0, 30)
+HideButton.Position = UDim2.new(1, -40, 0.5, -15)
+HideButton.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
 HideButton.BorderSizePixel = 0
-HideButton.Text = "👁️"
+HideButton.Text = "_"
 HideButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-HideButton.TextSize = isMobile and 14 : 12
-HideButton.Font = Enum.Font.Gotham
-HideButton.AutoButtonColor = false
-HideButton.Parent = ControlsFrame
+HideButton.TextSize = 16
+HideButton.Font = Enum.Font.GothamBold
 
-local HideCorner = Instance.new("UICorner")
-HideCorner.CornerRadius = UDim.new(0, 4)
-HideCorner.Parent = HideButton
+local HideButtonCorner = Instance.new("UICorner")
+HideButtonCorner.CornerRadius = UDim.new(0, 6)
+HideButtonCorner.Parent = HideButton
 
--- Close Button (larger for touch)
+-- Close Button
 local CloseButton = Instance.new("TextButton")
 CloseButton.Name = "CloseButton"
-CloseButton.Size = UDim2.new(0, isMobile and 25 : 20, 0, isMobile and 25 : 20)
-CloseButton.Position = UDim2.new(0, isMobile and 35 : 30, 0.5, isMobile and -12 : -10)
+CloseButton.Size = UDim2.new(0, 30, 0, 30)
+CloseButton.Position = UDim2.new(1, -80, 0.5, -15)
 CloseButton.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
 CloseButton.BorderSizePixel = 0
-CloseButton.Text = "✕"
+CloseButton.Text = "X"
 CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseButton.TextSize = isMobile and 14 : 12
+CloseButton.TextSize = 14
 CloseButton.Font = Enum.Font.GothamBold
-CloseButton.AutoButtonColor = false
-CloseButton.Parent = ControlsFrame
 
-local CloseCorner = Instance.new("UICorner")
-CloseCorner.CornerRadius = UDim.new(0, 4)
-CloseCorner.Parent = CloseButton
+local CloseButtonCorner = Instance.new("UICorner")
+CloseButtonCorner.CornerRadius = UDim.new(0, 6)
+CloseButtonCorner.Parent = CloseButton
 
--- Mobile-optimized Tab System
+-- Navigation Tabs
 local TabContainer = Instance.new("Frame")
-TabContainer.Size = UDim2.new(1, 0, 0, isMobile and 60 : 50)
-TabContainer.Position = UDim2.new(0, 0, 0, isMobile and 50 : 45)
-TabContainer.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-TabContainer.BorderSizePixel = 0
-TabContainer.Parent = MainContainer
+TabContainer.Name = "TabContainer"
+TabContainer.Size = UDim2.new(1, -20, 0, 30)
+TabContainer.Position = UDim2.new(0, 10, 0, 50)
+TabContainer.BackgroundTransparency = 1
 
--- Scrollable tabs for mobile
-local TabsScrolling = Instance.new("ScrollingFrame")
-TabsScrolling.Size = UDim2.new(1, 0, 1, 0)
-TabsScrolling.BackgroundTransparency = 1
-TabsScrolling.BorderSizePixel = 0
-TabsScrolling.ScrollBarThickness = isMobile and 8 : 6
-TabsScrolling.ScrollBarImageColor3 = Color3.fromRGB(80, 80, 100)
-TabsScrolling.Parent = TabContainer
+local TabListLayout = Instance.new("UIListLayout")
+TabListLayout.Parent = TabContainer
+TabListLayout.FillDirection = Enum.FillDirection.Horizontal
+TabListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+TabListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+TabListLayout.Padding = UDim.new(0, 5)
 
-local TabsLayout = Instance.new("UIListLayout")
-TabsLayout.FillDirection = Enum.FillDirection.Horizontal
-TabsLayout.Padding = UDim.new(0, 5)
-TabsLayout.Parent = TabsScrolling
+-- Content Area
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Name = "ContentFrame"
+ContentFrame.Size = UDim2.new(1, -20, 1, -100)
+ContentFrame.Position = UDim2.new(0, 10, 0, 90)
+ContentFrame.BackgroundTransparency = 1
 
--- Mobile-optimized tabs
-local Tabs = {
-    {Name = "Home", Icon = "🏠"},
-    {Name = "Scripts", Icon = "⚡"}, 
-    {Name = "Player", Icon = "👤"},
-    {Name = "Visuals", Icon = "👁️"},
-    {Name = "Settings", Icon = "⚙️"}
-}
+-- Notification System
+local NotificationFrame = Instance.new("Frame")
+NotificationFrame.Name = "NotificationFrame"
+NotificationFrame.Size = UDim2.new(0, 300, 0, 60)
+NotificationFrame.Position = UDim2.new(1, 10, 0, 10)
+NotificationFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+NotificationFrame.BorderSizePixel = 0
+NotificationFrame.Visible = false
 
-local TabButtons = {}
+local NotificationCorner = Instance.new("UICorner")
+NotificationCorner.CornerRadius = UDim.new(0, 8)
+NotificationCorner.Parent = NotificationFrame
 
-for i, tab in ipairs(Tabs) do
+local NotificationLabel = Instance.new("TextLabel")
+NotificationLabel.Name = "NotificationLabel"
+NotificationLabel.Size = UDim2.new(1, -20, 1, -20)
+NotificationLabel.Position = UDim2.new(0, 10, 0, 10)
+NotificationLabel.BackgroundTransparency = 1
+NotificationLabel.Text = "Notification System Ready"
+NotificationLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+NotificationLabel.TextSize = 12
+NotificationLabel.Font = Enum.Font.Gotham
+NotificationLabel.TextWrapped = true
+
+-- Parent semua elemen
+TitleLabel.Parent = TitleBar
+HideButton.Parent = TitleBar
+CloseButton.Parent = TitleBar
+TitleBar.Parent = MainFrame
+TabContainer.Parent = MainFrame
+ContentFrame.Parent = MainFrame
+NotificationFrame.Parent = MainFrame
+MainFrame.Parent = DeltaGUI
+DeltaGUI.Parent = playerGui
+
+-- Variabel untuk drag functionality
+local dragging = false
+local dragInput, dragStart, startPos
+
+-- Fungsi untuk membuat tab
+local function createTab(tabName, tabNumber)
     local TabButton = Instance.new("TextButton")
-    TabButton.Name = tab.Name .. "Tab"
-    TabButton.Size = UDim2.new(0, isMobile and 80 : 70, 1, -10)
-    TabButton.Position = UDim2.new(0, (i-1) * (isMobile and 85 : 75), 0, 5)
-    TabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+    TabButton.Name = tabName .. "Tab"
+    TabButton.Size = UDim2.new(0, 60, 1, 0)
+    TabButton.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
     TabButton.BorderSizePixel = 0
-    TabButton.Text = isMobile and tab.Icon .. "\n" .. tab.Name : tab.Icon .. " " .. tab.Name
+    TabButton.Text = tabName
     TabButton.TextColor3 = Color3.fromRGB(200, 200, 200)
-    TabButton.TextSize = isMobile and 12 : 11
+    TabButton.TextSize = 12
     TabButton.Font = Enum.Font.Gotham
-    TabButton.AutoButtonColor = false
-    TabButton.Parent = TabsScrolling
     
     local TabCorner = Instance.new("UICorner")
     TabCorner.CornerRadius = UDim.new(0, 6)
     TabCorner.Parent = TabButton
     
-    TabButtons[tab.Name] = TabButton
+    return TabButton
 end
 
--- Update scrolling canvas size
-TabsLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    TabsScrolling.CanvasSize = UDim2.new(0, TabsLayout.AbsoluteContentSize.X, 0, 0)
-end)
-
--- Content Area (optimized for mobile)
-local ContentFrame = Instance.new("Frame")
-ContentFrame.Size = UDim2.new(1, 0, 1, -(isMobile and 110 : 95))
-ContentFrame.Position = UDim2.new(0, 0, 0, isMobile and 110 : 95)
-ContentFrame.BackgroundTransparency = 1
-ContentFrame.Parent = MainContainer
-
-local ContentScrolling = Instance.new("ScrollingFrame")
-ContentScrolling.Size = UDim2.new(1, -10, 1, -10)
-ContentScrolling.Position = UDim2.new(0, 5, 0, 5)
-ContentScrolling.BackgroundTransparency = 1
-ContentScrolling.BorderSizePixel = 0
-ContentScrolling.ScrollBarThickness = isMobile and 10 : 8
-ContentScrolling.ScrollBarImageColor3 = Color3.fromRGB(80, 80, 100)
-ContentScrolling.VerticalScrollBarInset = Enum.ScrollBarInset.Always
-ContentScrolling.Parent = ContentFrame
-
-local ContentLayout = Instance.new("UIListLayout")
-ContentLayout.Padding = UDim.new(0, isMobile and 12 : 10)
-ContentLayout.Parent = ContentScrolling
-
--- Function to send notification
-function SendNotification(title, message, duration)
-    game.StarterGui:SetCore("SendNotification", {
-        Title = title,
-        Text = message,
-        Duration = duration or 3,
-        Icon = "rbxassetid://13378057870"
-    })
+-- Fungsi untuk membuat page content
+local function createPage(pageName)
+    local PageFrame = Instance.new("ScrollingFrame")
+    PageFrame.Name = pageName .. "Page"
+    PageFrame.Size = UDim2.new(1, 0, 1, 0)
+    PageFrame.Position = UDim2.new(0, 0, 0, 0)
+    PageFrame.BackgroundTransparency = 1
+    PageFrame.ScrollBarThickness = 4
+    PageFrame.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 150)
+    PageFrame.Visible = false
+    
+    local PageListLayout = Instance.new("UIListLayout")
+    PageListLayout.Parent = PageFrame
+    PageListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    PageListLayout.Padding = UDim.new(0, 5)
+    
+    return PageFrame
 end
 
--- Mobile-optimized button creation
-function CreateMobileButton(parent, text, callback)
-    local Button = Instance.new("TextButton")
-    Button.Size = UDim2.new(1, 0, 0, isMobile and 45 : 40)
-    Button.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
-    Button.BorderSizePixel = 0
-    Button.Text = text
-    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Button.TextSize = isMobile and 14 : 13
-    Button.Font = Enum.Font.Gotham
-    Button.AutoButtonColor = false
-    Button.Parent = parent
+-- Buat 5 tabs
+local tabs = {"Home", "Scripts", "Settings", "Tools", "Premium"}
+local tabButtons = {}
+local pages = {}
+
+for i, tabName in ipairs(tabs) do
+    -- Buat tab button
+    local tabButton = createTab(tabName, i)
+    tabButton.Parent = TabContainer
+    tabButtons[tabName] = tabButton
     
-    local ButtonCorner = Instance.new("UICorner")
-    ButtonCorner.CornerRadius = UDim.new(0, 8)
-    ButtonCorner.Parent = Button
+    -- Buat page content
+    local page = createPage(tabName)
+    page.Parent = ContentFrame
+    pages[tabName] = page
     
-    -- Touch feedback
-    local function onTouchStart()
-        TweenService:Create(Button, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(65, 65, 90)}):Play()
-        TweenService:Create(Button, TweenInfo.new(0.1), {Size = UDim2.new(0.98, 0, 0, isMobile and 43 : 38)}):Play()
-    end
+    -- Tambahkan title untuk setiap page
+    local pageTitle = Instance.new("TextLabel")
+    pageTitle.Name = "Title"
+    pageTitle.Size = UDim2.new(1, -20, 0, 30)
+    pageTitle.Position = UDim2.new(0, 10, 0, 10)
+    pageTitle.BackgroundTransparency = 1
+    pageTitle.Text = tabName .. " Page"
+    pageTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    pageTitle.TextSize = 18
+    pageTitle.Font = Enum.Font.GothamBold
+    pageTitle.TextXAlignment = Enum.TextXAlignment.Left
+    pageTitle.Parent = page
     
-    local function onTouchEnd()
-        TweenService:Create(Button, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(45, 45, 65)}):Play()
-        TweenService:Create(Button, TweenInfo.new(0.1), {Size = UDim2.new(1, 0, 0, isMobile and 45 : 40)}):Play()
-    end
-    
-    if isMobile then
-        Button.TouchLongPress:Connect(function()
-            onTouchStart()
-            wait(0.2)
-            onTouchEnd()
-        end)
-        
-        Button.TouchTap:Connect(function()
-            onTouchStart()
-            callback()
-            wait(0.1)
-            onTouchEnd()
-            SendNotification("Feature", text .. " activated!", 2)
-        end)
-    else
-        Button.MouseButton1Click:Connect(function()
-            callback()
-            SendNotification("Feature", text .. " activated!", 2)
-        end)
-        
-        Button.MouseEnter:Connect(function()
-            TweenService:Create(Button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 85)}):Play()
-        end)
-        
-        Button.MouseLeave:Connect(function()
-            TweenService:Create(Button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(45, 45, 65)}):Play()
-        end)
-    end
-    
-    return Button
+    -- Tambahkan konten dummy untuk setiap page
+    local contentLabel = Instance.new("TextLabel")
+    contentLabel.Name = "ContentLabel"
+    contentLabel.Size = UDim2.new(1, -20, 0, 100)
+    contentLabel.Position = UDim2.new(0, 10, 0, 50)
+    contentLabel.BackgroundTransparency = 1
+    contentLabel.Text = "This is " .. tabName .. " page content.\nPremium features will be added here."
+    contentLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+    contentLabel.TextSize = 14
+    contentLabel.Font = Enum.Font.Gotham
+    contentLabel.TextWrapped = true
+    contentLabel.TextXAlignment = Enum.TextXAlignment.Left
+    contentLabel.TextYAlignment = Enum.TextYAlignment.Top
+    contentLabel.Parent = page
 end
 
--- Create mobile-optimized sections
-function CreateMobileSection(title, parent)
-    local Section = Instance.new("Frame")
-    Section.Name = title .. "Section"
-    Section.Size = UDim2.new(1, 0, 0, 0)
-    Section.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
-    Section.BorderSizePixel = 0
-    Section.Parent = parent
+-- Set Home page sebagai default
+pages["Home"].Visible = true
+tabButtons["Home"].BackgroundColor3 = Color3.fromRGB(65, 120, 200)
+
+-- Fungsi untuk show notification
+local function showNotification(message, duration)
+    duration = duration or 3
     
-    local SectionCorner = Instance.new("UICorner")
-    SectionCorner.CornerRadius = UDim.new(0, 10)
-    SectionCorner.Parent = Section
+    NotificationLabel.Text = message
+    NotificationFrame.Visible = true
     
-    local SectionTitle = Instance.new("TextLabel")
-    SectionTitle.Size = UDim2.new(1, -20, 0, isMobile and 35 : 30)
-    SectionTitle.Position = UDim2.new(0, 10, 0, 5)
-    SectionTitle.BackgroundTransparency = 1
-    SectionTitle.Text = title
-    SectionTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-    SectionTitle.TextSize = isMobile and 16 : 15
-    SectionTitle.Font = Enum.Font.GothamBold
-    SectionTitle.TextXAlignment = Enum.TextXAlignment.Left
-    SectionTitle.Parent = Section
+    -- Animasi masuk
+    local tweenIn = TweenService:Create(
+        NotificationFrame,
+        TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        {Position = UDim2.new(1, -310, 0, 10)}
+    )
+    tweenIn:Play()
     
-    local SectionContent = Instance.new("Frame")
-    SectionContent.Size = UDim2.new(1, -20, 0, 0)
-    SectionContent.Position = UDim2.new(0, 10, 0, isMobile and 45 : 40)
-    SectionContent.BackgroundTransparency = 1
-    SectionContent.Parent = Section
+    wait(duration)
     
-    local ContentLayout = Instance.new("UIListLayout")
-    ContentLayout.Padding = UDim.new(0, isMobile and 10 : 8)
-    ContentLayout.Parent = SectionContent
+    -- Animasi keluar
+    local tweenOut = TweenService:Create(
+        NotificationFrame,
+        TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        {Position = UDim2.new(1, 10, 0, 10)}
+    )
+    tweenOut:Play()
     
-    ContentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        SectionContent.Size = UDim2.new(1, -20, 0, ContentLayout.AbsoluteContentSize.Y)
-        Section.Size = UDim2.new(1, 0, 0, SectionContent.Size.Y.Offset + (isMobile and 50 : 45))
-    end)
-    
-    return SectionContent
+    wait(0.3)
+    NotificationFrame.Visible = false
 end
 
--- Create tab contents
-local HomeContent = CreateMobileSection("Mobile Features", ContentScrolling)
-CreateMobileButton(HomeContent, "🚀 Quick Execute All", function()
-    -- Mobile-optimized feature
-end)
-
-CreateMobileButton(HomeContent, "⭐ Premium Mobile Tools", function()
-    -- Mobile-specific tools
-end)
-
-local ScriptsContent = CreateMobileSection("Mobile Scripts", ContentScrolling)
-CreateMobileButton(ScriptsContent, "⚡ Touch Optimized ESP", function()
-    -- Touch-friendly ESP
-end)
-
-CreateMobileButton(ScriptsContent, "🎯 Mobile Aimbot", function()
-    -- Mobile aimbot
-end)
-
-local PlayerContent = CreateMobileSection("Player Mods", ContentScrolling)
-CreateMobileButton(PlayerContent, "💨 Mobile Speed", function()
-    -- Mobile speed hack
-end)
-
-CreateMobileButton(PlayerContent, "🦘 Touch Jump", function()
-    -- Mobile jump mod
-end)
-
-local VisualsContent = CreateMobileSection("Mobile Visuals", ContentScrolling)
-CreateMobileButton(VisualsContent, "🌈 Mobile UI Theme", function()
-    -- Mobile themes
-end)
-
-local SettingsContent = CreateMobileSection("Mobile Settings", ContentScrolling)
-CreateMobileButton(SettingsContent, "⚙️ Touch Settings", function()
-    -- Touch settings
-end)
-
--- Tab switching function
-function SwitchTab(tabName)
-    -- Hide all sections
-    for _, child in pairs(ContentScrolling:GetChildren()) do
-        if child:IsA("Frame") and child.Name:match("Section$") then
-            child.Visible = false
-        end
-    end
-    
-    -- Show selected section
-    local targetSection = ContentScrolling:FindFirstChild(tabName .. "Section")
-    if targetSection then
-        targetSection.Visible = true
-    end
-    
-    -- Update tab buttons
-    for name, button in pairs(TabButtons) do
-        if name == tabName then
-            TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(70, 130, 200)}):Play()
-            TweenService:Create(button, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-        else
-            TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 40, 55)}):Play()
-            TweenService:Create(button, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(200, 200, 200)}):Play()
-        end
-    end
-    
-    SendNotification("Tab", "Switched to " .. tabName, 1)
-end
-
--- Connect tab buttons
-for name, button in pairs(TabButtons) do
-    if isMobile then
-        button.TouchTap:Connect(function()
-            SwitchTab(name)
-        end)
-    else
-        button.MouseButton1Click:Connect(function()
-            SwitchTab(name)
-        end)
+-- Fungsi untuk toggle UI visibility
+local function toggleUI()
+    MainFrame.Visible = not MainFrame.Visible
+    if MainFrame.Visible then
+        showNotification("Delta Executor UI Shown")
     end
 end
 
--- Mobile-optimized UI controls
-HideButton.MouseButton1Click:Connect(function()
-    MainContainer.Visible = not MainContainer.Visible
-    SendNotification("UI", "GUI " .. (MainContainer.Visible and "shown" or "hidden"), 2)
-end)
+-- Drag functionality
+local function update(input)
+    local delta = input.Position - dragStart
+    MainFrame.Position = UDim2.new(
+        startPos.X.Scale, 
+        startPos.X.Offset + delta.X, 
+        startPos.Y.Scale, 
+        startPos.Y.Offset + delta.Y
+    )
+end
 
-CloseButton.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
-    SendNotification("UI", "Mobile GUI Closed", 2)
-end)
-
--- Touch controls for header drag
-local dragging = false
-local dragStart, startPos
-
-Header.InputBegan:Connect(function(input)
+TitleBar.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
         dragging = true
         dragStart = input.Position
-        startPos = MainContainer.Position
+        startPos = MainFrame.Position
         
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
@@ -428,31 +307,89 @@ Header.InputBegan:Connect(function(input)
     end
 end)
 
-Header.InputChanged:Connect(function(input)
-    if (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) and dragging then
-        local delta = input.Position - dragStart
-        MainContainer.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+TitleBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
     end
 end)
 
--- Auto-resize content
-ContentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    ContentScrolling.CanvasSize = UDim2.new(0, 0, 0, ContentLayout.AbsoluteContentSize.Y)
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
 end)
 
--- Initialize
-SwitchTab("Home")
-
--- Platform-specific welcome message
-if isMobile then
-    SendNotification("Mobile Premium", "Touch-optimized GUI Ready!\nDrag header to move", 5)
-else
-    SendNotification("Premium GUI", "Desktop mode activated!", 3)
+-- Tab switching functionality
+for tabName, tabButton in pairs(tabButtons) do
+    tabButton.MouseButton1Click:Connect(function()
+        -- Sembunyikan semua pages
+        for _, page in pairs(pages) do
+            page.Visible = false
+        end
+        
+        -- Reset semua tab colors
+        for _, btn in pairs(tabButtons) do
+            btn.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+        end
+        
+        -- Tampilkan page yang dipilih dan ubah warna tab
+        pages[tabName].Visible = true
+        tabButton.BackgroundColor3 = Color3.fromRGB(65, 120, 200)
+        
+        showNotification("Switched to " .. tabName .. " page")
+    end)
 end
 
--- Mobile-specific optimizations
-if isMobile then
-    -- Larger touch targets
-    -- Simplified interactions
-    -- Mobile-appropriate sizing
+-- Hide/Show functionality
+HideButton.MouseButton1Click:Connect(function()
+    toggleUI()
+end)
+
+-- Close functionality
+CloseButton.MouseButton1Click:Connect(function()
+    DeltaGUI:Destroy()
+    showNotification("Delta Executor Closed", 2)
+end)
+
+-- Mobile touch optimization
+if UserInputService.TouchEnabled then
+    -- Adjust sizes for mobile
+    MainFrame.Size = UDim2.new(0, 320, 0, 450)
+    MainFrame.Position = UDim2.new(0.5, -160, 0.5, -225)
+    
+    -- Make buttons bigger for touch
+    for _, tabButton in pairs(tabButtons) do
+        tabButton.Size = UDim2.new(0, 55, 1, 0)
+    end
 end
+
+-- Initial notification
+showNotification("Delta Executor Premium Loaded!\nMobile UI Ready", 3)
+
+-- Safe boundaries untuk mobile
+local function ensureSafePosition()
+    local viewportSize = workspace.CurrentCamera.ViewportSize
+    local frameSize = MainFrame.AbsoluteSize
+    local position = MainFrame.Position
+    
+    local minX = 0
+    local maxX = viewportSize.X - frameSize.X
+    local minY = 0
+    local maxY = viewportSize.Y - frameSize.Y
+    
+    local currentX = position.X.Offset
+    local currentY = position.Y.Offset
+    
+    -- Clamp position
+    local newX = math.clamp(currentX, minX, maxX)
+    local newY = math.clamp(currentY, minY, maxY)
+    
+    if currentX ~= newX or currentY ~= newY then
+        MainFrame.Position = UDim2.new(position.X.Scale, newX, position.Y.Scale, newY)
+    end
+end
+
+-- Run boundary check periodically
+RunService.Heartbeat:Connect(ensureSafePosition)
+
+return DeltaGUI
