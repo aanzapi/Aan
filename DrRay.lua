@@ -1,78 +1,134 @@
--- Delta Executor GUI Modern
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("Delta Executor - Modern GUI", "DarkTheme")
+-- Simple Delta GUI
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
 
--- Main Tab
-local MainTab = Window:NewTab("Main")
-local MainSection = MainTab:NewSection("Main Features")
+-- Create ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "DeltaGUI"
+ScreenGui.Parent = game.CoreGui
 
-MainSection:NewButton("Infinite Yield", "Admin Commands", function()
+-- Main Frame
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 400, 0, 500)
+MainFrame.Position = UDim2.new(0.5, -200, 0.5, -250)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
+
+-- Corner Radius
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.Parent = MainFrame
+
+-- Title Bar
+local TitleBar = Instance.new("Frame")
+TitleBar.Size = UDim2.new(1, 0, 0, 40)
+TitleBar.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+TitleBar.BorderSizePixel = 0
+TitleBar.Parent = MainFrame
+
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 8)
+TitleCorner.Parent = TitleBar
+
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Size = UDim2.new(1, -40, 1, 0)
+TitleLabel.Position = UDim2.new(0, 10, 0, 0)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Text = "Delta Executor - Modern GUI"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.TextSize = 16
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+TitleLabel.Parent = TitleBar
+
+-- Close Button
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.new(0, 30, 0, 30)
+CloseButton.Position = UDim2.new(1, -35, 0, 5)
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+CloseButton.Text = "X"
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.TextSize = 14
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.Parent = TitleBar
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 4)
+CloseCorner.Parent = CloseButton
+
+-- Scrolling Frame
+local ScrollFrame = Instance.new("ScrollingFrame")
+ScrollFrame.Size = UDim2.new(1, -20, 1, -60)
+ScrollFrame.Position = UDim2.new(0, 10, 0, 50)
+ScrollFrame.BackgroundTransparency = 1
+ScrollFrame.BorderSizePixel = 0
+ScrollFrame.ScrollBarThickness = 6
+ScrollFrame.Parent = MainFrame
+
+-- UI List Layout
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Padding = UDim.new(0, 10)
+UIListLayout.Parent = ScrollFrame
+
+-- Fungsi untuk membuat button
+function CreateButton(text, callback)
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(1, 0, 0, 40)
+    Button.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
+    Button.Text = text
+    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Button.TextSize = 14
+    Button.Font = Enum.Font.Gotham
+    Button.AutoButtonColor = false
+    Button.Parent = ScrollFrame
+    
+    local ButtonCorner = Instance.new("UICorner")
+    ButtonCorner.CornerRadius = UDim.new(0, 6)
+    ButtonCorner.Parent = Button
+    
+    -- Hover effect
+    Button.MouseEnter:Connect(function()
+        game:GetService("TweenService"):Create(Button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 80)}):Play()
+    end)
+    
+    Button.MouseLeave:Connect(function()
+        game:GetService("TweenService"):Create(Button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(45, 45, 60)}):Play()
+    end)
+    
+    Button.MouseButton1Click:Connect(function()
+        callback()
+    end)
+    
+    return Button
+end
+
+-- Add buttons
+CreateButton("Infinite Yield (Admin)", function()
     loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
 end)
 
-MainSection:NewButton("Fly GUI", "Fly Script", function()
+CreateButton("Fly GUI", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGui/main/FlyGui.lua"))()
 end)
 
-MainSection:NewButton("ESP Players", "Player ESP", function()
+CreateButton("ESP Players", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/ic3w0lf22/Unnamed-ESP/master/UnnamedESP.lua"))()
 end)
 
-MainSection:NewToggle("Speed Hack", "Increase WalkSpeed", function(state)
-    if state then
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 50
-    else
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
-    end
+CreateButton("Speed Hack (50)", function()
+    LocalPlayer.Character.Humanoid.WalkSpeed = 50
 end)
 
-MainSection:NewSlider("WalkSpeed", "Change WalkSpeed", 500, 16, function(s)
-    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = s
+CreateButton("Reset Character", function()
+    LocalPlayer.Character:BreakJoints()
 end)
 
-MainSection:NewSlider("JumpPower", "Change JumpPower", 500, 50, function(s)
-    game.Players.LocalPlayer.Character.Humanoid.JumpPower = s
-end)
-
--- Player Tab
-local PlayerTab = Window:NewTab("Player")
-local PlayerSection = PlayerTab:NewSection("Player Modifications")
-
-PlayerSection:NewTextBox("Change Name", "Change Display Name", function(txt)
-    game.Players.LocalPlayer.DisplayName = txt
-end)
-
-PlayerSection:NewButton("Reset Character", "Respawn Character", function()
-    game.Players.LocalPlayer.Character:BreakJoints()
-end)
-
-PlayerSection:NewKeybind("Toggle GUI", "Toggle GUI Visibility", Enum.KeyCode.RightControl, function()
-	Library:ToggleUI()
-end)
-
--- Teleport Tab
-local TeleportTab = Window:NewTab("Teleport")
-local TeleportSection = TeleportTab:NewSection("Teleport Locations")
-
-TeleportSection:NewDropdown("Teleport to Player", "Select Player", function(plr)
-    local target = game.Players[plr]
-    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
-    end
-end)
-
-TeleportSection:NewButton("Spawn Location", "Teleport to Spawn", function()
-    local spawn = game:GetService("Players").LocalPlayer:FindFirstChild("SpawnPos")
-    if spawn then
-        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(spawn.Value)
-    end
-end)
-
--- Game Tab
-local GameTab = Window:NewTab("Game")
-local GameSection = GameTab:NewSection("Game Features")
-
-GameSection:NewButton("Anti AFK", "Prevent AFK Kick", function()
+CreateButton("Anti AFK", function()
     local VirtualUser = game:GetService("VirtualUser")
     game:GetService("Players").LocalPlayer.Idled:connect(function()
         VirtualUser:CaptureController()
@@ -80,51 +136,32 @@ GameSection:NewButton("Anti AFK", "Prevent AFK Kick", function()
     end)
 end)
 
-GameSection:NewToggle("No Clip", "Walk through walls", function(state)
-    if state then
-        game:GetService("RunService").Stepped:Connect(function()
-            if game.Players.LocalPlayer.Character then
-                for _, v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
-                    if v:IsA("BasePart") then
-                        v.CanCollide = false
-                    end
-                end
-            end
-        end)
+CreateButton("Destroy GUI", function()
+    ScreenGui:Destroy()
+end)
+
+-- Close button functionality
+CloseButton.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+-- Auto resize scrolling frame
+UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
+end)
+
+-- Toggle GUI dengan key
+local UIVisible = true
+Mouse.KeyDown:Connect(function(Key)
+    if Key == "f1" then
+        UIVisible = not UIVisible
+        MainFrame.Visible = UIVisible
     end
 end)
 
-GameSection:NewToggle("God Mode", "Invincibility", function(state)
-    if state then
-        game.Players.LocalPlayer.Character.Humanoid.Name = "Humanoid1"
-        local newHumanoid = game.Players.LocalPlayer.Character.Humanoid1:Clone()
-        newHumanoid.Parent = game.Players.LocalPlayer.Character
-        newHumanoid.Name = "Humanoid"
-        wait()
-        game.Players.LocalPlayer.Character.Humanoid1:Destroy()
-        workspace.CurrentCamera.CameraSubject = game.Players.LocalPlayer.Character.Humanoid
-    end
-end)
-
--- Settings Tab
-local SettingsTab = Window:NewTab("Settings")
-local SettingsSection = SettingsTab:NewSection("GUI Settings")
-
-SettingsSection:NewButton("Destroy GUI", "Remove GUI", function()
-    Library:Destroy()
-end)
-
-SettingsSection:NewColorPicker("GUI Color", "Change GUI Color", Color3.fromRGB(0, 255, 0), function(color)
-    Window:ChangeColor(color)
-end)
-
-SettingsSection:NewKeybind("UI Toggle Key", "Change Toggle Key", Enum.KeyCode.F1, function()
-    print("Keybind changed")
-end)
-
--- Notification ketika GUI loaded
-Library:Notify("Delta GUI Loaded Successfully!", 5)
-
--- Auto execute beberapa fitur
-wait(1)
-Library:Notify("Welcome to Delta Executor!", 3)
+-- Notification
+game.StarterGui:SetCore("SendNotification", {
+    Title = "Delta GUI",
+    Text = "GUI Loaded! Press F1 to toggle",
+    Duration = 5
+})
