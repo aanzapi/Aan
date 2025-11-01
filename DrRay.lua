@@ -1,163 +1,152 @@
---[[  Elegant Base UI + Hamburger Menu
-      Made for StarterGui (LocalScript)
-      UI components are created by script, no manual UI needed
---]]
+-- Script UI dengan Tab - Dibuat oleh Grok (xAI)
+-- Pastikan ini adalah LocalScript di StarterGui
 
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local player = Players.LocalPlayer
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
--- Create ScreenGui
-local gui = Instance.new("ScreenGui")
-gui.Name = "ElegantBaseUI"
-gui.IgnoreGuiInset = true
-gui.ResetOnSpawn = false
-gui.Parent = player:WaitForChild("PlayerGui")
+-- Buat ScreenGui utama
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "CustomUITabs"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui
 
--- Theme Config
-local THEME = {
-    Accent = Color3.fromRGB(36, 90, 191),
-    Background = Color3.fromRGB(245, 246, 250),
-    Foreground = Color3.fromRGB(25, 25, 25),
-    TopbarHeight = 48,
-    MenuWidth = 280,
-    OverlayTransparency = 0.6
-}
+-- Frame utama (background UI)
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0.8, 0, 0.7, 0)  -- 80% lebar, 70% tinggi layar
+mainFrame.Position = UDim2.new(0.1, 0, 0.15, 0)  -- Posisi di tengah
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)  -- Abu-abu gelap
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = screenGui
 
--- Helper: round corner
-local function round(obj, rad)
-    local c = Instance.new("UICorner")
-    c.CornerRadius = rad or UDim.new(0, 10)
-    c.Parent = obj
+-- Tambahkan shadow untuk tampilan bagus
+local shadow = Instance.new("Frame")
+shadow.Size = UDim2.new(1, 10, 1, 10)
+shadow.Position = UDim2.new(0, -5, 0, -5)
+shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+shadow.BackgroundTransparency = 0.5
+shadow.ZIndex = -1
+shadow.Parent = mainFrame
+
+-- Frame untuk tab buttons (di atas)
+local tabFrame = Instance.new("Frame")
+tabFrame.Size = UDim2.new(1, 0, 0.1, 0)  -- 10% tinggi dari mainFrame
+tabFrame.Position = UDim2.new(0, 0, 0, 0)
+tabFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+tabFrame.BorderSizePixel = 0
+tabFrame.Parent = mainFrame
+
+-- Frame untuk konten tab (di bawah)
+local contentFrame = Instance.new("Frame")
+contentFrame.Size = UDim2.new(1, 0, 0.9, 0)  -- 90% sisanya
+contentFrame.Position = UDim2.new(0, 0, 0.1, 0)
+contentFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+contentFrame.BorderSizePixel = 0
+contentFrame.Parent = mainFrame
+
+-- Fungsi untuk membuat tab button
+local function createTabButton(name, position, tabIndex)
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0.2, 0, 1, 0)  -- 20% lebar tabFrame
+    button.Position = position
+    button.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    button.Text = name
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.Font = Enum.Font.SourceSansBold
+    button.TextSize = 18
+    button.BorderSizePixel = 0
+    button.Parent = tabFrame
+    
+    -- Hover effect
+    button.MouseEnter:Connect(function()
+        button.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+    end)
+    button.MouseLeave:Connect(function()
+        button.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    end)
+    
+    -- Klik untuk switch tab
+    button.MouseButton1Click:Connect(function()
+        switchToTab(tabIndex)
+    end)
+    
+    return button
 end
 
--- Root Background
-local root = Instance.new("Frame")
-root.Size = UDim2.new(1, 0, 1, 0)
-root.BackgroundColor3 = THEME.Background
-root.Parent = gui
-
--- Topbar
-local top = Instance.new("Frame")
-top.Size = UDim2.new(1, 0, 0, THEME.TopbarHeight)
-top.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-top.BorderSizePixel = 0
-top.Parent = root
-
--- Title
-local title = Instance.new("TextLabel")
-title.Text = "My Elegant UI"
-title.Font = Enum.Font.GothamSemibold
-title.TextSize = 18
-title.TextColor3 = THEME.Foreground
-title.BackgroundTransparency = 1
-title.AnchorPoint = Vector2.new(0.5, 0.5)
-title.Position = UDim2.new(0.5, 0, 0.5, 0)
-title.Size = UDim2.new(0, 180, 0, 24)
-title.Parent = top
-
--- Hamburger Button
-local hamburger = Instance.new("TextButton")
-hamburger.Size = UDim2.new(0, 40, 0, 32)
-hamburger.Position = UDim2.new(0, 8, 0.5, -16)
-hamburger.BackgroundColor3 = Color3.fromRGB(255,255,255)
-hamburger.Text = "☰"
-hamburger.Font = Enum.Font.GothamBold
-hamburger.TextSize = 22
-hamburger.TextColor3 = THEME.Foreground
-hamburger.AutoButtonColor = false
-hamburger.Parent = top
-round(hamburger, UDim.new(0, 6))
-
--- Overlay (fade black bg)
-local overlay = Instance.new("Frame")
-overlay.Size = UDim2.new(1, 0, 1, 0)
-overlay.BackgroundColor3 = Color3.new(0,0,0)
-overlay.BackgroundTransparency = 1
-overlay.ZIndex = 5
-overlay.Visible = false
-overlay.Parent = root
-
--- Side Menu
-local menu = Instance.new("Frame")
-menu.Size = UDim2.new(0, THEME.MenuWidth, 1, 0)
-menu.Position = UDim2.new(-1, 0, 0, 0)
-menu.BackgroundColor3 = Color3.fromRGB(255,255,255)
-menu.BorderSizePixel = 0
-menu.ZIndex = 6
-menu.Parent = root
-
--- Menu Header
-local header = Instance.new("Frame")
-header.Size = UDim2.new(1,0,0,THEME.TopbarHeight)
-header.BackgroundColor3 = THEME.Accent
-header.Parent = menu
-
-local headText = Instance.new("TextLabel")
-headText.Text = "Menu"
-headText.Font = Enum.Font.GothamBold
-headText.TextSize = 18
-headText.TextColor3 = Color3.new(1,1,1)
-headText.BackgroundTransparency = 1
-headText.Position = UDim2.new(0,16,0.5,-10)
-headText.Size = UDim2.new(0,200,0,20)
-headText.Parent = header
-
--- List layout inside menu
-local content = Instance.new("Frame")
-content.Size = UDim2.new(1,0,1,-THEME.TopbarHeight)
-content.Position = UDim2.new(0,0,0,THEME.TopbarHeight)
-content.BackgroundTransparency = 1
-content.Parent = menu
-
-local layout = Instance.new("UIListLayout")
-layout.Padding = UDim.new(0, 6)
-layout.Parent = content
-
--- Create buttons function
-local function createButton(text)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, -30, 0, 42)
-    btn.BackgroundColor3 = Color3.fromRGB(245,245,245)
-    btn.Text = text
-    btn.Font = Enum.Font.Gotham
-    btn.TextSize = 16
-    btn.TextColor3 = THEME.Foreground
-    btn.Parent = content
-    round(btn, UDim.new(0, 8))
-    return btn
+-- Fungsi untuk membuat konten tab
+local function createTabContent(tabIndex)
+    local content = Instance.new("ScrollingFrame")
+    content.Size = UDim2.new(1, 0, 1, 0)
+    content.BackgroundTransparency = 1
+    content.ScrollBarThickness = 10
+    content.CanvasSize = UDim2.new(0, 0, 2, 0)  -- Scrollable
+    content.Parent = contentFrame
+    
+    -- Contoh konten: Label dan Button
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 0.2, 0)
+    label.Position = UDim2.new(0, 0, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = "Konten Tab " .. tabIndex
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.Font = Enum.Font.SourceSans
+    label.TextSize = 24
+    label.Parent = content
+    
+    local exampleButton = Instance.new("TextButton")
+    exampleButton.Size = UDim2.new(0.5, 0, 0.1, 0)
+    exampleButton.Position = UDim2.new(0.25, 0, 0.3, 0)
+    exampleButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+    exampleButton.Text = "Klik Saya!"
+    exampleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    exampleButton.Font = Enum.Font.SourceSansBold
+    exampleButton.TextSize = 16
+    exampleButton.Parent = content
+    
+    exampleButton.MouseButton1Click:Connect(function()
+        print("Tombol di Tab " .. tabIndex .. " diklik!")
+    end)
+    
+    return content
 end
 
--- Example buttons
-createButton("Profile")
-createButton("Inventory")
-createButton("Settings")
-local closeBtn = createButton("Close Menu")
+-- Array untuk menyimpan tab contents
+local tabContents = {}
 
--- Tween settings
-local openTween = TweenInfo.new(0.28, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-local closeTween = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-local menuOpen = false
-
--- Menu open function
-local function openMenu()
-    if menuOpen then return end
-    menuOpen = true
-    overlay.Visible = true
-    TweenService:Create(overlay, openTween, {BackgroundTransparency = 1 - THEME.OverlayTransparency}):Play()
-    TweenService:Create(menu, openTween, {Position = UDim2.new(0,0,0,0)}):Play()
+-- Fungsi untuk switch tab
+local currentTab = 1
+local function switchToTab(tabIndex)
+    for i, content in ipairs(tabContents) do
+        content.Visible = (i == tabIndex)
+    end
+    currentTab = tabIndex
 end
 
--- Menu close function
-local function closeMenu()
-    if not menuOpen then return end
-    menuOpen = false
-    TweenService:Create(overlay, closeTween, {BackgroundTransparency = 1}):Play()
-    TweenService:Create(menu, closeTween, {Position = UDim2.new(-1,0,0,0)}):Play()
-    task.wait(closeTween.Time)
-    overlay.Visible = false
+-- Buat 5 tab buttons
+createTabButton("Tab 1", UDim2.new(0, 0, 0, 0), 1)
+createTabButton("Tab 2", UDim2.new(0.2, 0, 0, 0), 2)
+createTabButton("Tab 3", UDim2.new(0.4, 0, 0, 0), 3)
+createTabButton("Tab 4", UDim2.new(0.6, 0, 0, 0), 4)
+createTabButton("Tab 5", UDim2.new(0.8, 0, 0, 0), 5)
+
+-- Buat konten untuk setiap tab
+for i = 1, 5 do
+    tabContents[i] = createTabContent(i)
 end
 
-hamburger.MouseButton1Click:Connect(openMenu)
-overlay.MouseButton1Click:Connect(closeMenu)
-closeBtn.MouseButton1Click:Connect(closeMenu)
+-- Set tab pertama sebagai default
+switchToTab(1)
+
+-- Tambahkan close button di kanan atas
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0.05, 0, 0.05, 0)
+closeButton.Position = UDim2.new(0.95, 0, 0, 0)
+closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+closeButton.Text = "X"
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.Font = Enum.Font.SourceSansBold
+closeButton.TextSize = 14
+closeButton.Parent = mainFrame
+
+closeButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy()  -- Tutup UI
+end)
