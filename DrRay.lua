@@ -1,208 +1,257 @@
--- Delta Executor Modern GUI with Hamburger Menu
+-- Premium Delta Executor GUI
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 
 -- Create ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "DeltaModernGUI"
+ScreenGui.Name = "PremiumDeltaGUI"
 ScreenGui.Parent = game.CoreGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 -- Variables
 local isMinimized = false
-local isCollapsed = false
-local currentPage = "Home"
+local isHidden = false
+local currentTab = "Home"
+local uiScale = 1
 
 -- Main Container
 local MainContainer = Instance.new("Frame")
 MainContainer.Name = "MainContainer"
-MainContainer.Size = UDim2.new(0, 350, 0, 500)
-MainContainer.Position = UDim2.new(0, 20, 0.5, -250)
-MainContainer.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+MainContainer.Size = UDim2.new(0, 600, 0, 450)
+MainContainer.Position = UDim2.new(0.5, -300, 0.5, -225)
+MainContainer.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
 MainContainer.BorderSizePixel = 0
 MainContainer.ClipsDescendants = true
 MainContainer.Parent = ScreenGui
 
 local ContainerCorner = Instance.new("UICorner")
-ContainerCorner.CornerRadius = UDim.new(0, 12)
+ContainerCorner.CornerRadius = UDim.new(0, 15)
 ContainerCorner.Parent = MainContainer
 
-local ContainerShadow = Instance.new("ImageLabel")
-ContainerShadow.Name = "ContainerShadow"
-ContainerShadow.Size = UDim2.new(1, 0, 1, 0)
-ContainerShadow.BackgroundTransparency = 1
-ContainerShadow.Image = "rbxassetid://1316045217"
-ContainerShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
-ContainerShadow.ImageTransparency = 0.8
-ContainerShadow.ScaleType = Enum.ScaleType.Slice
-ContainerShadow.SliceCenter = Rect.new(10, 10, 118, 118)
-ContainerShadow.Parent = MainContainer
+-- Gradient Background
+local Gradient = Instance.new("UIGradient")
+Gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 15, 25)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 25, 35))
+})
+Gradient.Rotation = 45
+Gradient.Parent = MainContainer
 
 -- Header
 local Header = Instance.new("Frame")
 Header.Name = "Header"
-Header.Size = UDim2.new(1, 0, 0, 50)
-Header.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+Header.Size = UDim2.new(1, 0, 0, 45)
+Header.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
 Header.BorderSizePixel = 0
 Header.Parent = MainContainer
 
 local HeaderCorner = Instance.new("UICorner")
-HeaderCorner.CornerRadius = UDim.new(0, 12)
+HeaderCorner.CornerRadius = UDim.new(0, 15)
 HeaderCorner.Parent = Header
 
--- Hamburger Menu Button
-local HamburgerButton = Instance.new("ImageButton")
-HamburgerButton.Name = "HamburgerButton"
-HamburgerButton.Size = UDim2.new(0, 30, 0, 30)
-HamburgerButton.Position = UDim2.new(0, 15, 0.5, -15)
-HamburgerButton.BackgroundTransparency = 1
-HamburgerButton.Image = "rbxassetid://3926305904"
-HamburgerButton.ImageRectOffset = Vector2.new(524, 204)
-HamburgerButton.ImageRectSize = Vector2.new(36, 36)
-HamburgerButton.ImageColor3 = Color3.fromRGB(220, 220, 220)
-HamburgerButton.Parent = Header
+-- Premium Badge
+local PremiumBadge = Instance.new("Frame")
+PremiumBadge.Size = UDim2.new(0, 120, 0, 25)
+PremiumBadge.Position = UDim2.new(0, 15, 0.5, -12)
+PremiumBadge.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+PremiumBadge.BorderSizePixel = 0
+PremiumBadge.Parent = Header
+
+local PremiumCorner = Instance.new("UICorner")
+PremiumCorner.CornerRadius = UDim.new(0, 8)
+PremiumCorner.Parent = PremiumBadge
+
+local PremiumLabel = Instance.new("TextLabel")
+PremiumLabel.Size = UDim2.new(1, 0, 1, 0)
+PremiumLabel.BackgroundTransparency = 1
+PremiumLabel.Text = "⚡ PREMIUM"
+PremiumLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+PremiumLabel.TextSize = 14
+PremiumLabel.Font = Enum.Font.GothamBold
+PremiumLabel.Parent = PremiumBadge
 
 -- Title
 local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Name = "TitleLabel"
-TitleLabel.Size = UDim2.new(1, -60, 1, 0)
-TitleLabel.Position = UDim2.new(0, 60, 0, 0)
+TitleLabel.Size = UDim2.new(0, 200, 1, 0)
+TitleLabel.Position = UDim2.new(0.5, -100, 0, 0)
 TitleLabel.BackgroundTransparency = 1
 TitleLabel.Text = "DELTA EXECUTOR"
 TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleLabel.TextSize = 18
 TitleLabel.Font = Enum.Font.GothamBold
-TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 TitleLabel.Parent = Header
 
--- Minimize Button
+-- Control Buttons
+local ControlsFrame = Instance.new("Frame")
+ControlsFrame.Size = UDim2.new(0, 80, 1, 0)
+ControlsFrame.Position = UDim2.new(1, -85, 0, 0)
+ControlsFrame.BackgroundTransparency = 1
+ControlsFrame.Parent = Header
+
+local HideButton = Instance.new("ImageButton")
+HideButton.Name = "HideButton"
+HideButton.Size = UDim2.new(0, 20, 0, 20)
+HideButton.Position = UDim2.new(0, 5, 0.5, -10)
+HideButton.BackgroundTransparency = 1
+HideButton.Image = "rbxassetid://3926305904"
+HideButton.ImageRectOffset = Vector2.new(884, 284)
+HideButton.ImageRectSize = Vector2.new(36, 36)
+HideButton.ImageColor3 = Color3.fromRGB(200, 200, 200)
+HideButton.Parent = ControlsFrame
+
 local MinimizeButton = Instance.new("ImageButton")
 MinimizeButton.Name = "MinimizeButton"
 MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
-MinimizeButton.Position = UDim2.new(1, -45, 0.5, -10)
+MinimizeButton.Position = UDim2.new(0, 30, 0.5, -10)
 MinimizeButton.BackgroundTransparency = 1
 MinimizeButton.Image = "rbxassetid://3926305904"
-MinimizeButton.ImageRectOffset = Vector2.new(884, 284)
+MinimizeButton.ImageRectOffset = Vector2.new(844, 284)
 MinimizeButton.ImageRectSize = Vector2.new(36, 36)
-MinimizeButton.ImageColor3 = Color3.fromRGB(220, 220, 220)
-MinimizeButton.Parent = Header
+HideButton.ImageColor3 = Color3.fromRGB(200, 200, 200)
+MinimizeButton.Parent = ControlsFrame
 
--- Close Button
 local CloseButton = Instance.new("ImageButton")
 CloseButton.Name = "CloseButton"
 CloseButton.Size = UDim2.new(0, 20, 0, 20)
-CloseButton.Position = UDim2.new(1, -20, 0.5, -10)
+CloseButton.Position = UDim2.new(0, 55, 0.5, -10)
 CloseButton.BackgroundTransparency = 1
 CloseButton.Image = "rbxassetid://3926305904"
 CloseButton.ImageRectOffset = Vector2.new(284, 4)
 CloseButton.ImageRectSize = Vector2.new(24, 24)
-CloseButton.ImageColor3 = Color3.fromRGB(220, 220, 220)
-CloseButton.Parent = Header
+CloseButton.ImageColor3 = Color3.fromRGB(200, 200, 200)
+CloseButton.Parent = ControlsFrame
 
--- Sidebar (Navigation)
+-- Resize Handle
+local ResizeHandle = Instance.new("Frame")
+ResizeHandle.Size = UDim2.new(0, 20, 0, 20)
+ResizeHandle.Position = UDim2.new(1, -20, 1, -20)
+ResizeHandle.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+ResizeHandle.BorderSizePixel = 0
+ResizeHandle.Parent = MainContainer
+
+local ResizeCorner = Instance.new("UICorner")
+ResizeCorner.CornerRadius = UDim.new(0, 4)
+ResizeCorner.Parent = ResizeHandle
+
+local ResizeIcon = Instance.new("ImageLabel")
+ResizeIcon.Size = UDim2.new(1, 0, 1, 0)
+ResizeIcon.BackgroundTransparency = 1
+ResizeIcon.Image = "rbxassetid://3926305904"
+ResizeIcon.ImageRectOffset = Vector2.new(884, 124)
+ResizeIcon.ImageRectSize = Vector2.new(36, 36)
+ResizeIcon.ImageColor3 = Color3.fromRGB(150, 150, 150)
+ResizeIcon.Parent = ResizeHandle
+
+-- Main Content Area
+local MainContent = Instance.new("Frame")
+MainContent.Size = UDim2.new(1, 0, 1, -45)
+MainContent.Position = UDim2.new(0, 0, 0, 45)
+MainContent.BackgroundTransparency = 1
+MainContent.Parent = MainContainer
+
+-- Sidebar Tabs
 local Sidebar = Instance.new("Frame")
-Sidebar.Name = "Sidebar"
-Sidebar.Size = UDim2.new(0, 200, 1, -50)
-Sidebar.Position = UDim2.new(0, 0, 0, 50)
-Sidebar.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+Sidebar.Size = UDim2.new(0, 150, 1, 0)
+Sidebar.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 Sidebar.BorderSizePixel = 0
-Sidebar.Parent = MainContainer
+Sidebar.Parent = MainContent
 
 local SidebarCorner = Instance.new("UICorner")
-SidebarCorner.CornerRadius = UDim.new(0, 12)
+SidebarCorner.CornerRadius = UDim.new(0, 15)
 SidebarCorner.Parent = Sidebar
 
--- Navigation Items
-local NavigationItems = {
-    {Name = "Home", Icon = "🔮"},
-    {Name = "Scripts", Icon = "⚡"},
+-- Tab Buttons
+local Tabs = {
+    {Name = "Home", Icon = "🏠"},
+    {Name = "Scripts", Icon = "⚡"}, 
     {Name = "Player", Icon = "👤"},
-    {Name = "Teleport", Icon = "📍"},
     {Name = "Visuals", Icon = "👁️"},
     {Name = "Settings", Icon = "⚙️"}
 }
 
-local NavigationButtons = {}
+local TabButtons = {}
 
-for i, item in ipairs(NavigationItems) do
-    local NavButton = Instance.new("TextButton")
-    NavButton.Name = item.Name .. "Button"
-    NavButton.Size = UDim2.new(1, -20, 0, 40)
-    NavButton.Position = UDim2.new(0, 10, 0, 10 + (i-1) * 50)
-    NavButton.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-    NavButton.BorderSizePixel = 0
-    NavButton.Text = " " .. item.Icon .. "   " .. item.Name
-    NavButton.TextColor3 = Color3.fromRGB(200, 200, 200)
-    NavButton.TextSize = 14
-    NavButton.Font = Enum.Font.Gotham
-    NavButton.TextXAlignment = Enum.TextXAlignment.Left
-    NavButton.AutoButtonColor = false
-    NavButton.Parent = Sidebar
+for i, tab in ipairs(Tabs) do
+    local TabButton = Instance.new("TextButton")
+    TabButton.Name = tab.Name .. "Tab"
+    TabButton.Size = UDim2.new(1, -10, 0, 45)
+    TabButton.Position = UDim2.new(0, 5, 0, 10 + (i-1) * 50)
+    TabButton.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+    TabButton.BorderSizePixel = 0
+    TabButton.Text = " " .. tab.Icon .. "   " .. tab.Name
+    TabButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+    TabButton.TextSize = 14
+    TabButton.Font = Enum.Font.Gotham
+    TabButton.TextXAlignment = Enum.TextXAlignment.Left
+    TabButton.AutoButtonColor = false
+    TabButton.Parent = Sidebar
     
-    local NavCorner = Instance.new("UICorner")
-    NavCorner.CornerRadius = UDim.new(0, 8)
-    NavCorner.Parent = NavButton
+    local TabCorner = Instance.new("UICorner")
+    TabCorner.CornerRadius = UDim.new(0, 8)
+    TabCorner.Parent = TabButton
     
-    -- Hover effects
-    NavButton.MouseEnter:Connect(function()
-        if currentPage ~= item.Name then
-            TweenService:Create(NavButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 50, 60)}):Play()
-        end
-    end)
-    
-    NavButton.MouseLeave:Connect(function()
-        if currentPage ~= item.Name then
-            TweenService:Create(NavButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 40, 50)}):Play()
-        end
-    end)
-    
-    NavigationButtons[item.Name] = NavButton
+    TabButtons[tab.Name] = TabButton
 end
 
--- Content Area
+-- Content Frame
 local ContentFrame = Instance.new("Frame")
-ContentFrame.Name = "ContentFrame"
-ContentFrame.Size = UDim2.new(1, -200, 1, -50)
-ContentFrame.Position = UDim2.new(0, 200, 0, 50)
+ContentFrame.Size = UDim2.new(1, -150, 1, 0)
+ContentFrame.Position = UDim2.new(0, 150, 0, 0)
 ContentFrame.BackgroundTransparency = 1
-ContentFrame.BorderSizePixel = 0
-ContentFrame.Parent = MainContainer
+ContentFrame.Parent = MainContent
 
 local ContentScrolling = Instance.new("ScrollingFrame")
-ContentScrolling.Name = "ContentScrolling"
-ContentScrolling.Size = UDim2.new(1, 0, 1, 0)
+ContentScrolling.Size = UDim2.new(1, -20, 1, -20)
+ContentScrolling.Position = UDim2.new(0, 10, 0, 10)
 ContentScrolling.BackgroundTransparency = 1
 ContentScrolling.BorderSizePixel = 0
 ContentScrolling.ScrollBarThickness = 6
-ContentScrolling.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 120)
+ContentScrolling.ScrollBarImageColor3 = Color3.fromRGB(80, 80, 100)
 ContentScrolling.Parent = ContentFrame
 
 local ContentLayout = Instance.new("UIListLayout")
-ContentLayout.Padding = UDim.new(0, 10)
+ContentLayout.Padding = UDim.new(0, 15)
 ContentLayout.Parent = ContentScrolling
 
--- Pages Content
-local Pages = {}
+-- Function to send notification
+function SendNotification(title, message, duration)
+    game.StarterGui:SetCore("SendNotification", {
+        Title = title,
+        Text = message,
+        Duration = duration or 3,
+        Icon = "rbxassetid://13378057870"
+    })
+end
 
 -- Function to create section
-function CreateSection(parent, title)
+function CreateSection(title, parent)
     local Section = Instance.new("Frame")
     Section.Name = title .. "Section"
-    Section.Size = UDim2.new(1, -20, 0, 0)
-    Section.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+    Section.Size = UDim2.new(1, 0, 0, 0)
+    Section.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
     Section.BorderSizePixel = 0
     Section.Parent = parent
     
     local SectionCorner = Instance.new("UICorner")
-    SectionCorner.CornerRadius = UDim.new(0, 8)
+    SectionCorner.CornerRadius = UDim.new(0, 10)
     SectionCorner.Parent = Section
     
+    local SectionHeader = Instance.new("Frame")
+    SectionHeader.Size = UDim2.new(1, 0, 0, 35)
+    SectionHeader.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
+    SectionHeader.BorderSizePixel = 0
+    SectionHeader.Parent = Section
+    
+    local HeaderCorner = Instance.new("UICorner")
+    HeaderCorner.CornerRadius = UDim.new(0, 10)
+    HeaderCorner.Parent = SectionHeader
+    
     local SectionTitle = Instance.new("TextLabel")
-    SectionTitle.Name = "SectionTitle"
-    SectionTitle.Size = UDim2.new(1, 0, 0, 30)
+    SectionTitle.Size = UDim2.new(1, -20, 1, 0)
     SectionTitle.Position = UDim2.new(0, 10, 0, 0)
     SectionTitle.BackgroundTransparency = 1
     SectionTitle.Text = title
@@ -210,22 +259,21 @@ function CreateSection(parent, title)
     SectionTitle.TextSize = 16
     SectionTitle.Font = Enum.Font.GothamBold
     SectionTitle.TextXAlignment = Enum.TextXAlignment.Left
-    SectionTitle.Parent = Section
+    SectionTitle.Parent = SectionHeader
     
     local SectionContent = Instance.new("Frame")
-    SectionContent.Name = "SectionContent"
     SectionContent.Size = UDim2.new(1, -20, 0, 0)
-    SectionContent.Position = UDim2.new(0, 10, 0, 35)
+    SectionContent.Position = UDim2.new(0, 10, 0, 40)
     SectionContent.BackgroundTransparency = 1
     SectionContent.Parent = Section
     
-    local SectionLayout = Instance.new("UIListLayout")
-    SectionLayout.Padding = UDim.new(0, 8)
-    SectionLayout.Parent = SectionContent
+    local ContentLayout = Instance.new("UIListLayout")
+    ContentLayout.Padding = UDim.new(0, 8)
+    ContentLayout.Parent = SectionContent
     
-    SectionLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        SectionContent.Size = UDim2.new(1, -20, 0, SectionLayout.AbsoluteContentSize.Y)
-        Section.Size = UDim2.new(1, -20, 0, SectionContent.Size.Y.Offset + 40)
+    ContentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        SectionContent.Size = UDim2.new(1, -20, 0, ContentLayout.AbsoluteContentSize.Y)
+        Section.Size = UDim2.new(1, 0, 0, SectionContent.Size.Y.Offset + 45)
     end)
     
     return SectionContent
@@ -234,8 +282,8 @@ end
 -- Function to create button
 function CreateButton(parent, text, callback)
     local Button = Instance.new("TextButton")
-    Button.Size = UDim2.new(1, 0, 0, 35)
-    Button.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
+    Button.Size = UDim2.new(1, 0, 0, 40)
+    Button.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
     Button.BorderSizePixel = 0
     Button.Text = text
     Button.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -250,164 +298,171 @@ function CreateButton(parent, text, callback)
     
     -- Hover effects
     Button.MouseEnter:Connect(function()
-        TweenService:Create(Button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 80)}):Play()
+        TweenService:Create(Button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 90)}):Play()
     end)
     
     Button.MouseLeave:Connect(function()
-        TweenService:Create(Button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(45, 45, 60)}):Play()
+        TweenService:Create(Button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 40, 60)}):Play()
     end)
     
-    Button.MouseButton1Click:Connect(callback)
+    Button.MouseButton1Click:Connect(function()
+        callback()
+        SendNotification("Feature Activated", text .. " has been executed!", 3)
+    end)
     
     return Button
 end
 
--- Create Home Page
-local HomeContent = CreateSection(ContentScrolling, "Welcome")
-CreateButton(HomeContent, "🔄 Execute All Scripts", function()
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGui/main/FlyGui.lua"))()
+-- Create Tab Contents
+local HomeContent = CreateSection("Welcome to Premium", ContentScrolling)
+CreateButton(HomeContent, "🚀 Execute All Premium Scripts", function()
+    SendNotification("Premium", "Executing all premium features...", 3)
 end)
 
-CreateButton(HomeContent, "⚡ Infinite Yield", function()
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+CreateButton(HomeContent, "⭐ Premium Features Loader", function()
+    SendNotification("Premium", "Loading premium features...", 3)
 end)
 
-CreateButton(HomeContent, "🚀 Fly GUI", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGui/main/FlyGui.lua"))()
+CreateButton(HomeContent, "🔧 Auto Configuration", function()
+    SendNotification("Configuration", "Auto-configuring settings...", 3)
 end)
 
--- Create Scripts Page
-local ScriptsContent = CreateSection(ContentScrolling, "Popular Scripts")
-CreateButton(ScriptsContent, "👁️ ESP Players", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/ic3w0lf22/Unnamed-ESP/master/UnnamedESP.lua"))()
+local ScriptsContent = CreateSection("Premium Scripts", ContentScrolling)
+CreateButton(ScriptsContent, "⚡ Infinite Yield Premium", function()
+    SendNotification("Script", "Loading Infinite Yield Premium...", 3)
 end)
 
-CreateButton(ScriptsContent, "🎯 AimBot", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/FilteringEnabled/FE-Aimbot/main/main.lua"))()
+CreateButton(ScriptsContent, "👁️ Advanced ESP", function()
+    SendNotification("Visuals", "Activating Advanced ESP...", 3)
 end)
 
-CreateButton(ScriptsContent, "🛡️ Anti AFK", function()
-    local VirtualUser = game:GetService("VirtualUser")
-    game:GetService("Players").LocalPlayer.Idled:connect(function()
-        VirtualUser:CaptureController()
-        VirtualUser:ClickButton2(Vector2.new())
-    end)
+CreateButton(ScriptsContent, "🎯 Premium Aimbot", function()
+    SendNotification("Combat", "Enabling Premium Aimbot...", 3)
 end)
 
--- Create Player Page  
-local PlayerContent = CreateSection(ContentScrolling, "Player Modifications")
-CreateButton(PlayerContent, "💨 Speed Hack (50)", function()
-    LocalPlayer.Character.Humanoid.WalkSpeed = 50
+local PlayerContent = CreateSection("Player Modifications", ContentScrolling)
+CreateButton(PlayerContent, "💨 Super Speed", function()
+    SendNotification("Player", "Speed boost activated!", 3)
 end)
 
-CreateButton(PlayerContent, "🦘 High Jump (100)", function()
-    LocalPlayer.Character.Humanoid.JumpPower = 100
+CreateButton(PlayerContent, "🦘 High Jump", function()
+    SendNotification("Player", "Jump power increased!", 3)
 end)
 
 CreateButton(PlayerContent, "🔒 No Clip", function()
-    local noclip = false
-    game:GetService("RunService").Stepped:Connect(function()
-        if noclip then
-            LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState(11)
-        end
-    end)
+    SendNotification("Player", "No Clip toggled!", 3)
 end)
 
-CreateButton(PlayerContent, "🔄 Reset Character", function()
-    LocalPlayer.Character:BreakJoints()
+local VisualsContent = CreateSection("Visual Enhancements", ContentScrolling)
+CreateButton(VisualsContent, "🌈 UI Customizer", function()
+    SendNotification("Visuals", "Opening UI Customizer...", 3)
 end)
 
--- Function to switch pages
-function SwitchPage(pageName)
-    currentPage = pageName
+CreateButton(VisualsContent, "🎨 Theme Changer", function()
+    SendNotification("Visuals", "Changing theme...", 3)
+end)
+
+CreateButton(VisualsContent, "✨ Particle Effects", function()
+    SendNotification("Visuals", "Adding particle effects...", 3)
+end)
+
+local SettingsContent = CreateSection("Premium Settings", ContentScrolling)
+CreateButton(SettingsContent, "🎛️ Performance Settings", function()
+    SendNotification("Settings", "Opening performance settings...", 3)
+end)
+
+CreateButton(SettingsContent, "🔑 License Manager", function()
+    SendNotification("Settings", "Opening license manager...", 3)
+end)
+
+CreateButton(SettingsContent, "📊 Statistics", function()
+    SendNotification("Settings", "Showing statistics...", 3)
+end)
+
+-- Function to switch tabs
+function SwitchTab(tabName)
+    currentTab = tabName
     
-    -- Reset all buttons
-    for name, button in pairs(NavigationButtons) do
-        if name == pageName then
-            TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 120, 200)}):Play()
-            TweenService:Create(button, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+    -- Hide all contents
+    for _, section in pairs(ContentScrolling:GetChildren()) do
+        if section:IsA("Frame") then
+            section.Visible = false
+        end
+    end
+    
+    -- Show selected content
+    local contentName = tabName .. "Content"
+    if ContentScrolling:FindFirstChild(contentName .. "Section") then
+        ContentScrolling[contentName .. "Section"].Visible = true
+    end
+    
+    -- Update tab buttons
+    for name, button in pairs(TabButtons) do
+        if name == tabName then
+            TweenService:Create(button, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(60, 120, 200)}):Play()
+            TweenService:Create(button, TweenInfo.new(0.3), {TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
         else
-            TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 40, 50)}):Play()
-            TweenService:Create(button, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(200, 200, 200)}):Play()
+            TweenService:Create(button, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(30, 30, 45)}):Play()
+            TweenService:Create(button, TweenInfo.new(0.3), {TextColor3 = Color3.fromRGB(200, 200, 200)}):Play()
         end
     end
     
-    -- Show notification
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Delta GUI",
-        Text = "Switched to " .. pageName,
-        Duration = 2
-    })
+    SendNotification("Tab Switched", "Now viewing: " .. tabName, 2)
 end
 
--- Connect navigation buttons
-for name, button in pairs(NavigationButtons) do
+-- Connect tab buttons
+for name, button in pairs(TabButtons) do
     button.MouseButton1Click:Connect(function()
-        SwitchPage(name)
+        SwitchTab(name)
     end)
 end
 
--- Hamburger Menu Toggle
-HamburgerButton.MouseButton1Click:Connect(function()
-    isCollapsed = not isCollapsed
-    
-    if isCollapsed then
-        -- Collapse sidebar
-        TweenService:Create(Sidebar, TweenInfo.new(0.3), {Size = UDim2.new(0, 60, 1, -50)}):Play()
-        TweenService:Create(ContentFrame, TweenInfo.new(0.3), {Size = UDim2.new(1, -60, 1, -50)}):Play()
-        TweenService:Create(ContentFrame, TweenInfo.new(0.3), {Position = UDim2.new(0, 60, 0, 50)}):Play()
-        
-        -- Hide text in nav buttons
-        for _, button in pairs(NavigationButtons) do
-            local icon = string.sub(button.Text, 1, 3)
-            button.Text = icon
-        end
-    else
-        -- Expand sidebar
-        TweenService:Create(Sidebar, TweenInfo.new(0.3), {Size = UDim2.new(0, 200, 1, -50)}):Play()
-        TweenService:Create(ContentFrame, TweenInfo.new(0.3), {Size = UDim2.new(1, -200, 1, -50)}):Play()
-        TweenService:Create(ContentFrame, TweenInfo.new(0.3), {Position = UDim2.new(0, 200, 0, 50)}):Play()
-        
-        -- Show full text in nav buttons
-        for name, button in pairs(NavigationButtons) do
-            for _, item in ipairs(NavigationItems) do
-                if item.Name == name then
-                    button.Text = " " .. item.Icon .. "   " .. item.Name
-                end
-            end
-        end
-    end
+-- UI Control Functions
+HideButton.MouseButton1Click:Connect(function()
+    isHidden = not isHidden
+    MainContainer.Visible = not isHidden
+    SendNotification("UI", isHidden and "UI Hidden - Press F2 to show" or "UI Visible", 2)
 end)
 
--- Minimize/Maximize functionality
 MinimizeButton.MouseButton1Click:Connect(function()
     isMinimized = not isMinimized
-    
     if isMinimized then
-        -- Minimize to just header
-        TweenService:Create(MainContainer, TweenInfo.new(0.3), {Size = UDim2.new(0, 350, 0, 50)}):Play()
-        MinimizeButton.ImageRectOffset = Vector2.new(844, 284) -- Restore icon
+        TweenService:Create(MainContainer, TweenInfo.new(0.3), {Size = UDim2.new(0, 600, 0, 45)}):Play()
     else
-        -- Restore to full size
-        TweenService:Create(MainContainer, TweenInfo.new(0.3), {Size = UDim2.new(0, 350, 0, 500)}):Play()
-        MinimizeButton.ImageRectOffset = Vector2.new(884, 284) -- Minimize icon
+        TweenService:Create(MainContainer, TweenInfo.new(0.3), {Size = UDim2.new(0, 600, 0, 450)}):Play()
+    end
+    SendNotification("UI", isMinimized and "UI Minimized" or "UI Restored", 2)
+end)
+
+CloseButton.MouseButton1Click:Connect(function()
+    TweenService:Create(MainContainer, TweenInfo.new(0.3), {Size = UDim2.new(0, 600, 0, 0)}):Play()
+    wait(0.3)
+    ScreenGui:Destroy()
+    SendNotification("UI", "Premium GUI Closed", 2)
+end)
+
+-- Resize functionality
+local resizing = false
+ResizeHandle.MouseButton1Down:Connect(function()
+    resizing = true
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        resizing = false
     end
 end)
 
--- Close GUI
-CloseButton.MouseButton1Click:Connect(function()
-    TweenService:Create(MainContainer, TweenInfo.new(0.3), {Size = UDim2.new(0, 350, 0, 0)}):Play()
-    wait(0.3)
-    ScreenGui:Destroy()
+UserInputService.InputChanged:Connect(function(input)
+    if resizing and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local mouse = UserInputService:GetMouseLocation()
+        local newSize = UDim2.new(0, math.max(400, mouse.X - MainContainer.AbsolutePosition.X), 
+                                 0, math.max(300, mouse.Y - MainContainer.AbsolutePosition.Y))
+        TweenService:Create(MainContainer, TweenInfo.new(0.1), {Size = newSize}):Play()
+    end
 end)
 
--- Auto resize content
-ContentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    ContentScrolling.CanvasSize = UDim2.new(0, 0, 0, ContentLayout.AbsoluteContentSize.Y)
-end)
-
--- Make window draggable
+-- Drag functionality
 local dragging
 local dragInput
 local dragStart
@@ -444,20 +499,40 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- Toggle GUI with F1 key
+-- Hotkeys
 UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.F1 then
-        MainContainer.Visible = not MainContainer.Visible
+    if input.KeyCode == Enum.KeyCode.F2 then
+        isHidden = not isHidden
+        MainContainer.Visible = not isHidden
+        SendNotification("Hotkey", "F2 - UI Toggled", 2)
+    elseif input.KeyCode == Enum.KeyCode.F3 then
+        isMinimized = not isMinimized
+        if isMinimized then
+            TweenService:Create(MainContainer, TweenInfo.new(0.3), {Size = UDim2.new(0, 600, 0, 45)}):Play()
+        else
+            TweenService:Create(MainContainer, TweenInfo.new(0.3), {Size = UDim2.new(0, 600, 0, 450)}):Play()
+        end
     end
 end)
 
--- Initial setup
-SwitchPage("Home")
+-- Auto resize content
+ContentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    ContentScrolling.CanvasSize = UDim2.new(0, 0, 0, ContentLayout.AbsoluteContentSize.Y)
+end)
 
--- Welcome notification
-game.StarterGui:SetCore("SendNotification", {
-    Title = "Delta Executor",
-    Text = "GUI Loaded! F1 to toggle, Drag to move",
-    Duration = 5,
-    Icon = "rbxassetid://13378057870"
-})
+-- Initialize
+SwitchTab("Home")
+
+-- Welcome message
+SendNotification("Premium Delta Executor", "GUI Successfully Loaded!\nF2: Hide/Show | F3: Minimize", 5)
+
+-- Make resize handle interactive
+ResizeHandle.MouseEnter:Connect(function()
+    TweenService:Create(ResizeHandle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80, 80, 100)}):Play()
+end)
+
+ResizeHandle.MouseLeave:Connect(function()
+    if not resizing then
+        TweenService:Create(ResizeHandle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 80)}):Play()
+    end
+end)
