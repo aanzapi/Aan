@@ -1,202 +1,163 @@
--- Base Script dengan Menu Hamburger
--- Compatible dengan: Corona SDK, Gideros, atau framework Lua mobile lainnya
+--[[  Elegant Base UI + Hamburger Menu
+      Made for StarterGui (LocalScript)
+      UI components are created by script, no manual UI needed
+--]]
 
-local widget = require("widget")
-local composer = require("composer") -- Jika menggunakan Corona SDK
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
 
--- Warna yang digunakan
-local colors = {
-    primary = {0.2, 0.6, 0.8},
-    secondary = {0.9, 0.9, 0.9},
-    text = {0.2, 0.2, 0.2},
-    background = {1, 1, 1}
+-- Create ScreenGui
+local gui = Instance.new("ScreenGui")
+gui.Name = "ElegantBaseUI"
+gui.IgnoreGuiInset = true
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- Theme Config
+local THEME = {
+    Accent = Color3.fromRGB(36, 90, 191),
+    Background = Color3.fromRGB(245, 246, 250),
+    Foreground = Color3.fromRGB(25, 25, 25),
+    TopbarHeight = 48,
+    MenuWidth = 280,
+    OverlayTransparency = 0.6
 }
 
--- Variabel global
-local screenWidth, screenHeight = display.contentWidth, display.contentHeight
-local isMenuOpen = false
-local menuWidth = screenWidth * 0.7
-
--- Grup untuk elemen UI
-local sceneGroup = display.newGroup()
-
--- Background utama
-local background = display.newRect(sceneGroup, screenWidth/2, screenHeight/2, screenWidth, screenHeight)
-background:setFillColor(unpack(colors.background))
-
--- Header dengan hamburger menu
-local header = display.newRect(sceneGroup, screenWidth/2, 0, screenWidth, 60)
-header.y = header.contentHeight/2
-header:setFillColor(unpack(colors.primary))
-
--- Judul header
-local title = display.newText(sceneGroup, "Aplikasi Saya", screenWidth/2, header.y, native.systemFont, 18)
-title:setFillColor(1, 1, 1)
-
--- Tombol Hamburger
-local hamburgerButton = display.newGroup()
-sceneGroup:insert(hamburgerButton)
-
--- Garis-garis hamburger (3 garis)
-for i = 1, 3 do
-    local line = display.newRect(hamburgerButton, 30, 15 + (i-1)*10, 25, 3)
-    line:setFillColor(1, 1, 1)
-end
-hamburgerButton.x, hamburgerButton.y = 30, header.y
-
--- Menu Sidebar
-local menuGroup = display.newGroup()
-sceneGroup:insert(menuGroup)
-
--- Background menu
-local menuBackground = display.newRect(menuGroup, 0, 0, menuWidth, screenHeight)
-menuBackground.x = -menuWidth/2
-menuBackground:setFillColor(0.1, 0.1, 0.1, 0.95)
-
--- Overlay untuk menutup menu
-local overlay = display.newRect(menuGroup, screenWidth/2, screenHeight/2, screenWidth, screenHeight)
-overlay:setFillColor(0, 0, 0, 0.5)
-overlay.isVisible = false
-overlay.isHitTestable = true
-
--- Daftar menu items
-local menuItems = {
-    "Beranda",
-    "Profil",
-    "Pengaturan",
-    "Bantuan",
-    "Tentang",
-    "Keluar"
-}
-
-local menuIcons = {
-    "🏠", "👤", "⚙️", "❓", "ℹ️", "🚪"
-}
-
--- Fungsi untuk membuat menu items
-local function createMenuItems()
-    local startY = 100
-    local itemHeight = 50
-    
-    for i = 1, #menuItems do
-        local yPos = startY + (i-1) * itemHeight
-        
-        -- Background item menu
-        local itemBg = display.newRect(menuGroup, menuWidth/2, yPos, menuWidth - 20, 40)
-        itemBg:setFillColor(0.3, 0.3, 0.3)
-        itemBg.alpha = 0.7
-        
-        -- Icon menu
-        local icon = display.newText(menuGroup, menuIcons[i], 40, yPos, native.systemFont, 20)
-        
-        -- Text menu
-        local text = display.newText(menuGroup, menuItems[i], 70, yPos, native.systemFont, 16)
-        text.anchorX = 0
-        text:setFillColor(1, 1, 1)
-        
-        -- Tambahkan event listener untuk setiap item
-        local function onMenuItemTap(event)
-            print("Menu dipilih:", menuItems[i])
-            closeMenu()
-            -- Tambahkan aksi sesuai menu yang dipilih
-            if menuItems[i] == "Keluar" then
-                native.requestExit()
-            end
-            return true
-        end
-        
-        itemBg:addEventListener("tap", onMenuItemTap)
-        icon:addEventListener("tap", onMenuItemTap)
-        text:addEventListener("tap", onMenuItemTap)
-    end
+-- Helper: round corner
+local function round(obj, rad)
+    local c = Instance.new("UICorner")
+    c.CornerRadius = rad or UDim.new(0, 10)
+    c.Parent = obj
 end
 
--- Fungsi untuk membuka menu
+-- Root Background
+local root = Instance.new("Frame")
+root.Size = UDim2.new(1, 0, 1, 0)
+root.BackgroundColor3 = THEME.Background
+root.Parent = gui
+
+-- Topbar
+local top = Instance.new("Frame")
+top.Size = UDim2.new(1, 0, 0, THEME.TopbarHeight)
+top.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+top.BorderSizePixel = 0
+top.Parent = root
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Text = "My Elegant UI"
+title.Font = Enum.Font.GothamSemibold
+title.TextSize = 18
+title.TextColor3 = THEME.Foreground
+title.BackgroundTransparency = 1
+title.AnchorPoint = Vector2.new(0.5, 0.5)
+title.Position = UDim2.new(0.5, 0, 0.5, 0)
+title.Size = UDim2.new(0, 180, 0, 24)
+title.Parent = top
+
+-- Hamburger Button
+local hamburger = Instance.new("TextButton")
+hamburger.Size = UDim2.new(0, 40, 0, 32)
+hamburger.Position = UDim2.new(0, 8, 0.5, -16)
+hamburger.BackgroundColor3 = Color3.fromRGB(255,255,255)
+hamburger.Text = "☰"
+hamburger.Font = Enum.Font.GothamBold
+hamburger.TextSize = 22
+hamburger.TextColor3 = THEME.Foreground
+hamburger.AutoButtonColor = false
+hamburger.Parent = top
+round(hamburger, UDim.new(0, 6))
+
+-- Overlay (fade black bg)
+local overlay = Instance.new("Frame")
+overlay.Size = UDim2.new(1, 0, 1, 0)
+overlay.BackgroundColor3 = Color3.new(0,0,0)
+overlay.BackgroundTransparency = 1
+overlay.ZIndex = 5
+overlay.Visible = false
+overlay.Parent = root
+
+-- Side Menu
+local menu = Instance.new("Frame")
+menu.Size = UDim2.new(0, THEME.MenuWidth, 1, 0)
+menu.Position = UDim2.new(-1, 0, 0, 0)
+menu.BackgroundColor3 = Color3.fromRGB(255,255,255)
+menu.BorderSizePixel = 0
+menu.ZIndex = 6
+menu.Parent = root
+
+-- Menu Header
+local header = Instance.new("Frame")
+header.Size = UDim2.new(1,0,0,THEME.TopbarHeight)
+header.BackgroundColor3 = THEME.Accent
+header.Parent = menu
+
+local headText = Instance.new("TextLabel")
+headText.Text = "Menu"
+headText.Font = Enum.Font.GothamBold
+headText.TextSize = 18
+headText.TextColor3 = Color3.new(1,1,1)
+headText.BackgroundTransparency = 1
+headText.Position = UDim2.new(0,16,0.5,-10)
+headText.Size = UDim2.new(0,200,0,20)
+headText.Parent = header
+
+-- List layout inside menu
+local content = Instance.new("Frame")
+content.Size = UDim2.new(1,0,1,-THEME.TopbarHeight)
+content.Position = UDim2.new(0,0,0,THEME.TopbarHeight)
+content.BackgroundTransparency = 1
+content.Parent = menu
+
+local layout = Instance.new("UIListLayout")
+layout.Padding = UDim.new(0, 6)
+layout.Parent = content
+
+-- Create buttons function
+local function createButton(text)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -30, 0, 42)
+    btn.BackgroundColor3 = Color3.fromRGB(245,245,245)
+    btn.Text = text
+    btn.Font = Enum.Font.Gotham
+    btn.TextSize = 16
+    btn.TextColor3 = THEME.Foreground
+    btn.Parent = content
+    round(btn, UDim.new(0, 8))
+    return btn
+end
+
+-- Example buttons
+createButton("Profile")
+createButton("Inventory")
+createButton("Settings")
+local closeBtn = createButton("Close Menu")
+
+-- Tween settings
+local openTween = TweenInfo.new(0.28, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local closeTween = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+local menuOpen = false
+
+-- Menu open function
 local function openMenu()
-    if isMenuOpen then return end
-    
-    isMenuOpen = true
-    transition.to(menuGroup, {x = menuWidth/2, time = 300, transition = easing.outSine})
-    overlay.isVisible = true
+    if menuOpen then return end
+    menuOpen = true
+    overlay.Visible = true
+    TweenService:Create(overlay, openTween, {BackgroundTransparency = 1 - THEME.OverlayTransparency}):Play()
+    TweenService:Create(menu, openTween, {Position = UDim2.new(0,0,0,0)}):Play()
 end
 
--- Fungsi untuk menutup menu
+-- Menu close function
 local function closeMenu()
-    if not isMenuOpen then return end
-    
-    isMenuOpen = false
-    transition.to(menuGroup, {x = -menuWidth/2, time = 300, transition = easing.outSine})
-    overlay.isVisible = false
+    if not menuOpen then return end
+    menuOpen = false
+    TweenService:Create(overlay, closeTween, {BackgroundTransparency = 1}):Play()
+    TweenService:Create(menu, closeTween, {Position = UDim2.new(-1,0,0,0)}):Play()
+    task.wait(closeTween.Time)
+    overlay.Visible = false
 end
 
--- Fungsi toggle menu
-local function toggleMenu()
-    if isMenuOpen then
-        closeMenu()
-    else
-        openMenu()
-    end
-end
-
--- Event listener untuk tombol hamburger
-hamburgerButton:addEventListener("tap", toggleMenu)
-
--- Event listener untuk overlay (menutup menu saat diklik)
-overlay:addEventListener("tap", closeMenu)
-
--- Fungsi untuk handle swipe gesture
-local function onTouch(event)
-    if event.phase == "began" then
-        startX = event.x
-    elseif event.phase == "ended" then
-        local endX = event.x
-        local diffX = endX - startX
-        
-        -- Swipe kanan untuk buka menu
-        if diffX > 50 and not isMenuOpen then
-            openMenu()
-        -- Swipe kiri untuk tutup menu
-        elseif diffX < -50 and isMenuOpen then
-            closeMenu()
-        end
-    end
-    return true
-end
-
--- Tambahkan event listener untuk swipe
-Runtime:addEventListener("touch", onTouch)
-
--- Konten utama aplikasi
-local contentGroup = display.newGroup()
-sceneGroup:insert(contentGroup)
-
--- Contoh konten halaman
-local welcomeText = display.newText(contentGroup, "Selamat Datang di Aplikasi", screenWidth/2, screenHeight/2, native.systemFont, 20)
-welcomeText:setFillColor(unpack(colors.text))
-
-local instructionText = display.newText(contentGroup, "Tap icon ☰ untuk membuka menu", screenWidth/2, screenHeight/2 + 40, native.systemFont, 14)
-instructionText:setFillColor(0.5, 0.5, 0.5)
-
--- Inisialisasi menu items
-createMenuItems()
-
--- Posisi awal menu di luar layar
-menuGroup.x = -menuWidth/2
-
--- Fungsi untuk cleanup (jika diperlukan)
-local function cleanup()
-    hamburgerButton:removeEventListener("tap", toggleMenu)
-    overlay:removeEventListener("tap", closeMenu)
-    Runtime:removeEventListener("touch", onTouch)
-end
-
--- Export fungsi yang diperlukan (jika menggunakan module)
-local scene = {
-    sceneGroup = sceneGroup,
-    openMenu = openMenu,
-    closeMenu = closeMenu,
-    toggleMenu = toggleMenu,
-    cleanup = cleanup
-}
-
-return scene
+hamburger.MouseButton1Click:Connect(openMenu)
+overlay.MouseButton1Click:Connect(closeMenu)
+closeBtn.MouseButton1Click:Connect(closeMenu)
