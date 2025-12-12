@@ -1,47 +1,108 @@
--- UI dengan efek visual
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI/main/Library.lua"))()
-local Window = Library.CreateLib("Delta Pro UI", "Sentinel")
+-- Orion Lib Base UI for Delta
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local Window = OrionLib:MakeWindow({
+    Name = "Delta Minimal UI",
+    HidePremium = false,
+    SaveConfig = true,
+    ConfigFolder = "DeltaConfig"
+})
 
--- Home Section
-local Home = Window:NewTab("Home")
-local HomeSection = Home:NewSection("Welcome")
+-- Quick Actions Tab
+local QuickTab = Window:MakeTab({
+    Name = "Quick",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
 
-HomeSection:NewButton("Rejoin Server", "Rejoin current server", function()
-    game:GetService("TeleportService"):Teleport(game.PlaceId)
-end)
+QuickTab:AddToggle({
+    Name = "Noclip",
+    Default = false,
+    Callback = function(Value)
+        local Noclip = nil
+        local Clip = nil
+        
+        if Value then
+            Clip = false
+            Noclip = game:GetService('RunService').Stepped:Connect(function()
+                if Clip == false then
+                    for _, child in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+                        if child:IsA('BasePart') and child.CanCollide then
+                            child.CanCollide = false
+                        end
+                    end
+                end
+            end)
+            getgenv().NoclipLoop = Noclip
+        else
+            if NoclipLoop then
+                NoclipLoop:Disconnect()
+            end
+        end
+    end    
+})
 
-HomeSection:NewToggle("Fly (E)", "Press E to fly", function(state)
-    getgenv().FlyEnabled = state
-    if state then
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
+QuickTab:AddSlider({
+    Name = "FOV Changer",
+    Min = 70,
+    Max = 120,
+    Default = 70,
+    Color = Color3.fromRGB(255,255,255),
+    Increment = 1,
+    ValueName = "FOV",
+    Callback = function(Value)
+        game:GetService("Workspace").CurrentCamera.FieldOfView = Value
+    end    
+})
+
+-- Scripts Tab
+local ScriptsTab = Window:MakeTab({
+    Name = "Scripts",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+ScriptsTab:AddButton({
+    Name = "Infinite Yield",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+    end    
+})
+
+ScriptsTab:AddButton({
+    Name = "CMD-X",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/CMD-X/CMD-X/master/Source"))()
     end
-end)
+})
 
--- Visuals Section
-local Visuals = Window:NewTab("Visuals")
-local ESP = Visuals:NewSection("ESP Settings")
+-- Info Tab
+local InfoTab = Window:MakeTab({
+    Name = "Info",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
 
-ESP:NewToggle("Box ESP", "Draw box around players", function(state)
-    -- ESP function here
-    print("Box ESP:", state)
-end)
+InfoTab:AddParagraph("Welcome!", "This UI is optimized for Delta Executor")
+InfoTab:AddLabel("Executor: Delta")
+InfoTab:AddLabel("Status: Ready")
+InfoTab:AddButton({
+    Name = "Copy Discord",
+    Callback = function()
+        setclipboard("discord.gg/example")
+        OrionLib:MakeNotification({
+            Name = "Copied!",
+            Content = "Discord link copied to clipboard",
+            Image = "rbxassetid://4483345998",
+            Time = 3
+        })
+    end    
+})
 
-ESP:NewColorPicker("ESP Color", "Choose ESP color", Color3.fromRGB(255,0,0), function(color)
-    print("Color changed to:", color)
-end)
+OrionLib:MakeNotification({
+    Name = "UI Loaded!",
+    Content = "Minimal UI loaded successfully",
+    Image = "rbxassetid://4483345998",
+    Time = 3
+})
 
--- Settings
-local Settings = Window:NewTab("Settings")
-local UI = Settings:NewSection("UI Customization")
-
-UI:NewKeybind("Toggle UI", "Show/Hide UI", Enum.KeyCode.RightShift, function()
-	Library:ToggleUI()
-end)
-
-UI:NewButton("Save Settings", "Save current config", function()
-    Library:SaveConfig("DeltaConfig")
-end)
-
-UI:NewButton("Destroy UI", "Remove UI", function()
-    Library:Destroy()
-end)
+OrionLib:Init()
