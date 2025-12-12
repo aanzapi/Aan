@@ -5,9 +5,9 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-    Name = "Delta Executor Base UI",
+    Name = "AanYakan",
     LoadingTitle = "Loading Base UI...",
-    LoadingSubtitle = "by YourName",
+    LoadingSubtitle = "by AanYakan",
     ConfigurationSaving = {
         Enabled = true,
         FolderName = "DeltaBaseUI",
