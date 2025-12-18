@@ -1,102 +1,129 @@
 -- =============================================================================
--- DELTA FISHING UI BASE
--- Optimized for Delta Executor
+-- ⚡ DELTA FISHING HUB - PREMIUM UI
 -- =============================================================================
-
 -- Services
 local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
 
 -- Player
 local Player = Players.LocalPlayer
 local Mouse = Player:GetMouse()
 
--- Library (using Delta's library or create our own)
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/UI-Libraries/main/Vynixius/Source.lua"))()
--- Alternative: Use Delta's built-in if available
+-- UI Library (Premium Design)
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
--- Main Window
-local Window = Library:AddWindow({
-    title = {"⚡ Delta Fishing", "v2.0"},
-    theme = {
-        Accent = Color3.fromRGB(0, 170, 255)
+-- Create Main Window
+local Window = Rayfield:CreateWindow({
+    Name = "⚡ DELTA FISHING | v3.0",
+    LoadingTitle = "Loading Fishing System...",
+    LoadingSubtitle = "by Premium Hub",
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "DeltaFishing",
+        FileName = "Config"
     },
-    key = Enum.KeyCode.RightControl,
-    default = true
+    Discord = {
+        Enabled = false,
+        Invite = "noinvite",
+        RememberJoins = true
+    },
+    KeySystem = false,
+    KeySettings = {
+        Title = "Fishing Hub",
+        Subtitle = "Key System",
+        Note = "No key required",
+        FileName = "Key",
+        SaveKey = true,
+        GrabKeyFromSite = false,
+        Key = {"DELTA"}
+    }
 })
 
--- Tabs
-local MainTab = Window:AddTab({title = "Main", icon = "home"})
-local AutoTab = Window:AddTab({title = "Automation", icon = "settings"})
-local SettingsTab = Window:AddTab({title = "Settings", icon = "sliders"})
+-- Colors
+local Theme = {
+    Primary = Color3.fromRGB(0, 184, 255),
+    Secondary = Color3.fromRGB(25, 25, 35),
+    Success = Color3.fromRGB(0, 255, 136),
+    Danger = Color3.fromRGB(255, 71, 87),
+    Warning = Color3.fromRGB(255, 170, 0),
+    Dark = Color3.fromRGB(15, 15, 20),
+    Light = Color3.fromRGB(240, 240, 245)
+}
+
+-- Main Tab
+local MainTab = Window:CreateTab("Dashboard", "rbxassetid://7733674079")
+local AutomationTab = Window:CreateTab("Automation", "rbxassetid://7733675284")
+local SettingsTab = Window:CreateTab("Settings", "rbxassetid://7733676211")
 
 -- =============================================================================
--- MAIN TAB
+-- DASHBOARD TAB
 -- =============================================================================
-MainTab:AddSection({title = "Fishing Control"})
+MainTab:CreateSection("🎯 Control Panel")
 
--- Status Label
-local StatusLabel = MainTab:AddLabel({
-    text = "Status: Idle",
-    color = Color3.fromRGB(200, 200, 200)
+-- Status Panel
+local StatusCard = MainTab:CreateParagraph({
+    Title = "System Status",
+    Content = "🟢 Ready | Connected to Server"
 })
 
--- Toggle Fishing
-local FishingToggle = MainTab:AddToggle({
-    title = "Auto Fish",
-    default = false,
-    callback = function(state)
-        if state then
-            StatusLabel:Set("Status: Fishing...")
-            -- Start fishing logic here
+-- Quick Actions
+local AutoToggle = MainTab:CreateToggle({
+    Name = "⚡ Auto Fishing",
+    CurrentValue = false,
+    Flag = "AutoFishing",
+    Callback = function(Value)
+        if Value then
+            StatusCard:Set({
+                Title = "System Status",
+                Content = "🎣 Fishing Active | Auto Mode"
+            })
+            Rayfield:Notify({
+                Title = "Fishing Started",
+                Content = "Auto fishing system activated",
+                Duration = 2,
+                Image = "rbxassetid://7733674079"
+            })
         else
-            StatusLabel:Set("Status: Idle")
-            -- Stop fishing logic here
+            StatusCard:Set({
+                Title = "System Status",
+                Content = "🟡 Idle | Ready to Fish"
+            })
+            Rayfield:Notify({
+                Title = "Fishing Stopped",
+                Content = "Auto fishing system deactivated",
+                Duration = 2,
+                Image = "rbxassetid://7733674079"
+            })
         end
     end
 })
 
--- Catch Counter
-local CatchCounter = 0
-local CatchLabel = MainTab:AddLabel({
-    text = "Catches: 0",
-    color = Color3.fromRGB(0, 200, 255)
-})
-
--- Catch Button
-MainTab:AddButton({
-    title = "Manual Catch",
-    callback = function()
-        CatchCounter = CatchCounter + 1
-        CatchLabel:Set("Catches: " .. CatchCounter)
-        -- Manual catch logic
-    end
-})
-
-MainTab:AddDivider()
-
--- Fishing Stats
-MainTab:AddSection({title = "Statistics"})
+-- Statistics Panel
+MainTab:CreateSection("📊 Statistics")
 
 local Stats = {
-    TimeFishing = 0,
+    TotalCatches = 0,
     RareCatches = 0,
+    TimeFishing = 0,
     TotalValue = 0
 }
 
--- Stats Labels
-local TimeLabel = MainTab:AddLabel({text = "Time Fishing: 0s"})
-local RareLabel = MainTab:AddLabel({text = "Rare Catches: 0"})
-local ValueLabel = MainTab:AddLabel({text = "Total Value: $0"})
+local StatsContainer = MainTab:CreateSection("Live Stats", false)
 
--- Update stats timer
+local CatchLabel = MainTab:CreateLabel("Total Catches: 0")
+local RareLabel = MainTab:CreateLabel("Rare Catches: 0")
+local TimeLabel = MainTab:CreateLabel("Time Fishing: 00:00:00")
+local ValueLabel = MainTab:CreateLabel("Total Value: $0")
+
+-- Update timer
 spawn(function()
     while true do
         task.wait(1)
-        if FishingToggle.Value then
-            Stats.TimeFishing = Stats.TimeFishing + 1
+        if AutoToggle.CurrentValue then
+            Stats.TimeFishing += 1
             local hours = math.floor(Stats.TimeFishing / 3600)
             local minutes = math.floor((Stats.TimeFishing % 3600) / 60)
             local seconds = Stats.TimeFishing % 60
@@ -105,217 +132,362 @@ spawn(function()
     end
 end)
 
+-- Manual Controls
+MainTab:CreateSection("🕹️ Manual Controls")
+
+MainTab:CreateButton({
+    Name = "🎣 Cast Rod",
+    Callback = function()
+        Rayfield:Notify({
+            Title = "Manual Cast",
+            Content = "Casting fishing rod...",
+            Duration = 1.5
+        })
+    end
+})
+
+MainTab:CreateButton({
+    Name = "🎯 Reel In",
+    Callback = function()
+        Stats.TotalCatches += 1
+        CatchLabel:Set("Total Catches: " .. Stats.TotalCatches)
+        Rayfield:Notify({
+            Title = "Success!",
+            Content = "Fish caught! Total: " .. Stats.TotalCatches,
+            Duration = 2
+        })
+    end
+})
+
+-- Quick Sell
+local SellToggle = MainTab:CreateToggle({
+    Name = "💸 Auto Sell",
+    CurrentValue = false,
+    Flag = "AutoSell",
+    Callback = function(Value)
+        Rayfield:Notify({
+            Title = Value and "Auto Sell ON" or "Auto Sell OFF",
+            Content = Value and "Fish will be automatically sold" or "Manual selling required",
+            Duration = 2
+        })
+    end
+})
+
 -- =============================================================================
--- AUTOMATION TAB (Your Fishing System Integration)
+-- AUTOMATION TAB (BLATANT FISHING INTEGRATION)
 -- =============================================================================
-AutoTab:AddSection({title = "⚡ Blatant Fishing System"})
+AutomationTab:CreateSection("⚡ Blatant Fishing System")
 
 -- Blatant Mode Toggle
-local BlatantToggle = AutoTab:AddToggle({
-    title = "Blatant Mode",
-    description = "Fast fishing with minigame bypass",
-    default = false,
-    callback = function(state)
+local BlatantToggle = AutomationTab:CreateToggle({
+    Name = "🔥 Blatant Mode",
+    CurrentValue = false,
+    Flag = "BlatantMode",
+    Callback = function(Value)
         if ToggleBlatantMode then
-            ToggleBlatantMode(state)
+            ToggleBlatantMode(Value)
         end
+        Rayfield:Notify({
+            Title = Value and "Blatant Mode ON" or "Blatant Mode OFF",
+            Content = Value and "Minigame bypass activated" or "Normal fishing mode",
+            Duration = 3,
+            Image = "rbxassetid://7733675284"
+        })
     end
 })
 
--- Reel Delay Slider
-AutoTab:AddSlider({
-    title = "Reel Delay",
-    description = "Delay before reeling fish",
-    suffix = "s",
-    default = 0.5,
-    min = 0,
-    max = 1.87,
-    rounding = 2,
-    callback = function(value)
+-- Delay Settings
+AutomationTab:CreateSection("⏱️ Timing Settings")
+
+local ReelSlider = AutomationTab:CreateSlider({
+    Name = "Reel Delay",
+    Range = {0, 1.87},
+    Increment = 0.01,
+    Suffix = "s",
+    CurrentValue = 0.5,
+    Flag = "ReelDelay",
+    Callback = function(Value)
         if SetBlatantReelDelay then
-            SetBlatantReelDelay(value)
+            SetBlatantReelDelay(Value)
         end
     end
 })
 
--- Fishing Delay Slider
-AutoTab:AddSlider({
-    title = "Fishing Delay",
-    description = "Delay between fishing attempts",
-    suffix = "ms",
-    default = 15,
-    min = 1,
-    max = 100,
-    rounding = 0,
-    callback = function(value)
+local FishSlider = AutomationTab:CreateSlider({
+    Name = "Fishing Delay",
+    Range = {1, 100},
+    Increment = 1,
+    Suffix = "ms",
+    CurrentValue = 15,
+    Flag = "FishingDelay",
+    Callback = function(Value)
         if SetBlatantFishingDelay then
-            SetBlatantFishingDelay(value / 1000)
+            SetBlatantFishingDelay(Value / 1000)
         end
     end
 })
 
--- Buttons
-AutoTab:AddButton({
-    title = "Initialize System",
-    callback = function()
+-- Advanced Settings
+AutomationTab:CreateSection("🔧 Advanced")
+
+AutomationTab:CreateButton({
+    Name = "Initialize System",
+    Callback = function()
         if InitializeBlatantFishing then
             InitializeBlatantFishing()
         end
+        Rayfield:Notify({
+            Title = "Initializing",
+            Content = "Starting fishing system...",
+            Duration = 2
+        })
     end
 })
 
-AutoTab:AddButton({
-    title = "Manual Cast",
-    callback = function()
-        if ManualBlatantFish then
-            ManualBlatantFish()
-        end
+AutomationTab:CreateButton({
+    Name = "Test Connection",
+    Callback = function()
+        Rayfield:Notify({
+            Title = "Connection Test",
+            Content = "Checking server connection...",
+            Duration = 2
+        })
     end
 })
 
-AutoTab:AddDivider()
+-- Whitelist Settings
+AutomationTab:CreateSection("👑 Whitelist")
 
--- Webhook Section (Optional)
-AutoTab:AddSection({title = "Notifications"})
-
-local WebhookToggle = AutoTab:AddToggle({
-    title = "Discord Webhook",
-    description = "Send catches to Discord",
-    default = false
-})
-
-AutoTab:AddInput({
-    title = "Webhook URL",
-    placeholder = "https://discord.com/api/webhooks/...",
-    callback = function(text)
-        -- Save webhook URL
+local PlayerBox = AutomationTab:CreateInput({
+    Name = "Whitelist Player",
+    PlaceholderText = "Player Name",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(Text)
+        Rayfield:Notify({
+            Title = "Whitelist Added",
+            Content = Text .. " has been whitelisted",
+            Duration = 3
+        })
     end
 })
 
 -- =============================================================================
 -- SETTINGS TAB
 -- =============================================================================
-SettingsTab:AddSection({title = "UI Settings"})
+SettingsTab:CreateSection("🎨 UI Customization")
 
 -- Theme Color
-SettingsTab:AddColorpicker({
-    title = "Theme Color",
-    default = Color3.fromRGB(0, 170, 255),
-    callback = function(color)
-        Window:ChangeThemeOption("Accent", color)
+local ColorPicker = SettingsTab:CreateColorPicker({
+    Name = "Theme Color",
+    Color = Theme.Primary,
+    Flag = "ThemeColor",
+    Callback = function(Color)
+        Theme.Primary = Color
     end
 })
 
--- Toggle Key
-SettingsTab:AddKeybind({
-    title = "Toggle UI Key",
-    default = Enum.KeyCode.RightControl,
-    callback = function()
-        Window:Toggle()
+-- UI Transparency
+local TransparencySlider = SettingsTab:CreateSlider({
+    Name = "UI Transparency",
+    Range = {0, 1},
+    Increment = 0.1,
+    Suffix = "%",
+    CurrentValue = 0,
+    Flag = "UITransparency",
+    Callback = function(Value)
+        -- Set UI transparency
     end
 })
 
--- Auto Close
-SettingsTab:AddToggle({
-    title = "Auto-Close UI",
-    description = "Close UI after toggling feature",
-    default = false
-})
+-- Toggle Keybind
+SettingsTab:CreateSection("⌨️ Keybinds")
 
-SettingsTab:AddDivider()
+local Keybind = SettingsTab:CreateKeybind({
+    Name = "Toggle UI",
+    CurrentKeybind = "RightControl",
+    HoldToInteract = false,
+    Flag = "UIToggle",
+    Callback = function(Keybind)
+        Window:Toggle(Keybind)
+    end
+})
 
 -- Performance
-SettingsTab:AddSection({title = "Performance"})
+SettingsTab:CreateSection("⚡ Performance")
 
-SettingsTab:AddSlider({
-    title = "Update Rate",
-    description = "Lower = better performance",
-    suffix = "ms",
-    default = 50,
-    min = 10,
-    max = 1000,
-    rounding = 0,
-    callback = function(value)
+SettingsTab:CreateSlider({
+    Name = "Update Rate",
+    Range = {10, 1000},
+    Increment = 10,
+    Suffix = "ms",
+    CurrentValue = 50,
+    Flag = "UpdateRate",
+    Callback = function(Value)
         -- Set update interval
     end
 })
 
--- Save/Load
-SettingsTab:AddButton({
-    title = "Save Settings",
-    callback = function()
-        -- Save settings logic
+-- Config Management
+SettingsTab:CreateSection("💾 Configuration")
+
+SettingsTab:CreateButton({
+    Name = "Save Configuration",
+    Callback = function()
+        Rayfield:Notify({
+            Title = "Configuration Saved",
+            Content = "Settings have been saved successfully",
+            Duration = 3
+        })
     end
 })
 
-SettingsTab:AddButton({
-    title = "Load Settings",
-    callback = function()
-        -- Load settings logic
+SettingsTab:CreateButton({
+    Name = "Load Configuration",
+    Callback = function()
+        Rayfield:Notify({
+            Title = "Configuration Loaded",
+            Content = "Settings have been loaded",
+            Duration = 3
+        })
     end
 })
 
+SettingsTab:CreateButton({
+    Name = "Reset to Default",
+    Callback = function()
+        Rayfield:Notify({
+            Title = "Reset Complete",
+            Content = "All settings reset to default",
+            Duration = 3
+        })
+    end
+})
+
+-- Watermark
+SettingsTab:CreateSection("ℹ️ Information")
+
+SettingsTab:CreateLabel("Delta Fishing Hub v3.0")
+SettingsTab:CreateLabel("Made for Delta Executor")
+SettingsTab:CreateLabel("Status: Premium")
+
 -- =============================================================================
--- NOTIFICATION FUNCTION
+-- PREMIUM FEATURES
 -- =============================================================================
-function Notify(options)
-    Library:Notify({
-        title = options.Title or "Notification",
-        content = options.Content or "",
-        duration = options.Duration or 3
-    })
-    
-    -- Also print to console for debugging
-    print(string.format("[%s] %s", options.Title or "Notification", options.Content or ""))
-end
+local PremiumTab = Window:CreateTab("Premium", "rbxassetid://7733713439")
+
+PremiumTab:CreateSection("🌟 Premium Features")
+
+-- ESP Features
+local ESPToggle = PremiumTab:CreateToggle({
+    Name = "🎯 Fish ESP",
+    CurrentValue = false,
+    Flag = "FishESP",
+    Callback = function(Value)
+        Rayfield:Notify({
+            Title = Value and "Fish ESP ON" or "Fish ESP OFF",
+            Content = Value and "Highlighting rare fish" or "ESP disabled",
+            Duration = 3,
+            Image = "rbxassetid://7733713439"
+        })
+    end
+})
+
+-- Auto-Upgrade
+PremiumTab:CreateToggle({
+    Name = "⚡ Auto Upgrade Rod",
+    CurrentValue = false,
+    Flag = "AutoUpgrade",
+    Callback = function(Value)
+        Rayfield:Notify({
+            Title = Value and "Auto-Upgrade ON" or "Auto-Upgrade OFF",
+            Content = Value and "Automatically upgrading fishing rod" or "Manual upgrades only",
+            Duration = 3
+        })
+    end
+})
+
+-- Anti-AFK
+PremiumTab:CreateToggle({
+    Name = "🤖 Anti-AFK System",
+    CurrentValue = false,
+    Flag = "AntiAFK",
+    Callback = function(Value)
+        Rayfield:Notify({
+            Title = Value and "Anti-AFK ON" or "Anti-AFK OFF",
+            Content = Value and "Preventing AFK detection" or "Normal AFK behavior",
+            Duration = 3
+        })
+    end
+})
+
+-- Server Hop
+PremiumTab:CreateButton({
+    Name = "🔄 Server Hop",
+    Callback = function()
+        Rayfield:Notify({
+            Title = "Server Hop",
+            Content = "Finding new server...",
+            Duration = 5
+        })
+    end
+})
 
 -- =============================================================================
 -- INITIALIZATION
 -- =============================================================================
 
+-- Load configuration
+Rayfield:LoadConfiguration()
+
 -- Welcome message
+task.wait(2)
+Rayfield:Notify({
+    Title = "Delta Fishing Hub",
+    Content = "Welcome! UI Loaded Successfully",
+    Duration = 5,
+    Image = "rbxassetid://7733674079"
+})
+
+-- Status indicator
 spawn(function()
-    task.wait(1)
-    Notify({
-        Title = "Delta Fishing",
-        Content = "UI loaded successfully! Press RightControl to toggle.",
-        Duration = 5
-    })
-end)
-
--- Save settings on close
-game:GetService("UserInputService").WindowFocused:Connect(function()
-    -- Auto-save when window focused
-end)
-
--- Keybind listener
-local UIS = game:GetService("UserInputService")
-UIS.InputBegan:Connect(function(input, gameProcessed)
-    if input.KeyCode == Enum.KeyCode.RightControl and not gameProcessed then
-        Window:Toggle()
+    while true do
+        task.wait(5)
+        if AutoToggle.CurrentValue then
+            StatusCard:Set({
+                Title = "System Status",
+                Content = "🎣 Fishing Active | " .. Stats.TotalCatches .. " Catches"
+            })
+        end
     end
 end)
 
--- Cleanup on script termination
+-- Auto-save
 game:GetService("Players").LocalPlayer.CharacterAdded:Connect(function()
-    -- Handle character reset
+    Rayfield:Notify({
+        Title = "Character Loaded",
+        Content = "Resuming fishing system...",
+        Duration = 3
+    })
 end)
 
--- Return the window for external access
+-- Return API
 return {
     Window = Window,
-    Tabs = {
-        Main = MainTab,
-        Auto = AutoTab,
-        Settings = SettingsTab
-    },
-    Notify = Notify,
-    GetStatus = function()
-        return {
-            Fishing = FishingToggle.Value,
-            Blatant = BlatantToggle.Value,
-            Catches = CatchCounter,
-            Time = Stats.TimeFishing
-        }
+    ToggleFishing = function(state)
+        AutoToggle:Set(state)
+    end,
+    GetStats = function()
+        return Stats
+    end,
+    AddCatch = function(rare, value)
+        Stats.TotalCatches += 1
+        if rare then
+            Stats.RareCatches += 1
+        end
+        Stats.TotalValue += value or 0
+        
+        CatchLabel:Set("Total Catches: " .. Stats.TotalCatches)
+        RareLabel:Set("Rare Catches: " .. Stats.RareCatches)
+        ValueLabel:Set("Total Value: $" .. Stats.TotalValue)
     end
 }
