@@ -1,493 +1,729 @@
--- =============================================================================
--- ⚡ DELTA FISHING HUB - PREMIUM UI
--- =============================================================================
--- Services
+-- ============================================
+-- DELTA FISHING HUB - Custom Premium UI
+-- ============================================
+
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local CoreGui = game:GetService("CoreGui")
 
--- Player
 local Player = Players.LocalPlayer
 local Mouse = Player:GetMouse()
 
--- UI Library (Premium Design)
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-
--- Create Main Window
-local Window = Rayfield:CreateWindow({
-    Name = "⚡ DELTA FISHING | v3.0",
-    LoadingTitle = "Loading Fishing System...",
-    LoadingSubtitle = "by Premium Hub",
-    ConfigurationSaving = {
-        Enabled = true,
-        FolderName = "DeltaFishing",
-        FileName = "Config"
-    },
-    Discord = {
-        Enabled = false,
-        Invite = "noinvite",
-        RememberJoins = true
-    },
-    KeySystem = false,
-    KeySettings = {
-        Title = "Fishing Hub",
-        Subtitle = "Key System",
-        Note = "No key required",
-        FileName = "Key",
-        SaveKey = true,
-        GrabKeyFromSite = false,
-        Key = {"DELTA"}
-    }
-})
-
--- Colors
-local Theme = {
+-- UI Colors
+local Colors = {
     Primary = Color3.fromRGB(0, 184, 255),
-    Secondary = Color3.fromRGB(25, 25, 35),
+    Secondary = Color3.fromRGB(30, 35, 45),
+    Dark = Color3.fromRGB(20, 25, 35),
+    Light = Color3.fromRGB(240, 245, 250),
     Success = Color3.fromRGB(0, 255, 136),
-    Danger = Color3.fromRGB(255, 71, 87),
-    Warning = Color3.fromRGB(255, 170, 0),
-    Dark = Color3.fromRGB(15, 15, 20),
-    Light = Color3.fromRGB(240, 240, 245)
+    Danger = Color3.fromRGB(255, 85, 85),
+    Warning = Color3.fromRGB(255, 184, 0)
 }
 
--- Main Tab
-local MainTab = Window:CreateTab("Dashboard", "rbxassetid://7733674079")
-local AutomationTab = Window:CreateTab("Automation", "rbxassetid://7733675284")
-local SettingsTab = Window:CreateTab("Settings", "rbxassetid://7733676211")
+-- Main UI Container
+local ScreenGui = Instance.new("ScreenGui")
+if gethui then
+    ScreenGui.Parent = gethui()
+elseif syn and syn.protect_gui then
+    syn.protect_gui(ScreenGui)
+    ScreenGui.Parent = game.CoreGui
+else
+    ScreenGui.Parent = game.CoreGui
+end
+ScreenGui.Name = "DeltaFishingHub"
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.ResetOnSpawn = false
 
--- =============================================================================
--- DASHBOARD TAB
--- =============================================================================
-MainTab:CreateSection("🎯 Control Panel")
+-- Main Window
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainWindow"
+MainFrame.Size = UDim2.new(0, 500, 0, 600)
+MainFrame.Position = UDim2.new(0.5, -250, 0.5, -300)
+MainFrame.BackgroundColor3 = Colors.Dark
+MainFrame.BackgroundTransparency = 0.05
+MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
+MainFrame.Parent = ScreenGui
 
--- Status Panel
-local StatusCard = MainTab:CreateParagraph({
-    Title = "System Status",
-    Content = "🟢 Ready | Connected to Server"
+-- Corner & Shadow
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 12)
+UICorner.Parent = MainFrame
+
+local UIGradient = Instance.new("UIGradient")
+UIGradient.Rotation = 90
+UIGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 30, 40)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 25, 35))
 })
+UIGradient.Parent = MainFrame
 
--- Quick Actions
-local AutoToggle = MainTab:CreateToggle({
-    Name = "⚡ Auto Fishing",
-    CurrentValue = false,
-    Flag = "AutoFishing",
-    Callback = function(Value)
-        if Value then
-            StatusCard:Set({
-                Title = "System Status",
-                Content = "🎣 Fishing Active | Auto Mode"
-            })
-            Rayfield:Notify({
-                Title = "Fishing Started",
-                Content = "Auto fishing system activated",
-                Duration = 2,
-                Image = "rbxassetid://7733674079"
-            })
-        else
-            StatusCard:Set({
-                Title = "System Status",
-                Content = "🟡 Idle | Ready to Fish"
-            })
-            Rayfield:Notify({
-                Title = "Fishing Stopped",
-                Content = "Auto fishing system deactivated",
-                Duration = 2,
-                Image = "rbxassetid://7733674079"
-            })
-        end
-    end
-})
+-- Title Bar
+local TitleBar = Instance.new("Frame")
+TitleBar.Size = UDim2.new(1, 0, 0, 50)
+TitleBar.BackgroundColor3 = Colors.Secondary
+TitleBar.BorderSizePixel = 0
+TitleBar.Parent = MainFrame
 
--- Statistics Panel
-MainTab:CreateSection("📊 Statistics")
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 12, 0, 0)
+TitleCorner.Parent = TitleBar
 
-local Stats = {
-    TotalCatches = 0,
-    RareCatches = 0,
-    TimeFishing = 0,
-    TotalValue = 0
-}
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Text = "⚡ DELTA FISHING HUB"
+TitleLabel.Size = UDim2.new(0, 200, 0, 30)
+TitleLabel.Position = UDim2.new(0, 15, 0.5, -15)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.TextColor3 = Colors.Light
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.TextSize = 18
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+TitleLabel.Parent = TitleBar
 
-local StatsContainer = MainTab:CreateSection("Live Stats", false)
+local VersionLabel = Instance.new("TextLabel")
+VersionLabel.Text = "v3.0"
+VersionLabel.Size = UDim2.new(0, 40, 0, 16)
+VersionLabel.Position = UDim2.new(0, 180, 0.5, -8)
+VersionLabel.BackgroundColor3 = Colors.Primary
+VersionLabel.BackgroundTransparency = 0.2
+VersionLabel.TextColor3 = Colors.Light
+VersionLabel.Font = Enum.Font.Gotham
+VersionLabel.TextSize = 12
+VersionLabel.Parent = TitleBar
 
-local CatchLabel = MainTab:CreateLabel("Total Catches: 0")
-local RareLabel = MainTab:CreateLabel("Rare Catches: 0")
-local TimeLabel = MainTab:CreateLabel("Time Fishing: 00:00:00")
-local ValueLabel = MainTab:CreateLabel("Total Value: $0")
+local VersionCorner = Instance.new("UICorner")
+VersionCorner.CornerRadius = UDim.new(0, 4)
+VersionCorner.Parent = VersionLabel
 
--- Update timer
-spawn(function()
-    while true do
-        task.wait(1)
-        if AutoToggle.CurrentValue then
-            Stats.TimeFishing += 1
-            local hours = math.floor(Stats.TimeFishing / 3600)
-            local minutes = math.floor((Stats.TimeFishing % 3600) / 60)
-            local seconds = Stats.TimeFishing % 60
-            TimeLabel:Set(string.format("Time Fishing: %02d:%02d:%02d", hours, minutes, seconds))
-        end
+-- Close Button
+local CloseButton = Instance.new("TextButton")
+CloseButton.Text = "×"
+CloseButton.Size = UDim2.new(0, 30, 0, 30)
+CloseButton.Position = UDim2.new(1, -40, 0.5, -15)
+CloseButton.BackgroundColor3 = Colors.Danger
+CloseButton.BackgroundTransparency = 0.2
+CloseButton.TextColor3 = Colors.Light
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.TextSize = 20
+CloseButton.Parent = TitleBar
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 8)
+CloseCorner.Parent = CloseButton
+
+-- Minimize Button
+local MinimizeButton = Instance.new("TextButton")
+MinimizeButton.Text = "–"
+MinimizeButton.Size = UDim2.new(0, 30, 0, 30)
+MinimizeButton.Position = UDim2.new(1, -75, 0.5, -15)
+MinimizeButton.BackgroundColor3 = Colors.Warning
+MinimizeButton.BackgroundTransparency = 0.2
+MinimizeButton.TextColor3 = Colors.Light
+MinimizeButton.Font = Enum.Font.GothamBold
+MinimizeButton.TextSize = 20
+MinimizeButton.Parent = TitleBar
+
+local MinimizeCorner = Instance.new("UICorner")
+MinimizeCorner.CornerRadius = UDim.new(0, 8)
+MinimizeCorner.Parent = MinimizeButton
+
+-- Drag Functionality
+local dragging = false
+local dragInput, dragStart, startPos
+
+local function updateInput(input)
+    local delta = input.Position - dragStart
+    MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+TitleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
     end
 end)
 
--- Manual Controls
-MainTab:CreateSection("🕹️ Manual Controls")
-
-MainTab:CreateButton({
-    Name = "🎣 Cast Rod",
-    Callback = function()
-        Rayfield:Notify({
-            Title = "Manual Cast",
-            Content = "Casting fishing rod...",
-            Duration = 1.5
-        })
+TitleBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
     end
-})
+end)
 
-MainTab:CreateButton({
-    Name = "🎯 Reel In",
-    Callback = function()
-        Stats.TotalCatches += 1
-        CatchLabel:Set("Total Catches: " .. Stats.TotalCatches)
-        Rayfield:Notify({
-            Title = "Success!",
-            Content = "Fish caught! Total: " .. Stats.TotalCatches,
-            Duration = 2
-        })
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        updateInput(input)
     end
-})
+end)
 
--- Quick Sell
-local SellToggle = MainTab:CreateToggle({
-    Name = "💸 Auto Sell",
-    CurrentValue = false,
-    Flag = "AutoSell",
-    Callback = function(Value)
-        Rayfield:Notify({
-            Title = Value and "Auto Sell ON" or "Auto Sell OFF",
-            Content = Value and "Fish will be automatically sold" or "Manual selling required",
-            Duration = 2
-        })
-    end
-})
+-- Tab System
+local TabsContainer = Instance.new("Frame")
+TabsContainer.Size = UDim2.new(1, -20, 0, 40)
+TabsContainer.Position = UDim2.new(0, 10, 0, 60)
+TabsContainer.BackgroundTransparency = 1
+TabsContainer.Parent = MainFrame
 
--- =============================================================================
--- AUTOMATION TAB (BLATANT FISHING INTEGRATION)
--- =============================================================================
-AutomationTab:CreateSection("⚡ Blatant Fishing System")
+local Tabs = {}
+local CurrentTab = nil
 
--- Blatant Mode Toggle
-local BlatantToggle = AutomationTab:CreateToggle({
-    Name = "🔥 Blatant Mode",
-    CurrentValue = false,
-    Flag = "BlatantMode",
-    Callback = function(Value)
-        if ToggleBlatantMode then
-            ToggleBlatantMode(Value)
+-- Content Container
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Size = UDim2.new(1, -20, 1, -110)
+ContentFrame.Position = UDim2.new(0, 10, 0, 110)
+ContentFrame.BackgroundTransparency = 1
+ContentFrame.ClipsDescendants = true
+ContentFrame.Parent = MainFrame
+
+-- Create Tab Function
+function CreateTab(name, icon)
+    local TabButton = Instance.new("TextButton")
+    TabButton.Name = name .. "Tab"
+    TabButton.Size = UDim2.new(0, 100, 1, 0)
+    TabButton.Position = UDim2.new(0, (#Tabs * 110), 0, 0)
+    TabButton.BackgroundColor3 = Colors.Secondary
+    TabButton.BackgroundTransparency = 0.5
+    TabButton.Text = icon .. " " .. name
+    TabButton.TextColor3 = Colors.Light
+    TabButton.Font = Enum.Font.Gotham
+    TabButton.TextSize = 14
+    TabButton.Parent = TabsContainer
+    
+    local TabCorner = Instance.new("UICorner")
+    TabCorner.CornerRadius = UDim.new(0, 8)
+    TabCorner.Parent = TabButton
+    
+    local TabContent = Instance.new("ScrollingFrame")
+    TabContent.Name = name .. "Content"
+    TabContent.Size = UDim2.new(1, 0, 1, 0)
+    TabContent.Position = UDim2.new(0, 0, 0, 0)
+    TabContent.BackgroundTransparency = 1
+    TabContent.ScrollBarThickness = 3
+    TabContent.ScrollBarImageColor3 = Colors.Primary
+    TabContent.Visible = false
+    TabContent.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    TabContent.Parent = ContentFrame
+    
+    local UIListLayout = Instance.new("UIListLayout")
+    UIListLayout.Padding = UDim.new(0, 10)
+    UIListLayout.Parent = TabContent
+    
+    local Padding = Instance.new("UIPadding")
+    Padding.PaddingTop = UDim.new(0, 5)
+    Padding.PaddingLeft = UDim.new(0, 5)
+    Padding.PaddingRight = UDim.new(0, 5)
+    Padding.Parent = TabContent
+    
+    TabButton.MouseButton1Click:Connect(function()
+        if CurrentTab then
+            CurrentTab.Button.BackgroundTransparency = 0.5
+            CurrentTab.Content.Visible = false
+            
+            TweenService:Create(CurrentTab.Button, TweenInfo.new(0.2), {
+                BackgroundColor3 = Colors.Secondary
+            }):Play()
         end
-        Rayfield:Notify({
-            Title = Value and "Blatant Mode ON" or "Blatant Mode OFF",
-            Content = Value and "Minigame bypass activated" or "Normal fishing mode",
-            Duration = 3,
-            Image = "rbxassetid://7733675284"
-        })
+        
+        TabButton.BackgroundTransparency = 0
+        TabContent.Visible = true
+        
+        TweenService:Create(TabButton, TweenInfo.new(0.2), {
+            BackgroundColor3 = Colors.Primary
+        }):Play()
+        
+        CurrentTab = {
+            Button = TabButton,
+            Content = TabContent
+        }
+    end)
+    
+    local tabData = {
+        Button = TabButton,
+        Content = TabContent,
+        CreateSection = function(title)
+            local SectionFrame = Instance.new("Frame")
+            SectionFrame.Size = UDim2.new(1, -10, 0, 40)
+            SectionFrame.BackgroundColor3 = Colors.Secondary
+            SectionFrame.BackgroundTransparency = 0.9
+            SectionFrame.Parent = TabContent
+            
+            local SectionCorner = Instance.new("UICorner")
+            SectionCorner.CornerRadius = UDim.new(0, 8)
+            SectionCorner.Parent = SectionFrame
+            
+            local SectionLabel = Instance.new("TextLabel")
+            SectionLabel.Text = "  " .. title
+            SectionLabel.Size = UDim2.new(1, 0, 1, 0)
+            SectionLabel.BackgroundTransparency = 1
+            SectionLabel.TextColor3 = Colors.Primary
+            SectionLabel.Font = Enum.Font.GothamBold
+            SectionLabel.TextSize = 16
+            SectionLabel.TextXAlignment = Enum.TextXAlignment.Left
+            SectionLabel.Parent = SectionFrame
+            
+            return {
+                Frame = SectionFrame,
+                CreateToggle = function(config)
+                    local ToggleFrame = Instance.new("Frame")
+                    ToggleFrame.Size = UDim2.new(1, -10, 0, 40)
+                    ToggleFrame.BackgroundColor3 = Colors.Dark
+                    ToggleFrame.BackgroundTransparency = 0.8
+                    ToggleFrame.Parent = TabContent
+                    
+                    local ToggleCorner = Instance.new("UICorner")
+                    ToggleCorner.CornerRadius = UDim.new(0, 6)
+                    ToggleCorner.Parent = ToggleFrame
+                    
+                    local ToggleLabel = Instance.new("TextLabel")
+                    ToggleLabel.Text = "  " .. config.Name
+                    ToggleLabel.Size = UDim2.new(0.7, 0, 1, 0)
+                    ToggleLabel.BackgroundTransparency = 1
+                    ToggleLabel.TextColor3 = Colors.Light
+                    ToggleLabel.Font = Enum.Font.Gotham
+                    ToggleLabel.TextSize = 14
+                    ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
+                    ToggleLabel.Parent = ToggleFrame
+                    
+                    local ToggleButton = Instance.new("Frame")
+                    ToggleButton.Size = UDim2.new(0, 50, 0, 26)
+                    ToggleButton.Position = UDim2.new(1, -60, 0.5, -13)
+                    ToggleButton.BackgroundColor3 = Colors.Danger
+                    ToggleButton.Parent = ToggleFrame
+                    
+                    local ToggleCircle = Instance.new("Frame")
+                    ToggleCircle.Size = UDim2.new(0, 20, 0, 20)
+                    ToggleCircle.Position = UDim2.new(0, 3, 0.5, -10)
+                    ToggleCircle.BackgroundColor3 = Colors.Light
+                    ToggleCircle.Parent = ToggleButton
+                    
+                    local ToggleCorner1 = Instance.new("UICorner")
+                    ToggleCorner1.CornerRadius = UDim.new(1, 0)
+                    ToggleCorner1.Parent = ToggleCircle
+                    
+                    local ToggleCorner2 = Instance.new("UICorner")
+                    ToggleCorner2.CornerRadius = UDim.new(1, 0)
+                    ToggleCorner2.Parent = ToggleButton
+                    
+                    local state = config.Default or false
+                    
+                    local function updateToggle()
+                        if state then
+                            TweenService:Create(ToggleButton, TweenInfo.new(0.2), {
+                                BackgroundColor3 = Colors.Success
+                            }):Play()
+                            TweenService:Create(ToggleCircle, TweenInfo.new(0.2), {
+                                Position = UDim2.new(1, -23, 0.5, -10)
+                            }):Play()
+                        else
+                            TweenService:Create(ToggleButton, TweenInfo.new(0.2), {
+                                BackgroundColor3 = Colors.Danger
+                            }):Play()
+                            TweenService:Create(ToggleCircle, TweenInfo.new(0.2), {
+                                Position = UDim2.new(0, 3, 0.5, -10)
+                            }):Play()
+                        end
+                        
+                        if config.Callback then
+                            config.Callback(state)
+                        end
+                    end
+                    
+                    ToggleFrame.InputBegan:Connect(function(input)
+                        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                            state = not state
+                            updateToggle()
+                        end
+                    end)
+                    
+                    updateToggle()
+                    
+                    return {
+                        Set = function(value)
+                            state = value
+                            updateToggle()
+                        end,
+                        Get = function()
+                            return state
+                        end
+                    }
+                end,
+                
+                CreateButton = function(config)
+                    local Button = Instance.new("TextButton")
+                    Button.Size = UDim2.new(1, -10, 0, 40)
+                    Button.BackgroundColor3 = Colors.Primary
+                    Button.BackgroundTransparency = 0.2
+                    Button.Text = config.Name
+                    Button.TextColor3 = Colors.Light
+                    Button.Font = Enum.Font.Gotham
+                    Button.TextSize = 14
+                    Button.Parent = TabContent
+                    
+                    local ButtonCorner = Instance.new("UICorner")
+                    ButtonCorner.CornerRadius = UDim.new(0, 8)
+                    ButtonCorner.Parent = Button
+                    
+                    Button.MouseButton1Click:Connect(function()
+                        TweenService:Create(Button, TweenInfo.new(0.1), {
+                            BackgroundTransparency = 0
+                        }):Play()
+                        if config.Callback then
+                            config.Callback()
+                        end
+                        task.wait(0.1)
+                        TweenService:Create(Button, TweenInfo.new(0.1), {
+                            BackgroundTransparency = 0.2
+                        }):Play()
+                    end)
+                end,
+                
+                CreateSlider = function(config)
+                    local SliderFrame = Instance.new("Frame")
+                    SliderFrame.Size = UDim2.new(1, -10, 0, 60)
+                    SliderFrame.BackgroundColor3 = Colors.Dark
+                    SliderFrame.BackgroundTransparency = 0.8
+                    SliderFrame.Parent = TabContent
+                    
+                    local SliderCorner = Instance.new("UICorner")
+                    SliderCorner.CornerRadius = UDim.new(0, 6)
+                    SliderCorner.Parent = SliderFrame
+                    
+                    local SliderLabel = Instance.new("TextLabel")
+                    SliderLabel.Text = "  " .. config.Name
+                    SliderLabel.Size = UDim2.new(1, 0, 0, 25)
+                    SliderLabel.BackgroundTransparency = 1
+                    SliderLabel.TextColor3 = Colors.Light
+                    SliderLabel.Font = Enum.Font.Gotham
+                    SliderLabel.TextSize = 14
+                    SliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+                    SliderLabel.Parent = SliderFrame
+                    
+                    local ValueLabel = Instance.new("TextLabel")
+                    ValueLabel.Text = tostring(config.Default or config.Min) .. (config.Suffix or "")
+                    ValueLabel.Size = UDim2.new(0, 60, 0, 25)
+                    ValueLabel.Position = UDim2.new(1, -65, 0, 0)
+                    ValueLabel.BackgroundTransparency = 1
+                    ValueLabel.TextColor3 = Colors.Primary
+                    ValueLabel.Font = Enum.Font.GothamBold
+                    ValueLabel.TextSize = 14
+                    ValueLabel.Parent = SliderFrame
+                    
+                    local SliderTrack = Instance.new("Frame")
+                    SliderTrack.Size = UDim2.new(1, -20, 0, 6)
+                    SliderTrack.Position = UDim2.new(0, 10, 1, -25)
+                    SliderTrack.BackgroundColor3 = Colors.Secondary
+                    SliderTrack.Parent = SliderFrame
+                    
+                    local TrackCorner = Instance.new("UICorner")
+                    TrackCorner.CornerRadius = UDim.new(1, 0)
+                    TrackCorner.Parent = SliderTrack
+                    
+                    local SliderFill = Instance.new("Frame")
+                    SliderFill.Size = UDim2.new(0.5, 0, 1, 0)
+                    SliderFill.BackgroundColor3 = Colors.Primary
+                    SliderFill.Parent = SliderTrack
+                    
+                    local FillCorner = Instance.new("UICorner")
+                    FillCorner.CornerRadius = UDim.new(1, 0)
+                    FillCorner.Parent = SliderFill
+                    
+                    local SliderButton = Instance.new("TextButton")
+                    SliderButton.Size = UDim2.new(0, 16, 0, 16)
+                    SliderButton.BackgroundColor3 = Colors.Light
+                    SliderButton.Text = ""
+                    SliderButton.Parent = SliderFrame
+                    
+                    local ButtonCorner = Instance.new("UICorner")
+                    ButtonCorner.CornerRadius = UDim.new(1, 0)
+                    ButtonCorner.Parent = SliderButton
+                    
+                    local min = config.Min or 0
+                    local max = config.Max or 100
+                    local value = config.Default or min
+                    local dragging = false
+                    
+                    local function updateSlider()
+                        local percent = (value - min) / (max - min)
+                        SliderFill.Size = UDim2.new(percent, 0, 1, 0)
+                        SliderButton.Position = UDim2.new(percent, -8, 1, -28)
+                        ValueLabel.Text = string.format("%.1f", value) .. (config.Suffix or "")
+                        
+                        if config.Callback then
+                            config.Callback(value)
+                        end
+                    end
+                    
+                    updateSlider()
+                    
+                    SliderButton.InputBegan:Connect(function(input)
+                        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                            dragging = true
+                        end
+                    end)
+                    
+                    SliderButton.InputEnded:Connect(function(input)
+                        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                            dragging = false
+                        end
+                    end)
+                    
+                    UserInputService.InputChanged:Connect(function(input)
+                        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                            local pos = input.Position.X - SliderTrack.AbsolutePosition.X
+                            local percent = math.clamp(pos / SliderTrack.AbsoluteSize.X, 0, 1)
+                            value = min + (max - min) * percent
+                            updateSlider()
+                        end
+                    end)
+                end
+            }
+        end
+    }
+    
+    table.insert(Tabs, tabData)
+    
+    if #Tabs == 1 then
+        TabButton.BackgroundTransparency = 0
+        TabContent.Visible = true
+        CurrentTab = tabData
+        
+        TweenService:Create(TabButton, TweenInfo.new(0.2), {
+            BackgroundColor3 = Colors.Primary
+        }):Play()
+    end
+    
+    return tabData
+end
+
+-- Create Notification System
+local NotificationFrame = Instance.new("Frame")
+NotificationFrame.Size = UDim2.new(0, 300, 1, -20)
+NotificationFrame.Position = UDim2.new(1, 10, 0, 10)
+NotificationFrame.BackgroundTransparency = 1
+NotificationFrame.Parent = ScreenGui
+
+local NotificationsList = Instance.new("UIListLayout")
+NotificationsList.Padding = UDim.new(0, 10)
+NotificationsList.HorizontalAlignment = Enum.HorizontalAlignment.Right
+NotificationsList.Parent = NotificationFrame
+
+function Notify(title, message, color)
+    color = color or Colors.Primary
+    
+    local Notification = Instance.new("Frame")
+    Notification.Size = UDim2.new(0, 280, 0, 80)
+    Notification.BackgroundColor3 = Colors.Dark
+    Notification.BackgroundTransparency = 0.05
+    Notification.Parent = NotificationFrame
+    
+    local NotifCorner = Instance.new("UICorner")
+    NotifCorner.CornerRadius = UDim.new(0, 8)
+    NotifCorner.Parent = Notification
+    
+    local Accent = Instance.new("Frame")
+    Accent.Size = UDim2.new(0, 5, 1, 0)
+    Accent.BackgroundColor3 = color
+    Accent.Parent = Notification
+    
+    local AccentCorner = Instance.new("UICorner")
+    AccentCorner.CornerRadius = UDim.new(0, 8, 0, 0)
+    AccentCorner.Parent = Accent
+    
+    local TitleLabel = Instance.new("TextLabel")
+    TitleLabel.Text = title
+    TitleLabel.Size = UDim2.new(1, -15, 0, 25)
+    TitleLabel.Position = UDim2.new(0, 15, 0, 10)
+    TitleLabel.BackgroundTransparency = 1
+    TitleLabel.TextColor3 = Colors.Light
+    TitleLabel.Font = Enum.Font.GothamBold
+    TitleLabel.TextSize = 16
+    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    TitleLabel.Parent = Notification
+    
+    local MessageLabel = Instance.new("TextLabel")
+    MessageLabel.Text = message
+    MessageLabel.Size = UDim2.new(1, -15, 0, 35)
+    MessageLabel.Position = UDim2.new(0, 15, 0, 35)
+    MessageLabel.BackgroundTransparency = 1
+    MessageLabel.TextColor3 = Color3.fromRGB(200, 200, 210)
+    MessageLabel.Font = Enum.Font.Gotham
+    MessageLabel.TextSize = 13
+    MessageLabel.TextXAlignment = Enum.TextXAlignment.Left
+    MessageLabel.TextWrapped = true
+    MessageLabel.Parent = Notification
+    
+    Notification:TweenPosition(UDim2.new(1, -290, 0, Notification.Position.Y.Offset), "Out", "Quad", 0.3)
+    
+    task.wait(3)
+    
+    Notification:TweenPosition(UDim2.new(1, 10, 0, Notification.Position.Y.Offset), "Out", "Quad", 0.3)
+    task.wait(0.3)
+    Notification:Destroy()
+end
+
+-- Create Tabs
+local MainTab = CreateTab("Main", "🏠")
+local AutoTab = CreateTab("Auto", "⚡")
+local SettingsTab = CreateTab("Settings", "⚙️")
+
+-- Main Tab Content
+MainTab.CreateSection("Status Panel")
+
+local StatsFrame = Instance.new("Frame")
+StatsFrame.Size = UDim2.new(1, -10, 0, 150)
+StatsFrame.BackgroundColor3 = Colors.Secondary
+StatsFrame.BackgroundTransparency = 0.8
+StatsFrame.Parent = MainTab.Content
+
+local StatsCorner = Instance.new("UICorner")
+StatsCorner.CornerRadius = UDim.new(0, 8)
+StatsCorner.Parent = StatsFrame
+
+-- Stats Grid
+for i = 1, 4 do
+    local StatBox = Instance.new("Frame")
+    StatBox.Size = UDim2.new(0.48, -5, 0.48, -5)
+    StatBox.Position = UDim2.new((i-1)%2*0.52, 5, math.floor((i-1)/2)*0.52, 5)
+    StatBox.BackgroundColor3 = Colors.Dark
+    StatBox.BackgroundTransparency = 0.9
+    StatBox.Parent = StatsFrame
+    
+    local BoxCorner = Instance.new("UICorner")
+    BoxCorner.CornerRadius = UDim.new(0, 6)
+    BoxCorner.Parent = StatBox
+end
+
+local CatchesLabel = Instance.new("TextLabel")
+CatchesLabel.Text = "0\nCatches"
+CatchesLabel.Size = UDim2.new(1, 0, 1, 0)
+CatchesLabel.BackgroundTransparency = 1
+CatchesLabel.TextColor3 = Colors.Success
+CatchesLabel.Font = Enum.Font.GothamBold
+CatchesLabel.TextSize = 20
+CatchesLabel.TextWrapped = true
+CatchesLabel.Parent = StatsFrame:FindFirstChild("Frame")
+
+-- Quick Controls
+MainTab.CreateSection("Quick Controls")
+
+local AutoFishToggle = MainTab.CreateSection("").CreateToggle({
+    Name = "Auto Fishing",
+    Default = false,
+    Callback = function(state)
+        Notify("Auto Fishing", state and "Started fishing" or "Stopped fishing", state and Colors.Success or Colors.Danger)
     end
 })
 
--- Delay Settings
-AutomationTab:CreateSection("⏱️ Timing Settings")
+MainTab.CreateSection("").CreateButton({
+    Name = "🎣 Cast Now",
+    Callback = function()
+        Notify("Manual Cast", "Casting fishing rod...", Colors.Primary)
+    end
+})
 
-local ReelSlider = AutomationTab:CreateSlider({
+-- Auto Tab Content
+AutoTab.CreateSection("Blatant Fishing")
+
+local BlatantToggle = AutoTab.CreateSection("").CreateToggle({
+    Name = "Blatant Mode",
+    Default = false,
+    Callback = function(state)
+        Notify("Blatant Mode", state and "Bypass activated" or "Bypass disabled", state and Colors.Warning or Colors.Danger)
+    end
+})
+
+AutoTab.CreateSection("Timing Settings")
+
+AutoTab.CreateSection("").CreateSlider({
     Name = "Reel Delay",
-    Range = {0, 1.87},
-    Increment = 0.01,
+    Min = 0,
+    Max = 1.87,
+    Default = 0.5,
     Suffix = "s",
-    CurrentValue = 0.5,
-    Flag = "ReelDelay",
-    Callback = function(Value)
-        if SetBlatantReelDelay then
-            SetBlatantReelDelay(Value)
-        end
+    Callback = function(value)
+        Notify("Reel Delay", "Set to " .. value .. "s", Colors.Primary)
     end
 })
 
-local FishSlider = AutomationTab:CreateSlider({
+AutoTab.CreateSection("").CreateSlider({
     Name = "Fishing Delay",
-    Range = {1, 100},
-    Increment = 1,
+    Min = 1,
+    Max = 100,
+    Default = 15,
     Suffix = "ms",
-    CurrentValue = 15,
-    Flag = "FishingDelay",
-    Callback = function(Value)
-        if SetBlatantFishingDelay then
-            SetBlatantFishingDelay(Value / 1000)
-        end
+    Callback = function(value)
+        Notify("Fishing Delay", "Set to " .. value .. "ms", Colors.Primary)
     end
 })
 
--- Advanced Settings
-AutomationTab:CreateSection("🔧 Advanced")
+AutoTab.CreateSection("Actions")
 
-AutomationTab:CreateButton({
+AutoTab.CreateSection("").CreateButton({
     Name = "Initialize System",
     Callback = function()
-        if InitializeBlatantFishing then
-            InitializeBlatantFishing()
-        end
-        Rayfield:Notify({
-            Title = "Initializing",
-            Content = "Starting fishing system...",
-            Duration = 2
-        })
+        Notify("System", "Initializing fishing system...", Colors.Success)
     end
 })
 
-AutomationTab:CreateButton({
-    Name = "Test Connection",
-    Callback = function()
-        Rayfield:Notify({
-            Title = "Connection Test",
-            Content = "Checking server connection...",
-            Duration = 2
-        })
-    end
-})
+-- Settings Tab Content
+SettingsTab.CreateSection("UI Settings")
 
--- Whitelist Settings
-AutomationTab:CreateSection("👑 Whitelist")
-
-local PlayerBox = AutomationTab:CreateInput({
-    Name = "Whitelist Player",
-    PlaceholderText = "Player Name",
-    RemoveTextAfterFocusLost = false,
-    Callback = function(Text)
-        Rayfield:Notify({
-            Title = "Whitelist Added",
-            Content = Text .. " has been whitelisted",
-            Duration = 3
-        })
-    end
-})
-
--- =============================================================================
--- SETTINGS TAB
--- =============================================================================
-SettingsTab:CreateSection("🎨 UI Customization")
-
--- Theme Color
-local ColorPicker = SettingsTab:CreateColorPicker({
-    Name = "Theme Color",
-    Color = Theme.Primary,
-    Flag = "ThemeColor",
-    Callback = function(Color)
-        Theme.Primary = Color
-    end
-})
-
--- UI Transparency
-local TransparencySlider = SettingsTab:CreateSlider({
+SettingsTab.CreateSection("").CreateSlider({
     Name = "UI Transparency",
-    Range = {0, 1},
-    Increment = 0.1,
+    Min = 0,
+    Max = 1,
+    Default = 0.05,
     Suffix = "%",
-    CurrentValue = 0,
-    Flag = "UITransparency",
-    Callback = function(Value)
-        -- Set UI transparency
+    Callback = function(value)
+        MainFrame.BackgroundTransparency = value
     end
 })
 
--- Toggle Keybind
-SettingsTab:CreateSection("⌨️ Keybinds")
-
-local Keybind = SettingsTab:CreateKeybind({
-    Name = "Toggle UI",
-    CurrentKeybind = "RightControl",
-    HoldToInteract = false,
-    Flag = "UIToggle",
-    Callback = function(Keybind)
-        Window:Toggle(Keybind)
-    end
-})
-
--- Performance
-SettingsTab:CreateSection("⚡ Performance")
-
-SettingsTab:CreateSlider({
-    Name = "Update Rate",
-    Range = {10, 1000},
-    Increment = 10,
-    Suffix = "ms",
-    CurrentValue = 50,
-    Flag = "UpdateRate",
-    Callback = function(Value)
-        -- Set update interval
-    end
-})
-
--- Config Management
-SettingsTab:CreateSection("💾 Configuration")
-
-SettingsTab:CreateButton({
-    Name = "Save Configuration",
+SettingsTab.CreateSection("").CreateButton({
+    Name = "Change Theme Color",
     Callback = function()
-        Rayfield:Notify({
-            Title = "Configuration Saved",
-            Content = "Settings have been saved successfully",
-            Duration = 3
-        })
+        Colors.Primary = Color3.fromHSV(math.random(), 0.8, 1)
+        Notify("Theme", "Changed theme color", Colors.Primary)
     end
 })
 
-SettingsTab:CreateButton({
-    Name = "Load Configuration",
-    Callback = function()
-        Rayfield:Notify({
-            Title = "Configuration Loaded",
-            Content = "Settings have been loaded",
-            Duration = 3
-        })
-    end
-})
+-- Button Functionality
+CloseButton.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
 
-SettingsTab:CreateButton({
-    Name = "Reset to Default",
-    Callback = function()
-        Rayfield:Notify({
-            Title = "Reset Complete",
-            Content = "All settings reset to default",
-            Duration = 3
-        })
-    end
-})
+MinimizeButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
 
--- Watermark
-SettingsTab:CreateSection("ℹ️ Information")
-
-SettingsTab:CreateLabel("Delta Fishing Hub v3.0")
-SettingsTab:CreateLabel("Made for Delta Executor")
-SettingsTab:CreateLabel("Status: Premium")
-
--- =============================================================================
--- PREMIUM FEATURES
--- =============================================================================
-local PremiumTab = Window:CreateTab("Premium", "rbxassetid://7733713439")
-
-PremiumTab:CreateSection("🌟 Premium Features")
-
--- ESP Features
-local ESPToggle = PremiumTab:CreateToggle({
-    Name = "🎯 Fish ESP",
-    CurrentValue = false,
-    Flag = "FishESP",
-    Callback = function(Value)
-        Rayfield:Notify({
-            Title = Value and "Fish ESP ON" or "Fish ESP OFF",
-            Content = Value and "Highlighting rare fish" or "ESP disabled",
-            Duration = 3,
-            Image = "rbxassetid://7733713439"
-        })
-    end
-})
-
--- Auto-Upgrade
-PremiumTab:CreateToggle({
-    Name = "⚡ Auto Upgrade Rod",
-    CurrentValue = false,
-    Flag = "AutoUpgrade",
-    Callback = function(Value)
-        Rayfield:Notify({
-            Title = Value and "Auto-Upgrade ON" or "Auto-Upgrade OFF",
-            Content = Value and "Automatically upgrading fishing rod" or "Manual upgrades only",
-            Duration = 3
-        })
-    end
-})
-
--- Anti-AFK
-PremiumTab:CreateToggle({
-    Name = "🤖 Anti-AFK System",
-    CurrentValue = false,
-    Flag = "AntiAFK",
-    Callback = function(Value)
-        Rayfield:Notify({
-            Title = Value and "Anti-AFK ON" or "Anti-AFK OFF",
-            Content = Value and "Preventing AFK detection" or "Normal AFK behavior",
-            Duration = 3
-        })
-    end
-})
-
--- Server Hop
-PremiumTab:CreateButton({
-    Name = "🔄 Server Hop",
-    Callback = function()
-        Rayfield:Notify({
-            Title = "Server Hop",
-            Content = "Finding new server...",
-            Duration = 5
-        })
-    end
-})
-
--- =============================================================================
--- INITIALIZATION
--- =============================================================================
-
--- Load configuration
-Rayfield:LoadConfiguration()
-
--- Welcome message
-task.wait(2)
-Rayfield:Notify({
-    Title = "Delta Fishing Hub",
-    Content = "Welcome! UI Loaded Successfully",
-    Duration = 5,
-    Image = "rbxassetid://7733674079"
-})
-
--- Status indicator
-spawn(function()
-    while true do
-        task.wait(5)
-        if AutoToggle.CurrentValue then
-            StatusCard:Set({
-                Title = "System Status",
-                Content = "🎣 Fishing Active | " .. Stats.TotalCatches .. " Catches"
-            })
-        end
+-- Toggle UI Keybind
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.RightControl then
+        MainFrame.Visible = not MainFrame.Visible
     end
 end)
 
--- Auto-save
-game:GetService("Players").LocalPlayer.CharacterAdded:Connect(function()
-    Rayfield:Notify({
-        Title = "Character Loaded",
-        Content = "Resuming fishing system...",
-        Duration = 3
-    })
-end)
+-- Initial Notification
+task.wait(1)
+Notify("Delta Fishing", "UI Loaded Successfully!\nPress RightControl to toggle", Colors.Success)
 
--- Return API
+-- Export API
 return {
-    Window = Window,
-    ToggleFishing = function(state)
-        AutoToggle:Set(state)
+    Notify = Notify,
+    ToggleUI = function()
+        MainFrame.Visible = not MainFrame.Visible
     end,
-    GetStats = function()
-        return Stats
-    end,
-    AddCatch = function(rare, value)
-        Stats.TotalCatches += 1
-        if rare then
-            Stats.RareCatches += 1
+    GetToggle = function(name)
+        if name == "AutoFish" then
+            return AutoFishToggle
+        elseif name == "Blatant" then
+            return BlatantToggle
         end
-        Stats.TotalValue += value or 0
-        
-        CatchLabel:Set("Total Catches: " .. Stats.TotalCatches)
-        RareLabel:Set("Rare Catches: " .. Stats.RareCatches)
-        ValueLabel:Set("Total Value: $" .. Stats.TotalValue)
     end
 }
